@@ -1,0 +1,205 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-background: #FFFFFF;
+  --color-foreground: #000000;
+
+  --color-card: #FFFFFF;
+  --color-card-foreground: #000000;
+
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #000000;
+
+  --color-primary: #8BC34A; /* Primary Green */
+  --color-primary-foreground: #FFFFFF;
+
+  --color-secondary: #E0E0E0; /* Border Gray */
+  --color-secondary-foreground: #000000;
+
+  --color-muted: #666666; /* Text Secondary */
+  --color-muted-foreground: #000000;
+
+  --color-accent: #000000; /* For subscribe button background */
+  --color-accent-foreground: #FFFFFF;
+
+  --color-destructive: #F44336; /* Status Red */
+  --color-destructive-foreground: #FFFFFF;
+
+  --color-border: #E0E0E0;
+  --color-input: #E0E0E0;
+  --color-ring: #000000;
+
+  --color-chart-1: #8BC34A; /* Operational Green */
+  --color-chart-2: #FF9800; /* Warning/Investigating Orange */
+  --color-chart-3: #F44336; /* Error Red */
+  --color-chart-4: #FFEB3B; /* Partial Outage Yellow */
+  --color-chart-5: #2196F3; /* Link Blue - not used in charts but for consistency */
+
+  --color-status-orange: #FF9800;
+  --color-status-red: #F44336;
+  --color-status-yellow: #FFEB3B;
+  --color-text-secondary-dark: #999999;
+  --color-link-blue: #2196F3;
+
+  --font-display: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: #E0E0E0;
+  }
+}
+
+@layer utilities {
+  body {
+    font-family: var(--font-body);
+  }
+}
+
+@layer base {
+  :root {
+    --background: #FFFFFF;
+    --foreground: #000000;
+    --card: #FFFFFF;
+    --card-foreground: #000000;
+    --popover: #FFFFFF;
+    --popover-foreground: #000000;
+    --primary: #8BC34A;
+    --primary-foreground: #FFFFFF;
+    --secondary: #E0E0E0;
+    --secondary-foreground: #000000;
+    --muted: #666666;
+    --muted-foreground: #000000;
+    --accent: #000000;
+    --accent-foreground: #FFFFFF;
+    --destructive: #F44336;
+    --destructive-foreground: #FFFFFF;
+    --border: #E0E0E0;
+    --input: #E0E0E0;
+    --ring: #000000;
+    --chart-1: #8BC34A;
+    --chart-2: #FF9800;
+    --chart-3: #F44336;
+    --chart-4: #FFEB3B;
+    --chart-5: #2196F3;
+    --radius: 0.25rem; /* Default small radius for buttons/cards */
+    --status-orange: #FF9800;
+    --status-red: #F44336;
+    --status-yellow: #FFEB3B;
+    --text-secondary-dark: #999999;
+    --link-blue: #2196F3;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--foreground);
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--foreground);
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--foreground);
+  }
+
+  p {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--foreground);
+  }
+
+  a {
+    color: var(--link-blue);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .text-primary-green {
+    color: var(--primary);
+  }
+
+  .text-status-orange {
+    color: var(--status-orange);
+  }
+
+  .text-status-red {
+    color: var(--status-red);
+  }
+
+  .text-status-yellow {
+    color: var(--status-yellow);
+  }
+
+  .text-secondary-light {
+    color: var(--muted);
+  }
+
+  .text-secondary-dark {
+    color: var(--text-secondary-dark);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Hide Next.js error overlay portal */
+nextjs-portal {
+  display: none !important;
+}

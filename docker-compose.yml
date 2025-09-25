@@ -1,0 +1,197 @@
+# Docker Compose for SLA Monitor System
+# Complete system with frontend apps, backend API, and PostgreSQL database
+
+version: '3.8'
+
+services:
+  # HAProxy Load Balancer & Reverse Proxy
+  haproxy:
+    build:
+      context: ./haproxy
+      dockerfile: Dockerfile
+    container_name: sla-monitor-haproxy
+    restart: unless-stopped
+    ports:
+      - "80:80"      # Main HTTP entry point
+      - "8404:8404"  # HAProxy stats interface
+    depends_on:
+      verify-monitor-api:
+        condition: service_healthy
+      verify-main:
+        condition: service_healthy
+      verify-incidents:
+        condition: service_healthy
+    networks:
+      - frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8404/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sla-monitor-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sla_monitor
+      POSTGRES_USER: ${DB_USER:-slamonitor}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-dev_password_123}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./verify-monitor-api/prisma/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-slamonitor} -d sla_monitor"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Backend API Server
+  verify-monitor-api:
+    build:
+      context: ./verify-monitor-api
+      dockerfile: Dockerfile
+    container_name: sla-monitor-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${DB_USER:-slamonitor}:${DB_PASSWORD:-dev_password_123}@postgres:5432/sla_monitor
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_key_change_in_production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:3006}
+      PORT: 3001
+      SEED_DATABASE: ${SEED_DATABASE:-true}
+    # Keep API port for direct access if needed (optional)
+    ports:
+      - "${API_PORT:-3001}:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # System Status Dashboard (Main App)
+  verify-main:
+    build:
+      context: ./verify-main
+      dockerfile: Dockerfile
+    container_name: sla-monitor-main
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${API_URL:-http://verify-monitor-api:3001}
+      NEXT_PUBLIC_WS_URL: ${WS_URL:-ws://verify-monitor-api:3001}
+      PORT: 3000
+    # Remove external port mapping - accessed via HAProxy
+    # ports:
+    #   - "${MAIN_PORT:-3000}:3000"
+    depends_on:
+      verify-monitor-api:
+        condition: service_healthy
+    networks:
+      - frontend
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Incident Management App
+  verify-incidents:
+    build:
+      context: ./verify-incidents
+      dockerfile: Dockerfile
+    container_name: sla-monitor-incidents
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${API_URL:-http://verify-monitor-api:3001}
+      NEXT_PUBLIC_WS_URL: ${WS_URL:-ws://verify-monitor-api:3001}
+      PORT: 3006
+    # Keep incidents port for direct access if needed (optional)
+    ports:
+      - "${INCIDENTS_PORT:-3006}:3006"
+    depends_on:
+      verify-monitor-api:
+        condition: service_healthy
+    networks:
+      - frontend
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3006/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Watch Server - Health Monitoring Service
+  watch-server:
+    build:
+      context: ./watch-server
+      dockerfile: Dockerfile
+    container_name: sla-monitor-watch
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${DB_USER:-slamonitor}:${DB_PASSWORD:-dev_password_123}@postgres:5432/sla_monitor
+      WATCH_MODE: ${WATCH_MODE:-continuous}
+      MONITORING_INTERVAL: ${MONITORING_INTERVAL:-60000}
+      PORT: 3008
+      API_HOST: verify-monitor-api
+      API_PORT: 3001
+      # Service endpoints to monitor
+      SERVICE_ENDPOINTS: ${SERVICE_ENDPOINTS:-}
+      # Monitoring configuration
+      HEALTH_CHECK_TIMEOUT: ${HEALTH_CHECK_TIMEOUT:-30000}
+      MAX_RETRY_ATTEMPTS: ${MAX_RETRY_ATTEMPTS:-3}
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_FILE: ${LOG_FILE:-logs/watch-server.log}
+    ports:
+      - "${WATCH_PORT:-3008}:3008"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      verify-monitor-api:
+        condition: service_healthy
+    networks:
+      - backend
+    volumes:
+      - watch_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  frontend:
+    driver: bridge
+    name: sla-monitor-frontend
+  backend:
+    driver: bridge
+    name: sla-monitor-backend
+
+volumes:
+  postgres_data:
+    driver: local
+    name: sla-monitor-db-data
+  watch_logs:
+    driver: local
+    name: sla-monitor-watch-logs

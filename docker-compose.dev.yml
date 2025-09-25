@@ -1,0 +1,75 @@
+# Docker Compose Override for Development
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: '3.8'
+
+services:
+  # Development overrides for verify-monitor-api
+  verify-monitor-api:
+    build:
+      context: ./verify-monitor-api
+      dockerfile: Dockerfile
+      target: builder  # Stop at builder stage for development
+    volumes:
+      - ./verify-monitor-api/src:/app/src:ro
+      - ./verify-monitor-api/prisma:/app/prisma:ro
+    environment:
+      NODE_ENV: development
+      SEED_DATABASE: true
+    command: ["npm", "run", "dev"]
+
+  # Development overrides for verify-main
+  verify-main:
+    build:
+      context: ./verify-main
+      dockerfile: Dockerfile
+      target: deps  # Use deps stage for development
+    volumes:
+      - ./verify-main/src:/app/src:ro
+      - ./verify-main/public:/app/public:ro
+      - ./verify-main/package.json:/app/package.json:ro
+      - ./verify-main/next.config.ts:/app/next.config.ts:ro
+      - ./verify-main/tailwind.config.ts:/app/tailwind.config.ts:ro
+      - ./verify-main/tsconfig.json:/app/tsconfig.json:ro
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_WS_URL: ws://localhost:3001
+    command: ["npm", "run", "dev"]
+
+  # Development overrides for verify-incidents
+  verify-incidents:
+    build:
+      context: ./verify-incidents
+      dockerfile: Dockerfile
+      target: deps  # Use deps stage for development
+    volumes:
+      - ./verify-incidents/src:/app/src:ro
+      - ./verify-incidents/public:/app/public:ro
+      - ./verify-incidents/package.json:/app/package.json:ro
+      - ./verify-incidents/next.config.ts:/app/next.config.ts:ro
+      - ./verify-incidents/tailwind.config.ts:/app/tailwind.config.ts:ro
+      - ./verify-incidents/tsconfig.json:/app/tsconfig.json:ro
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_WS_URL: ws://localhost:3001
+    command: ["npm", "run", "dev"]
+
+  # Development overrides for watch-server
+  watch-server:
+    build:
+      context: ./watch-server
+      dockerfile: Dockerfile
+      target: builder  # Stop at builder stage for development
+    volumes:
+      - ./watch-server/src:/app/src:ro
+      - ./watch-server/prisma:/app/prisma:ro
+      - ./watch-server/package.json:/app/package.json:ro
+      - ./watch-server/tsconfig.json:/app/tsconfig.json:ro
+    environment:
+      NODE_ENV: development
+      WATCH_MODE: continuous
+      MONITORING_INTERVAL: 30000  # 30 seconds for faster development
+      LOG_LEVEL: debug
+    command: ["npm", "run", "dev"]
