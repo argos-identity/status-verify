@@ -6,6 +6,7 @@
 ---
 
 ## 0. Account
+- **Admin URL**: http://serverIP:3006/auth/login?callbackUrl=/incidents/create
 - **ID**: admin@argosidentity.com
 - **Password**: admin123
 
