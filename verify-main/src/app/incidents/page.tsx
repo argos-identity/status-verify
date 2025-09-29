@@ -18,7 +18,7 @@ export default function IncidentsPage() {
           <IncidentHistory
             incidents={incidents}
             isLoading={isLoading}
-            error={error}
+            error={error ?? undefined}
             showAllIncidents={true}
           />
         </div>

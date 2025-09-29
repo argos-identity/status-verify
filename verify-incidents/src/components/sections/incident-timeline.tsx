@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Clock, 
-  User, 
-  MessageSquare, 
-  Plus, 
+import { useTranslations } from 'next-intl';
+import {
+  Clock,
+  User,
+  MessageSquare,
+  Plus,
   Send,
   CheckCircle,
   AlertCircle,
@@ -48,10 +49,11 @@ const getStatusIcon = (status: IncidentStatus) => {
   }
 };
 
-const TimelineItem: React.FC<{ update: IncidentUpdate; isLast: boolean }> = ({ 
-  update, 
-  isLast 
+const TimelineItem: React.FC<{ update: IncidentUpdate; isLast: boolean }> = ({
+  update,
+  isLast
 }) => {
+  const ti = useTranslations('incidents');
   const statusInfo = STATUS_INFO[update.status];
   
   return (
@@ -75,14 +77,14 @@ const TimelineItem: React.FC<{ update: IncidentUpdate; isLast: boolean }> = ({
       {/* 업데이트 내용 */}
       <div className="flex-1 pb-8">
         <div className="flex items-center gap-2 mb-2">
-          <Badge 
+          <Badge
             variant="secondary"
             style={{
               backgroundColor: statusInfo.bgColor,
               color: statusInfo.color
             }}
           >
-            {statusInfo.label}
+            {ti(`status.${update.status}`)}
           </Badge>
           <span className="text-xs text-muted-foreground">
             {formatDate(update.created_at)}
@@ -104,6 +106,8 @@ const AddUpdateForm: React.FC<{
   currentStatus: IncidentStatus;
   onSubmit: (update: { status: IncidentStatus; description: string }) => Promise<void>;
 }> = ({ currentStatus, onSubmit }) => {
+  const t = useTranslations('timeline');
+  const ti = useTranslations('incidents');
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState<IncidentStatus>(currentStatus);
   const [description, setDescription] = useState('');
@@ -113,7 +117,7 @@ const AddUpdateForm: React.FC<{
     e.preventDefault();
     
     if (!description.trim()) {
-      alert('업데이트 내용을 입력하세요.');
+      alert(t('enterUpdateContent'));
       return;
     }
     
@@ -124,7 +128,7 @@ const AddUpdateForm: React.FC<{
       setIsOpen(false);
     } catch (error) {
       console.error('Failed to add update:', error);
-      alert('업데이트 추가에 실패했습니다.');
+      alert(t('updateAddFailed'));
     } finally {
       setLoading(false);
     }
@@ -139,7 +143,7 @@ const AddUpdateForm: React.FC<{
           className="flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          상태 업데이트 추가
+          {t('addStatusUpdate')}
         </Button>
       </div>
     );
@@ -150,7 +154,7 @@ const AddUpdateForm: React.FC<{
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">새 상태</label>
+            <label className="text-sm font-medium">{t('newStatus')}</label>
             <Select value={status} onValueChange={(value) => setStatus(value as IncidentStatus)}>
               <SelectTrigger>
                 <SelectValue />
@@ -160,10 +164,7 @@ const AddUpdateForm: React.FC<{
                   <SelectItem key={key} value={key}>
                     <div className="flex items-center gap-2">
                       {getStatusIcon(key as IncidentStatus)}
-                      <span>{info.label}</span>
-                      <span className="text-xs text-muted-foreground">
-                        - {info.description}
-                      </span>
+                      <span>{ti(`status.${key}`)}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -172,16 +173,16 @@ const AddUpdateForm: React.FC<{
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-medium">업데이트 내용</label>
+            <label className="text-sm font-medium">{t('updateContent')}</label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="상태 변경에 대한 상세한 설명을 입력하세요. 원인 분석, 해결 과정, 다음 단계 등을 포함해주세요."
+              placeholder={t('placeholder')}
               rows={4}
               className="text-base"
             />
             <p className="text-xs text-muted-foreground">
-              현재: {description.length}자 (최소 10자 권장)
+              {t('characterCount', { count: description.length })}
             </p>
           </div>
           
@@ -195,7 +196,7 @@ const AddUpdateForm: React.FC<{
               }}
               disabled={loading}
             >
-              취소
+              {t('cancel')}
             </Button>
             <Button 
               type="submit" 
@@ -204,12 +205,12 @@ const AddUpdateForm: React.FC<{
               {loading ? (
                 <>
                   <Clock className="w-4 h-4 mr-2 animate-spin" />
-                  추가 중...
+                  {t('adding')}
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4 mr-2" />
-                  업데이트 추가
+                  {t('addUpdate')}
                 </>
               )}
             </Button>
@@ -220,30 +221,31 @@ const AddUpdateForm: React.FC<{
   );
 };
 
-const IncidentTimeline: React.FC<IncidentTimelineProps> = ({ 
+const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
   incidentId,
-  updates, 
+  updates,
   currentStatus,
   onAddUpdate,
-  canEdit = true 
+  canEdit = true
 }) => {
+  const t = useTranslations('timeline');
   if (updates.length === 0) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-primary" />
-            업데이트 히스토리
+            {t('updateHistory')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
             <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-2">
-              아직 업데이트가 없습니다
+              {t('noUpdatesYet')}
             </h3>
             <p className="text-muted-foreground mb-4">
-              첫 번째 상태 업데이트를 추가해보세요
+              {t('addFirstUpdate')}
             </p>
             {canEdit && (
               <AddUpdateForm 
@@ -262,9 +264,9 @@ const IncidentTimeline: React.FC<IncidentTimelineProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-primary" />
-          업데이트 히스토리
+          {t('updateHistory')}
           <Badge variant="secondary" className="text-xs">
-            {updates.length}개 업데이트
+            {t('updateCount', { count: updates.length })}
           </Badge>
         </CardTitle>
       </CardHeader>

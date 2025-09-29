@@ -3,8 +3,11 @@
 **버전**: 1.0  
 **작성일**: 2025-08-28  
 **프로젝트**: Verify Api Service Monitoring System
-
 ---
+
+## 0. Account
+- ** Email**: admin@argosidentity.com
+- ** Password**: admin123
 
 ## 1. 프로젝트 개요
 

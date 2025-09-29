@@ -1,18 +1,27 @@
 import { withAuth } from 'next-auth/middleware'
+import createIntlMiddleware from 'next-intl/middleware';
+import { routing } from './i18n/routing';
+
+const intlMiddleware = createIntlMiddleware(routing);
 
 export default withAuth(
   function middleware(req) {
-    // Add any additional middleware logic here if needed
+    // Run the intl middleware for internationalization
+    return intlMiddleware(req);
   },
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Protect /incidents/create route
-        if (req.nextUrl.pathname.startsWith('/incidents/create')) {
+        // Extract pathname without locale prefix for authorization check
+        const pathname = req.nextUrl.pathname;
+        const pathnameWithoutLocale = pathname.replace(/^\/(ko|en)/, '') || '/';
+
+        // Protect /incidents/create route (with or without locale prefix)
+        if (pathnameWithoutLocale.startsWith('/incidents/create')) {
           return !!token
         }
-        // Protect /incidents/[id]/edit routes
-        if (req.nextUrl.pathname.match(/^\/incidents\/[^\/]+\/edit/)) {
+        // Protect /incidents/[id]/edit routes (with or without locale prefix)
+        if (pathnameWithoutLocale.match(/^\/incidents\/[^\/]+\/edit/)) {
           return !!token
         }
         return true
@@ -22,5 +31,6 @@ export default withAuth(
 )
 
 export const config = {
-  matcher: ['/incidents/create', '/incidents/:path*/edit']
+  // Match only internationalized pathnames and protected routes
+  matcher: ['/', '/(ko|en)/:path*', '/((?!api|_next|_vercel|.*\\..*).*)']
 }

@@ -60,87 +60,87 @@ export const AVAILABLE_SERVICES = [
   { id: 'curp-verifier', name: 'Curp Verifier' },
 ] as const;
 
-// 상태별 표시 정보
+// Status display information
 export const STATUS_INFO = {
   investigating: {
-    label: '조사 중',
+    label: 'Investigating',
     color: 'var(--color-status-investigating)',
     bgColor: 'rgba(255, 107, 53, 0.1)',
-    description: '문제를 조사하고 있습니다'
+    description: 'We are investigating the issue'
   },
   identified: {
-    label: '원인 식별',
+    label: 'Identified',
     color: 'var(--color-status-identified)',
     bgColor: 'rgba(255, 152, 0, 0.1)',
-    description: '문제의 원인을 식별했습니다'
+    description: 'The cause of the issue has been identified'
   },
   monitoring: {
-    label: '모니터링',
+    label: 'Monitoring',
     color: 'var(--color-status-monitoring)',
     bgColor: 'rgba(33, 150, 243, 0.1)',
-    description: '해결책을 적용하고 모니터링 중입니다'
+    description: 'Solution has been applied and we are monitoring'
   },
   resolved: {
-    label: '해결됨',
+    label: 'Resolved',
     color: 'var(--color-status-resolved)',
     bgColor: 'rgba(76, 175, 80, 0.1)',
-    description: '문제가 완전히 해결되었습니다'
+    description: 'The issue has been completely resolved'
   }
 } as const;
 
-// 우선순위별 표시 정보
+// Priority display information
 export const PRIORITY_INFO = {
   P1: {
     label: 'P1 - Critical',
     color: 'var(--color-priority-p1)',
     bgColor: 'rgba(244, 67, 54, 0.1)',
-    description: '서비스 완전 중단, 즉시 대응 필요'
+    description: 'Complete service outage, immediate response required'
   },
   P2: {
     label: 'P2 - High',
     color: 'var(--color-priority-p2)',
     bgColor: 'rgba(255, 152, 0, 0.1)',
-    description: '주요 기능 장애, 빠른 대응 필요'
+    description: 'Major feature failure, rapid response required'
   },
   P3: {
     label: 'P3 - Medium',
     color: 'var(--color-priority-p3)',
     bgColor: 'rgba(255, 193, 7, 0.1)',
-    description: '부분적 성능 저하, 일반적 대응'
+    description: 'Partial performance degradation, standard response'
   },
   P4: {
     label: 'P4 - Low',
     color: 'var(--color-priority-p4)',
     bgColor: 'rgba(76, 175, 80, 0.1)',
-    description: '경미한 문제, 일반적 처리'
+    description: 'Minor issue, standard processing'
   }
 } as const;
 
-// 심각도별 표시 정보
+// Severity display information
 export const SEVERITY_INFO = {
   critical: {
-    label: '치명적',
+    label: 'Critical',
     color: 'var(--color-severity-critical)',
     bgColor: 'rgba(244, 67, 54, 0.1)',
-    description: '시스템 전체에 영향을 미치는 치명적 문제'
+    description: 'Critical issue affecting the entire system'
   },
   high: {
-    label: '높음',
+    label: 'High',
     color: 'var(--color-severity-high)',
     bgColor: 'rgba(255, 87, 34, 0.1)',
-    description: '주요 기능에 영향을 미치는 심각한 문제'
+    description: 'Serious issue affecting major functions'
   },
   medium: {
-    label: '중간',
+    label: 'Medium',
     color: 'var(--color-severity-medium)',
     bgColor: 'rgba(255, 152, 0, 0.1)',
-    description: '일부 기능에 영향을 미치는 문제'
+    description: 'Issue affecting some functions'
   },
   low: {
-    label: '낮음',
+    label: 'Low',
     color: 'var(--color-severity-low)',
     bgColor: 'rgba(255, 193, 7, 0.1)',
-    description: '미미한 영향을 미치는 문제'
+    description: 'Issue with minimal impact'
   }
 } as const;
 

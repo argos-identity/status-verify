@@ -16,6 +16,7 @@ import {
   Loader2
 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import Header from '@/components/sections/header';
 import Footer from '@/components/sections/footer';
 import IncidentTimeline from '@/components/sections/incident-timeline';
@@ -42,6 +43,10 @@ export default function IncidentDetailPage() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const [updateLoading, setUpdateLoading] = useState(false);
 
+  const t = useTranslations('incident.detail');
+  const ti = useTranslations('incidents');
+  const tt = useTranslations('timeline');
+
   const incidentId = params.id as string;
   const isNewlyCreated = searchParams.get('created') === 'true';
 
@@ -63,7 +68,7 @@ export default function IncidentDetailPage() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex items-center gap-2">
               <Loader2 className="h-6 w-6 animate-spin" />
-              <span>장애 이벤트 정보를 불러오는 중...</span>
+              <span>{t('loadingIncident')}</span>
             </div>
           </div>
         </div>
@@ -75,7 +80,7 @@ export default function IncidentDetailPage() {
   // Error or not found state
   if (error || !incident) {
     const isPermissionError = error && (error.includes('Permission denied') || error.includes('Required permission'));
-    const errorMessage = error || `해당 장애 이벤트를 찾을 수 없습니다. (ID: ${incidentId})`;
+    const errorMessage = error || t('incidentNotFound', { id: incidentId });
 
     return (
       <div className="min-h-screen bg-background">
@@ -89,7 +94,7 @@ export default function IncidentDetailPage() {
                 <div className="mt-2">
                   <Link href="/auth/login">
                     <Button size="sm" variant="outline">
-                      로그인하러 가기
+                      {t('goToLogin')}
                     </Button>
                   </Link>
                 </div>
@@ -100,13 +105,13 @@ export default function IncidentDetailPage() {
             <Link href="/incidents">
               <Button variant="outline">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                목록으로 돌아가기
+{t('backToList')}
               </Button>
             </Link>
             {!isPermissionError && (
               <Button variant="outline" onClick={refresh}>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                다시 시도
+                {t('retry')}
               </Button>
             )}
           </div>
@@ -137,7 +142,7 @@ export default function IncidentDetailPage() {
       console.log('Update added successfully:', updateData);
     } catch (error) {
       console.error('Failed to add update:', error);
-      alert('업데이트 추가에 실패했습니다.');
+      alert(tt('updateAddFailed'));
     } finally {
       setUpdateLoading(false);
     }
@@ -155,7 +160,7 @@ export default function IncidentDetailPage() {
           <Alert className="mb-6 border-green-200 bg-green-50">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <AlertDescription className="text-green-800">
-              새 장애 이벤트가 성공적으로 생성되었습니다. verify-main에서 확인할 수 있습니다.
+              {t('newIncidentCreated')}
             </AlertDescription>
           </Alert>
         )}
@@ -166,7 +171,7 @@ export default function IncidentDetailPage() {
             <Link href="/incidents">
               <Button variant="outline" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                목록
+                {t('list')}
               </Button>
             </Link>
             <div>
@@ -190,7 +195,7 @@ export default function IncidentDetailPage() {
               <Link href={`/incidents/${incident.id}/edit`}>
                 <Button size="sm">
                   <Edit className="w-4 h-4 mr-2" />
-                  수정
+                  {t('edit')}
                 </Button>
               </Link>
             )}
@@ -203,12 +208,12 @@ export default function IncidentDetailPage() {
             {/* 기본 정보 */}
             <Card>
               <CardHeader>
-                <CardTitle>상세 정보</CardTitle>
+                <CardTitle>{t('detailInfo')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {incident.description && (
                   <div>
-                    <h4 className="text-sm font-medium mb-2">설명</h4>
+                    <h4 className="text-sm font-medium mb-2">{t('description')}</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">
                       {incident.description}
                     </p>
@@ -217,7 +222,7 @@ export default function IncidentDetailPage() {
                 
                 {incident.detection_criteria && (
                   <div>
-                    <h4 className="text-sm font-medium mb-2">발생 기준 / 감지 방법</h4>
+                    <h4 className="text-sm font-medium mb-2">{t('detectionCriteria')}</h4>
                     <p className="text-sm text-muted-foreground">
                       {incident.detection_criteria}
                     </p>
@@ -225,7 +230,7 @@ export default function IncidentDetailPage() {
                 )}
                 
                 <div>
-                  <h4 className="text-sm font-medium mb-2">영향받는 서비스</h4>
+                  <h4 className="text-sm font-medium mb-2">{t('affectedServices')}</h4>
                   <div className="flex flex-wrap gap-2">
                     {incident.affected_services && incident.affected_services.length > 0 ? (
                       incident.affected_services.map((service) => (
@@ -234,7 +239,7 @@ export default function IncidentDetailPage() {
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-muted-foreground">서비스 정보가 없습니다.</span>
+                      <span className="text-sm text-muted-foreground">{t('noServiceInfo')}</span>
                     )}
                   </div>
                 </div>
@@ -256,7 +261,7 @@ export default function IncidentDetailPage() {
             {/* 현재 상태 */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">현재 상태</CardTitle>
+                <CardTitle className="text-base">{t('currentStatus')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center">
@@ -269,7 +274,7 @@ export default function IncidentDetailPage() {
                       border: `2px solid ${statusInfo.color}`
                     }}
                   >
-                    {statusInfo.label}
+                    {ti(`status.${incident.status}`)}
                   </Badge>
                   <p className="text-xs text-muted-foreground mt-2">
                     {statusInfo.description}
@@ -278,7 +283,7 @@ export default function IncidentDetailPage() {
                 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>우선순위:</span>
+                    <span>{t('priority')}:</span>
                     <Badge 
                       variant="outline"
                       style={{
@@ -286,12 +291,12 @@ export default function IncidentDetailPage() {
                         color: priorityInfo.color
                       }}
                     >
-                      {priorityInfo.label}
+                      {ti(`priority.${incident.priority.toLowerCase()}`)}
                     </Badge>
                   </div>
                   
                   <div className="flex justify-between">
-                    <span>심각도:</span>
+                    <span>{t('severity')}:</span>
                     <Badge 
                       variant="outline"
                       style={{
@@ -299,7 +304,7 @@ export default function IncidentDetailPage() {
                         color: severityInfo.color
                       }}
                     >
-                      {severityInfo.label}
+                      {ti(`severity.${incident.severity}`)}
                     </Badge>
                   </div>
                 </div>
@@ -309,13 +314,13 @@ export default function IncidentDetailPage() {
             {/* 시간 정보 */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">시간 정보</CardTitle>
+                <CardTitle className="text-base">{t('timeInfo')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="font-medium">생성 시간</p>
+                    <p className="font-medium">{t('creationTime')}</p>
                     <p className="text-muted-foreground text-xs">
                       {formatDate(incident.created_at)}
                     </p>
@@ -326,7 +331,7 @@ export default function IncidentDetailPage() {
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
                     <div>
-                      <p className="font-medium text-green-700">해결 시간</p>
+                      <p className="font-medium text-green-700">{t('resolutionTime')}</p>
                       <p className="text-muted-foreground text-xs">
                         {formatDate(incident.resolved_at)}
                       </p>
@@ -337,7 +342,7 @@ export default function IncidentDetailPage() {
                 {resolutionTime && (
                   <div className="p-2 bg-green-50 rounded border border-green-200">
                     <p className="text-sm font-medium text-green-800">
-                      총 해결 시간: {resolutionTime}
+                      {t('totalResolutionTime', { resolutionTime })}
                     </p>
                   </div>
                 )}
@@ -348,13 +353,13 @@ export default function IncidentDetailPage() {
             {incident.reporter && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">담당자 정보</CardTitle>
+                  <CardTitle className="text-base">{t('assigneeInfo')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2 text-sm">
                     <User className="w-4 h-4 text-muted-foreground" />
                     <div>
-                      <p className="font-medium">보고자</p>
+                      <p className="font-medium">{t('reporter')}</p>
                       <p className="text-muted-foreground">{incident.reporter}</p>
                     </div>
                   </div>

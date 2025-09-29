@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import Header from '@/components/sections/header';
 import Footer from '@/components/sections/footer';
 import IncidentForm from '@/components/sections/incident-form';
@@ -15,6 +16,7 @@ export default function CreateIncidentPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { data: session } = useSession();
+  const t = useTranslations('incident.create');
 
   const handleSubmit = async (data: IncidentFormData) => {
     setLoading(true);
@@ -53,14 +55,14 @@ export default function CreateIncidentPage() {
 
       // 에러 메시지 설정
       if (error.status === 401) {
-        setError('인증이 필요합니다. 로그인 후 다시 시도해주세요.');
+        setError(t('errors.authenticationRequired'));
         router.push(`/auth/login?callbackUrl=/incidents/create`);
       } else if (error.status === 403) {
-        setError('인시던트 생성 권한이 없습니다.');
+        setError(t('errors.permissionDenied'));
       } else if (error.status === 0) {
-        setError('서버에 연결할 수 없습니다. 백엔드 API 서버가 실행 중인지 확인해주세요.');
+        setError(t('errors.serverConnectionFailed'));
       } else {
-        setError(error.message || '장애 이벤트 생성에 실패했습니다. 다시 시도해주세요.');
+        setError(error.message || t('errors.createFailed'));
       }
     } finally {
       setLoading(false);
@@ -72,7 +74,7 @@ export default function CreateIncidentPage() {
     const hasUnsavedData = storage.get(`incident-form-create-new`, null);
     
     if (hasUnsavedData) {
-      const shouldDiscard = confirm('저장되지 않은 변경사항이 있습니다. 정말 취소하시겠습니까?');
+      const shouldDiscard = confirm(t('confirmations.unsavedChanges'));
       if (!shouldDiscard) return;
       
       // 자동 저장 데이터 정리
@@ -98,7 +100,7 @@ export default function CreateIncidentPage() {
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">
-                  오류가 발생했습니다
+                  {t('errors.errorOccurred')}
                 </h3>
                 <div className="mt-2 text-sm text-red-700">
                   {error}

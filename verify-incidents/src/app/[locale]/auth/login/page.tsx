@@ -35,7 +35,7 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError('이메일 또는 비밀번호가 올바르지 않습니다')
+        setError('Invalid email or password')
       } else {
         // Check if login was successful by getting session
         const session = await getSession()
@@ -44,7 +44,7 @@ export default function LoginPage() {
         }
       }
     } catch (error) {
-      setError('로그인 중 오류가 발생했습니다')
+      setError('An error occurred during login')
     } finally {
       setLoading(false)
     }
@@ -67,16 +67,13 @@ export default function LoginPage() {
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Welcome</h1>
           <p className="text-muted-foreground">
-            Argosidentity Verify All Systems Operational
+            Verify All Systems Operational
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-center">로그인</CardTitle>
-            <CardDescription className="text-center">
-              장애 이벤트 관리 시스템에 로그인하세요
-            </CardDescription>
+            <CardTitle className="text-center">Login</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Error Alert */}
@@ -91,11 +88,11 @@ export default function LoginPage() {
             {/* Email/Password Form */}
             <form onSubmit={handleCredentialsLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">이메일</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="이메일을 입력하세요"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -104,12 +101,12 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">비밀번호</Label>
+                <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="비밀번호를 입력하세요"
+                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -138,15 +135,15 @@ export default function LoginPage() {
                 className="w-full h-12"
                 disabled={loading}
               >
-                {loading ? '로그인 중...' : '로그인'}
+                {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
 
             {/* Demo Credentials */}
             <div className="text-center text-sm text-muted-foreground">
-              <p>데모 계정:</p>
-              <p>이메일: admin@argosidentity.com</p>
-              <p>비밀번호: admin123</p>
+              <p>Demo Account:</p>
+              <p>Email: admin@argosidentity.com</p>
+              <p>Password: admin123</p>
             </div>
           </CardContent>
         </Card>

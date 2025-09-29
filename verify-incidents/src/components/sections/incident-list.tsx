@@ -1,5 +1,6 @@
 import React from 'react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import {
   Clock,
   AlertTriangle,
@@ -88,6 +89,7 @@ const SeverityBadge: React.FC<{ severity: Incident['severity'] }> = ({ severity 
 
 const IncidentCard: React.FC<{ incident: Incident }> = ({ incident }) => {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+  const t = useTranslations('incidents');
   const resolutionTime = calculateResolutionTime(incident.created_at, incident.resolved_at);
   
   return (
@@ -200,7 +202,7 @@ const IncidentCard: React.FC<{ incident: Incident }> = ({ incident }) => {
           <Link href={`/incidents/${incident.id}`}>
             <Button variant="outline" size="sm" className="flex items-center gap-1">
               <Eye className="w-3 h-3" />
-              상세보기
+{t('viewDetails')}
             </Button>
           </Link>
 
@@ -209,7 +211,7 @@ const IncidentCard: React.FC<{ incident: Incident }> = ({ incident }) => {
             <Link href={`/incidents/${incident.id}/edit`}>
               <Button size="sm" className="flex items-center gap-1">
                 <Edit className="w-3 h-3" />
-                수정
+{t('editIncident')}
               </Button>
             </Link>
           )}
@@ -220,6 +222,8 @@ const IncidentCard: React.FC<{ incident: Incident }> = ({ incident }) => {
 };
 
 const IncidentList: React.FC<IncidentListProps> = ({ incidents, loading = false, error = null }) => {
+  const t = useTranslations('incidents');
+  const tCommon = useTranslations('common');
   // Loading state
   if (loading) {
     return (
@@ -265,7 +269,7 @@ const IncidentList: React.FC<IncidentListProps> = ({ incidents, loading = false,
             <div className="mt-2">
               <Link href="/auth/login">
                 <Button size="sm" variant="outline">
-                  로그인하러 가기
+  {t('loginToSeeMore')}
                 </Button>
               </Link>
             </div>
@@ -281,17 +285,19 @@ const IncidentList: React.FC<IncidentListProps> = ({ incidents, loading = false,
       <div className="text-center py-12">
         <AlertTriangle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-foreground mb-2">
-          검색 조건에 맞는 장애 이벤트가 없습니다
+{t('noIncidentsFound')}
         </h3>
         <p className="text-muted-foreground mb-4">
-          다른 검색어나 필터를 사용해보세요
+{t('tryDifferentFilters')}
         </p>
+        {/* TODO: 향후 활성화를 위해 임시 비활성화
         <Link href="/incidents/create">
           <Button className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4" />
             New Failure Event 생성
           </Button>
         </Link>
+        */}
       </div>
     );
   }

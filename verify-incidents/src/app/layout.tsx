@@ -1,24 +1,10 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { AuthProvider } from "@/providers/auth-provider";
-
-export const metadata: Metadata = {
-  title: "Verify Incidents - SLA Monitor",
-  description: "Incident management system for SLA monitoring and tracking",
-};
+// This file only serves as the outermost layout root.
+// The actual layout with internationalization is in [locale]/layout.tsx
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="ko">
-      <body className="antialiased">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
-      </body>
-    </html>
-  );
+  return children;
 }

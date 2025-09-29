@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Filter, Search, RefreshCw, AlertCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useRouter } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import Header from '@/components/sections/header';
 import Footer from '@/components/sections/footer';
 import IncidentList from '@/components/sections/incident-list';
@@ -35,6 +36,8 @@ export default function IncidentsPage() {
 
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const t = useTranslations('incidents');
+  const tCommon = useTranslations('common');
 
   // Use API hooks instead of mock data
   const {
@@ -105,10 +108,10 @@ export default function IncidentsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-foreground">
-                Failure Event 관리
+{t('title')}
               </h1>
               <p className="text-muted-foreground mt-1">
-                시스템 장애 및 이벤트를 관리하고 추적합니다
+{t('subtitle')}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -120,8 +123,9 @@ export default function IncidentsPage() {
                 className="flex items-center gap-2"
               >
                 <RefreshCw className={`w-4 h-4 ${(incidentsLoading || statsLoading) ? 'animate-spin' : ''}`} />
-                새로고침
+{t('refresh')}
               </Button>
+              {/* TODO: 향후 활성화를 위해 임시 비활성화
               <Button
                 onClick={handleNewFailureEvent}
                 className="flex items-center gap-2 bg-primary hover:bg-primary/90"
@@ -130,6 +134,7 @@ export default function IncidentsPage() {
                 <Plus className="w-4 h-4" />
                 New Failure Event
               </Button>
+              */}
             </div>
           </div>
 
@@ -144,7 +149,7 @@ export default function IncidentsPage() {
                   <div className="mt-2">
                     <Link href="/auth/login">
                       <Button size="sm" variant="outline">
-                        로그인하러 가기
+{t('loginToSeeMore')}
                       </Button>
                     </Link>
                   </div>
@@ -164,7 +169,7 @@ export default function IncidentsPage() {
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="제목, 설명, 보고자로 검색..."
+placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -175,7 +180,7 @@ export default function IncidentsPage() {
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium text-muted-foreground">필터:</span>
+<span className="text-sm font-medium text-muted-foreground">{tCommon('filter')}:</span>
               </div>
 
               <Select 
@@ -183,14 +188,14 @@ export default function IncidentsPage() {
                 onValueChange={(value) => setFilters(prev => ({ ...prev, status: value as any }))}
               >
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="상태" />
+<SelectValue placeholder={t('filters.status')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">모든 상태</SelectItem>
-                  <SelectItem value="investigating">조사 중</SelectItem>
-                  <SelectItem value="identified">원인 식별</SelectItem>
-                  <SelectItem value="monitoring">모니터링</SelectItem>
-                  <SelectItem value="resolved">해결됨</SelectItem>
+<SelectItem value="all">{t('status.all')}</SelectItem>
+                  <SelectItem value="investigating">{t('status.investigating')}</SelectItem>
+                  <SelectItem value="identified">{t('status.identified')}</SelectItem>
+                  <SelectItem value="monitoring">{t('status.monitoring')}</SelectItem>
+                  <SelectItem value="resolved">{t('status.resolved')}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -199,13 +204,13 @@ export default function IncidentsPage() {
                 onValueChange={(value) => setFilters(prev => ({ ...prev, priority: value as any }))}
               >
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="우선순위" />
+<SelectValue placeholder={t('filters.priority')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">모든 우선순위</SelectItem>
-                  <SelectItem value="P1">P1 - Critical</SelectItem>
-                  <SelectItem value="P2">P2 - High</SelectItem>
-                  <SelectItem value="P3">P3 - Medium</SelectItem>
+<SelectItem value="all">{t('priority.all')}</SelectItem>
+                  <SelectItem value="P1">{t('priority.p1')}</SelectItem>
+                  <SelectItem value="P2">{t('priority.p2')}</SelectItem>
+                  <SelectItem value="P3">{t('priority.p3')}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -214,14 +219,14 @@ export default function IncidentsPage() {
                 onValueChange={(value) => setFilters(prev => ({ ...prev, severity: value as any }))}
               >
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="심각도" />
+<SelectValue placeholder={t('filters.severity')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">모든 심각도</SelectItem>
-                  <SelectItem value="critical">치명적</SelectItem>
-                  <SelectItem value="high">높음</SelectItem>
-                  <SelectItem value="medium">중간</SelectItem>
-                  <SelectItem value="low">낮음</SelectItem>
+<SelectItem value="all">{t('severity.all')}</SelectItem>
+                  <SelectItem value="critical">{t('severity.critical')}</SelectItem>
+                  <SelectItem value="high">{t('severity.high')}</SelectItem>
+                  <SelectItem value="medium">{t('severity.medium')}</SelectItem>
+                  <SelectItem value="low">{t('severity.low')}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -230,15 +235,15 @@ export default function IncidentsPage() {
                 onValueChange={(value) => setFilters(prev => ({ ...prev, affected_service: value as any }))}
               >
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="영향 서비스" />
+<SelectValue placeholder={t('filters.affectedService')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">모든 서비스</SelectItem>
-                  <SelectItem value="id-recognition">ID Recognition</SelectItem>
-                  <SelectItem value="face-liveness">Face Liveness</SelectItem>
-                  <SelectItem value="id-liveness">ID Liveness</SelectItem>
-                  <SelectItem value="face-compare">Face Compare</SelectItem>
-                  <SelectItem value="curp-verifier">Curp Verifier</SelectItem>
+<SelectItem value="all">{t('services.all')}</SelectItem>
+                  <SelectItem value="id-recognition">{t('services.idRecognition')}</SelectItem>
+                  <SelectItem value="face-liveness">{t('services.faceLiveness')}</SelectItem>
+                  <SelectItem value="id-liveness">{t('services.idLiveness')}</SelectItem>
+                  <SelectItem value="face-compare">{t('services.faceCompare')}</SelectItem>
+                  <SelectItem value="curp-verifier">{t('services.curpVerifier')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -250,10 +255,10 @@ export default function IncidentsPage() {
               filters.severity !== 'all' || 
               filters.affected_service !== 'all') && (
               <div className="flex items-center gap-2 pt-2 border-t">
-                <span className="text-sm text-muted-foreground">활성 필터:</span>
+<span className="text-sm text-muted-foreground">{t('activeFilters')}:</span>
                 {searchTerm && (
                   <Badge variant="secondary" className="flex items-center gap-1">
-                    검색: "{searchTerm}"
+{tCommon('search')}: "{searchTerm}"
                     <button 
                       onClick={() => setSearchTerm('')}
                       className="ml-1 hover:bg-muted-foreground/20 rounded-full p-0.5"
@@ -282,9 +287,9 @@ export default function IncidentsPage() {
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-muted-foreground">
             {incidentsLoading ? (
-              "로딩 중..."
+tCommon('loading')
             ) : (
-              `${filteredIncidents.length}개의 장애 이벤트 (${allIncidents.length}개 중)`
+t('incidentCount', { filtered: filteredIncidents.length, total: allIncidents.length })
             )}
           </p>
         </div>

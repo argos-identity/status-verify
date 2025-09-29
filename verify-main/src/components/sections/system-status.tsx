@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useIncidentByDate } from '@/hooks/use-incident-by-date';
 import { useServicesStatus } from '@/hooks/use-services-status';
@@ -16,6 +17,9 @@ interface UptimeBarProps {
 }
 
 const UptimeBar: React.FC<UptimeBarProps> = ({ status, date, serviceName, index }) => {
+  const t = useTranslations('systemStatus');
+  const locale = useLocale();
+
   // Get incident data for this specific date and service
   const { incidents, hasIncidents, isLoading } = useIncidentByDate(date, serviceName, status);
 
@@ -45,23 +49,23 @@ const UptimeBar: React.FC<UptimeBarProps> = ({ status, date, serviceName, index 
       const hasP2 = incidents.some(incident => incident.priority === 'P2');
       const hasP3 = incidents.some(incident => incident.priority === 'P3');
 
-      if (hasP1) return 'P1 중대 장애';
-      if (hasP2) return 'P2 높은 우선순위 문제';
-      if (hasP3) return 'P3 중간 우선순위 문제';
-      return 'P4 낮은 우선순위 문제';
+      if (hasP1) return t('p1Critical');
+      if (hasP2) return t('p2High');
+      if (hasP3) return t('p3Medium');
+      return t('p4Low');
     }
 
     switch (status) {
-      case 'operational': return '정상 운영';
-      case 'degraded': return '성능 저하';
-      case 'outage': return '장애 발생';
-      case 'partial': return '부분적 문제';
-      default: return '알 수 없음';
+      case 'operational': return t('operational');
+      case 'degraded': return t('degraded');
+      case 'outage': return t('majorOutage');
+      case 'partial': return t('partialOutage');
+      default: return t('unknownStatus');
     }
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('ko-KR', {
+    return date.toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -75,11 +79,11 @@ const UptimeBar: React.FC<UptimeBarProps> = ({ status, date, serviceName, index 
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <span className="text-green-500">✅</span>
-          <span><strong>상태:</strong> {getStatusText(status)}</span>
+          <span><strong>{t('status')}:</strong> {getStatusText(status)}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-purple-500">📍</span>
-          <span><strong>서비스:</strong> {serviceName}</span>
+          <span><strong>{t('services.service')}:</strong> {serviceName}</span>
         </div>
       </div>
 
@@ -89,14 +93,14 @@ const UptimeBar: React.FC<UptimeBarProps> = ({ status, date, serviceName, index 
           {isLoading ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="w-3 h-3 border border-current rounded-full border-t-transparent animate-spin" />
-              <span>Failure Event 로딩 중...</span>
+              <span>{t('loading')}</span>
             </div>
           ) : hasIncidents ? (
             <IncidentTooltip incidents={incidents} showLimit={3} />
           ) : (
             <div className="text-xs text-muted-foreground pt-1 border-t border-border">
               <span className="text-blue-500">ℹ️</span>
-              <span className="ml-2">관련 Failure Event가 없습니다</span>
+              <span className="ml-2">{t('noIncidents')}</span>
             </div>
           )}
         </>
@@ -163,6 +167,8 @@ const getStartDate = () => {
 };
 
 const ServiceStatusCard: React.FC<ServiceStatusProps> = ({ name, uptimePercentage, uptimeData, isLast }) => {
+  const t = useTranslations('systemStatus');
+
   // Determine current status based on today's data (last item in array)
   const todayStatus = uptimeData && uptimeData.length > 0 ? uptimeData[uptimeData.length - 1] : 'operational';
 
@@ -180,16 +186,16 @@ const ServiceStatusCard: React.FC<ServiceStatusProps> = ({ name, uptimePercentag
     const hasP3 = todayIncidents.some(incident => incident.priority === 'P3');
 
     if (hasP1) {
-      currentStatus = 'P1 중대 장애';
+      currentStatus = t('p1Critical');
       statusColor = 'text-chart-3'; // Red
     } else if (hasP2) {
-      currentStatus = 'P2 높은 우선순위 문제';
+      currentStatus = t('p2High');
       statusColor = 'text-chart-2'; // Orange
     } else if (hasP3) {
-      currentStatus = 'P3 중간 우선순위 문제';
+      currentStatus = t('p3Medium');
       statusColor = 'text-yellow-500'; // Yellow
     } else {
-      currentStatus = 'P4 낮은 우선순위 문제';
+      currentStatus = t('p4Low');
       statusColor = 'text-primary'; // Green
     }
   }
@@ -227,6 +233,8 @@ const ServiceStatusCard: React.FC<ServiceStatusProps> = ({ name, uptimePercentag
 };
 
 const SystemStatus = () => {
+  const t = useTranslations('systemStatus');
+
   // Use dynamic services data from API
   const { services: apiServices, isLoading, error } = useServicesStatus();
 
@@ -235,7 +243,7 @@ const SystemStatus = () => {
 
   // Always return fixed status text regardless of system condition
   const getOverallStatus = () => {
-    return 'Verify All Systems Operational';
+    return t('allSystemsOperational');
   };
 
   // Calculate system status considering P4 incidents

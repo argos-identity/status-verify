@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 import { 
   Save, 
   X, 
@@ -51,35 +52,17 @@ import {
   suggestPriority
 } from '@/lib/utils';
 
-// Zod 스키마 정의 - PRD.md 요구사항 반영
-const incidentSchema = z.object({
-  title: z.string()
-    .min(5, '제목은 5자 이상이어야 합니다')
-    .max(255, '제목은 255자를 초과할 수 없습니다'),
-  description: z.string()
-    .min(20, '상세 설명은 20자 이상이어야 합니다')
-    .max(2000, '설명은 2000자를 초과할 수 없습니다'),
-  status: z.enum(['investigating', 'identified', 'monitoring', 'resolved'], {
-    required_error: '상태를 선택하세요'
-  }),
-  severity: z.enum(['low', 'medium', 'high', 'critical'], {
-    required_error: '심각도를 선택하세요'
-  }),
-  priority: z.enum(['P1', 'P2', 'P3', 'P4'], {
-    required_error: '우선순위를 선택하세요'
-  }),
-  affected_services: z.array(z.string())
-    .min(1, '영향받는 서비스를 최소 1개 이상 선택하세요')
-    .max(5, '영향받는 서비스는 최대 5개까지 선택 가능합니다'),
-  reporter: z.string()
-    .min(1, '보고자를 입력하세요')
-    .max(100, '보고자명은 100자를 초과할 수 없습니다'),
-  detection_criteria: z.string()
-    .min(10, '발생 기준은 10자 이상이어야 합니다')
-    .max(500, '발생 기준은 500자를 초과할 수 없습니다')
-});
-
-type FormData = z.infer<typeof incidentSchema>;
+// Zod 스키마는 컴포넌트 안에서 동적으로 생성
+type FormData = {
+  title: string;
+  description: string;
+  status: 'investigating' | 'identified' | 'monitoring' | 'resolved';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  priority: 'P1' | 'P2' | 'P3' | 'P4';
+  affected_services: string[];
+  reporter: string;
+  detection_criteria: string;
+};
 
 interface IncidentFormProps {
   mode: 'create' | 'edit';
@@ -99,7 +82,40 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
   const [autoSaving, setAutoSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [completionProgress, setCompletionProgress] = useState(0);
-  
+
+  // 번역 훅들
+  const t = useTranslations('incident.create');
+  const tf = useTranslations('incident.create.form');
+  const tv = useTranslations('incident.create.validation');
+
+  // 번역된 메시지를 사용하는 Zod 스키마
+  const incidentSchema = useMemo(() => z.object({
+    title: z.string()
+      .min(5, tv('titleMinLength'))
+      .max(255, tv('titleMaxLength')),
+    description: z.string()
+      .min(20, tv('descriptionMinLength'))
+      .max(2000, tv('descriptionMaxLength')),
+    status: z.enum(['investigating', 'identified', 'monitoring', 'resolved'], {
+      required_error: tv('statusRequired')
+    }),
+    severity: z.enum(['low', 'medium', 'high', 'critical'], {
+      required_error: tv('severityRequired')
+    }),
+    priority: z.enum(['P1', 'P2', 'P3', 'P4'], {
+      required_error: tv('priorityRequired')
+    }),
+    affected_services: z.array(z.string())
+      .min(1, tv('servicesRequired'))
+      .max(5, tv('servicesMaxLimit')),
+    reporter: z.string()
+      .min(1, tv('reporterRequired'))
+      .max(100, tv('reporterMaxLength')),
+    detection_criteria: z.string()
+      .min(10, tv('detectionCriteriaMinLength'))
+      .max(500, tv('detectionCriteriaMaxLength'))
+  }), [tv]);
+
   // 자동 저장을 위한 키
   const autoSaveKey = `incident-form-${mode}-${initialData?.id || 'new'}`;
   
@@ -250,12 +266,12 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            {mode === 'create' ? 'New Failure Event 생성' : 'Failure Event 수정'}
+            {mode === 'create' ? tf('header.createTitle') : tf('header.editTitle')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {mode === 'create' 
-              ? '긴급 상황에서 빠른 입력이 가능하도록 설계되었습니다' 
-              : `${initialData?.id} 수정`
+            {mode === 'create'
+              ? tf('header.createDescription')
+              : tf('header.editDescription', { id: initialData?.id })
             }
           </p>
         </div>
@@ -263,7 +279,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
         {/* 진행률 표시 */}
         <div className="text-right">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm text-muted-foreground">완성도:</span>
+            <span className="text-sm text-muted-foreground">{tf('progress.completion')}</span>
             <span className="text-sm font-medium">{completionProgress}%</span>
             {completionProgress >= 70 && (
               <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -271,7 +287,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
           </div>
           <Progress value={completionProgress} className="w-32" />
           {completionProgress >= 70 && (
-            <p className="text-xs text-green-600 mt-1">제출 가능</p>
+            <p className="text-xs text-green-600 mt-1">{tf('progress.submittable')}</p>
           )}
         </div>
       </div>
@@ -283,12 +299,12 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
             {autoSaving ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                자동 저장 중...
+                {tf('autoSave.saving')}
               </>
             ) : (
               <>
                 <CheckCircle2 className="w-4 h-4 text-green-500" />
-                마지막 저장: {lastSaved?.toLocaleTimeString()}
+                {tf('autoSave.lastSaved')} {lastSaved?.toLocaleTimeString()}
               </>
             )}
           </AlertDescription>
@@ -301,19 +317,19 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-primary" />
-              기본 정보
-              <Badge variant="destructive" className="text-xs">필수</Badge>
+              {tf('cards.basicInfo')}
+              <Badge variant="destructive" className="text-xs">{tf('cards.required')}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* 제목 */}
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm font-medium">
-                제목 *
+                {tf('titleLabel')}
               </Label>
               <Input
                 id="title"
-                placeholder="예: ID Recognition 서비스 응답 지연"
+                placeholder={tf('detailedForm.titleExample')}
                 className={`${errors.title ? 'border-destructive' : ''} text-base`}
                 {...register('title')}
               />
@@ -325,12 +341,12 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
             {/* 설명 */}
             <div className="space-y-2">
               <Label htmlFor="description" className="text-sm font-medium">
-                상세 설명 *
+                {tf('detailedForm.detailedDescriptionLabel')}
               </Label>
               <Textarea
                 id="description"
                 rows={4}
-                placeholder="문제 상황을 구체적으로 설명해주세요. 언제, 어떤 상황에서 발생했는지, 현재 영향 범위는 어느 정도인지 등을 포함해주세요."
+                placeholder={tf('detailedForm.descriptionExample')}
                 className={`${errors.description ? 'border-destructive' : ''} text-base`}
                 {...register('description')}
               />
@@ -338,14 +354,14 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
                 <p className="text-xs text-destructive">{errors.description.message}</p>
               )}
               <p className="text-xs text-muted-foreground">
-                최소 20자 이상 입력하세요. 현재: {watchedData?.description?.length || 0}자
+                {tf('detailedForm.characterCountHelper', { count: watchedData?.description?.length || 0 })}
               </p>
             </div>
 
             {/* 상태 */}
             <div className="space-y-2">
               <Label htmlFor="status" className="text-sm font-medium">
-                상태 * <span className="text-xs text-muted-foreground">(우선순위와 심각도 자동 설정)</span>
+                {tf('detailedForm.statusLabelWithNote')}
               </Label>
               <Controller
                 name="status"
@@ -353,7 +369,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
                     <SelectTrigger>
-                      <SelectValue placeholder="상태 선택" />
+                      <SelectValue placeholder={tf('detailedForm.selectStatusPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(STATUS_INFO).map(([key, info]) => (
@@ -379,7 +395,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="severity" className="text-sm font-medium">
-                  심각도 *
+                  {tf('severityLabel')}
                 </Label>
                 <Controller
                   name="severity"
@@ -387,7 +403,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
-                        <SelectValue placeholder="심각도 선택" />
+                        <SelectValue placeholder={tf('severityPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(SEVERITY_INFO).map(([key, info]) => (
@@ -411,7 +427,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
 
               <div className="space-y-2">
                 <Label htmlFor="priority" className="text-sm font-medium">
-                  우선순위 * <span className="text-xs text-muted-foreground">(심각도 기반 자동 제안)</span>
+                  {tf('priorityLabel')} <span className="text-xs text-muted-foreground">{tf('detailedForm.severityAutoSuggest')}</span>
                 </Label>
                 <Controller
                   name="priority"
@@ -419,7 +435,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
                   render={({ field }) => (
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
-                        <SelectValue placeholder="우선순위 선택" />
+                        <SelectValue placeholder={tf('priorityPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(PRIORITY_INFO).map(([key, info]) => (
@@ -449,13 +465,13 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Server className="w-5 h-5 text-primary" />
-              영향 범위
-              <Badge variant="destructive" className="text-xs">필수</Badge>
+              {tf('cards.impactScope')}
+              <Badge variant="destructive" className="text-xs">{tf('cards.required')}</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Label className="text-sm font-medium">영향받는 서비스 *</Label>
+              <Label className="text-sm font-medium">{tf('affectedServicesLabel')}</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {AVAILABLE_SERVICES.map((service) => (
                   <div key={service.id} className="flex items-center space-x-2">
@@ -494,18 +510,18 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="w-5 h-5 text-primary" />
-              추가 정보
+              {tf('detailedForm.additionalInformation')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* 보고자 */}
             <div className="space-y-2">
               <Label htmlFor="reporter" className="text-sm font-medium">
-                보고자 *
+                {tf('reporterLabel')}
               </Label>
               <Input
                 id="reporter"
-                placeholder="예: 운영팀 - 김민수, 모니터링 시스템"
+                placeholder={tf('detailedForm.reporterExample')}
                 className={`${errors.reporter ? 'border-destructive' : ''} text-base`}
                 {...register('reporter')}
               />
@@ -517,12 +533,12 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
             {/* 감지 기준 */}
             <div className="space-y-2">
               <Label htmlFor="detection_criteria" className="text-sm font-medium">
-                발생 기준 / 감지 방법 *
+                {tf('detectionCriteriaLabel')}
               </Label>
               <Textarea
                 id="detection_criteria"
                 rows={3}
-                placeholder="예: 연속 3회 7초 초과 응답시간 감지, 시간당 5회 이상 타임아웃 발생"
+                placeholder={tf('detailedForm.detectionExample')}
                 className={`${errors.detection_criteria ? 'border-destructive' : ''} text-base`}
                 {...register('detection_criteria')}
               />
@@ -543,7 +559,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
               disabled={loading}
             >
               <X className="w-4 h-4 mr-2" />
-              취소
+              {tf('buttons.cancel')}
             </Button>
             
             <Button
@@ -554,12 +570,12 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  저장 중...
+                  {tf('buttons.saving')}
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  {mode === 'create' ? '생성' : '수정'}
+                  {mode === 'create' ? tf('buttons.create') : tf('buttons.edit')}
                 </>
               )}
             </Button>
@@ -569,11 +585,11 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
 
       {/* 모바일 최적화 안내 */}
       <div className="md:hidden bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-blue-900 mb-2">📱 모바일 최적화</h4>
+        <h4 className="text-sm font-medium text-blue-900 mb-2">{tf('mobile.title')}</h4>
         <ul className="text-xs text-blue-700 space-y-1">
-          <li>• 필수 항목만 입력하면 빠른 생성이 가능합니다</li>
-          <li>• 30초마다 자동 저장되어 데이터가 보호됩니다</li>
-          <li>• 큰 터치 영역으로 편리한 입력이 가능합니다</li>
+          <li>{tf('mobile.quickCreation')}</li>
+          <li>{tf('mobile.autoSave')}</li>
+          <li>{tf('mobile.touchFriendly')}</li>
         </ul>
       </div>
     </div>

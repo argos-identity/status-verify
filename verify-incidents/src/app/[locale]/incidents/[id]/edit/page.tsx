@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 import {
   ArrowLeft,
   Save,
@@ -37,6 +38,9 @@ export default function IncidentEditPage() {
   const params = useParams();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const t = useTranslations('incident.edit');
+  const tf = useTranslations('incident.create.form');
+  const ti = useTranslations('incidents');
 
   const incidentId = params.id as string;
   const [saving, setSaving] = useState(false);
@@ -86,7 +90,7 @@ export default function IncidentEditPage() {
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex items-center gap-2">
               <Loader2 className="h-6 w-6 animate-spin" />
-              <span>로딩 중...</span>
+              <span>{t('loading')}</span>
             </div>
           </div>
         </div>
@@ -104,19 +108,19 @@ export default function IncidentEditPage() {
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              {loadError || `해당 장애 이벤트를 찾을 수 없습니다. (ID: ${incidentId})`}
+              {loadError || t('errors.notFound', { id: incidentId })}
             </AlertDescription>
           </Alert>
           <div className="mt-4 flex items-center gap-2">
             <Link href="/incidents">
               <Button variant="outline">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                목록으로 돌아가기
+                {t('returnToList')}
               </Button>
             </Link>
             <Button variant="outline" onClick={refresh}>
               <Loader2 className="w-4 h-4 mr-2" />
-              다시 시도
+              {t('buttons.retry')}
             </Button>
           </div>
         </div>
@@ -127,7 +131,7 @@ export default function IncidentEditPage() {
 
   const handleSave = async () => {
     if (!formData.title?.trim()) {
-      setError('제목을 입력해주세요.');
+      setError(t('errors.titleRequired'));
       return;
     }
 
@@ -165,16 +169,16 @@ export default function IncidentEditPage() {
 
       // 에러 메시지 설정
       if (err.status === 401) {
-        setError('인증이 필요합니다. 로그인 후 다시 시도해주세요.');
+        setError(t('errors.authenticationRequired'));
         router.push(`/auth/login?callbackUrl=/incidents/${incidentId}/edit`);
       } else if (err.status === 403) {
-        setError('인시던트 수정 권한이 없습니다.');
+        setError(t('errors.permissionDenied'));
       } else if (err.status === 404) {
-        setError('해당 인시던트를 찾을 수 없습니다.');
+        setError(t('errors.incidentNotFound'));
       } else if (err.status === 0) {
-        setError('서버에 연결할 수 없습니다. 백엔드 API 서버가 실행 중인지 확인해주세요.');
+        setError(t('errors.serverConnectionFailed'));
       } else {
-        setError(err.message || '장애 이벤트 저장에 실패했습니다. 다시 시도해주세요.');
+        setError(err.message || t('errors.saveFailed'));
       }
     } finally {
       setSaving(false);
@@ -182,7 +186,7 @@ export default function IncidentEditPage() {
   };
 
   const handleDelete = async () => {
-    const confirmDelete = confirm('정말로 이 장애 이벤트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');
+    const confirmDelete = confirm(t('confirmations.deleteConfirm'));
     if (!confirmDelete) return;
 
     try {
@@ -204,15 +208,15 @@ export default function IncidentEditPage() {
 
       // 에러 메시지 설정
       if (err.status === 401) {
-        setError('인증이 필요합니다. 로그인 후 다시 시도해주세요.');
+        setError(t('errors.authenticationRequired'));
       } else if (err.status === 403) {
-        setError('인시던트 삭제 권한이 없습니다.');
+        setError(t('errors.permissionDenied'));
       } else if (err.status === 404) {
-        setError('해당 인시던트를 찾을 수 없습니다.');
+        setError(t('errors.incidentNotFound'));
       } else if (err.status === 0) {
-        setError('서버에 연결할 수 없습니다. 백엔드 API 서버가 실행 중인지 확인해주세요.');
+        setError(t('errors.serverConnectionFailed'));
       } else {
-        setError(err.message || '장애 이벤트 삭제에 실패했습니다. 다시 시도해주세요.');
+        setError(err.message || t('errors.deleteFailed'));
       }
     }
   };
@@ -236,7 +240,7 @@ export default function IncidentEditPage() {
       console.log('Update added successfully:', updateData);
     } catch (error) {
       console.error('Failed to add update:', error);
-      alert('업데이트 추가에 실패했습니다.');
+      alert(t('errors.updateAddFailed'));
     }
   };
 
@@ -275,7 +279,7 @@ export default function IncidentEditPage() {
             <Link href={`/incidents/${incidentId}`}>
               <Button variant="outline" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                뒤로
+                {t('buttons.back')}
               </Button>
             </Link>
             <div>
@@ -283,10 +287,10 @@ export default function IncidentEditPage() {
                 <Badge variant="outline" className="text-xs">
                   {incidentId}
                 </Badge>
-                <span className="text-xs text-muted-foreground">편집 모드</span>
+                <span className="text-xs text-muted-foreground">{t('editMode')}</span>
               </div>
               <h1 className="text-2xl font-bold text-foreground">
-                장애 이벤트 수정
+                {t('title')}
               </h1>
             </div>
           </div>
@@ -298,12 +302,12 @@ export default function IncidentEditPage() {
               onClick={handleDelete}
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              삭제
+              {t('buttons.delete')}
             </Button>
             <Link href={`/incidents/${incidentId}`}>
               <Button variant="outline" size="sm">
                 <X className="w-4 h-4 mr-2" />
-                취소
+                {t('buttons.cancel')}
               </Button>
             </Link>
             <Button
@@ -316,7 +320,7 @@ export default function IncidentEditPage() {
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
-              저장
+              {t('buttons.save')}
             </Button>
           </div>
         </div>
@@ -334,44 +338,44 @@ export default function IncidentEditPage() {
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle>기본 정보</CardTitle>
+              <CardTitle>{t('basicInfo')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">제목 *</label>
+                <label className="text-sm font-medium">{tf('titleLabel')}</label>
                 <Input
                   value={formData.title || ''}
                   onChange={(e) => handleFieldChange('title', e.target.value)}
-                  placeholder="장애 이벤트 제목을 입력하세요"
+                  placeholder={tf('titlePlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">설명</label>
+                <label className="text-sm font-medium">{tf('descriptionLabel')}</label>
                 <Textarea
                   value={formData.description || ''}
                   onChange={(e) => handleFieldChange('description', e.target.value)}
-                  placeholder="장애 상황에 대한 상세한 설명을 입력하세요"
+                  placeholder={tf('descriptionPlaceholder')}
                   rows={4}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">발생 기준 / 감지 방법</label>
+                <label className="text-sm font-medium">{tf('detectionCriteriaLabel')}</label>
                 <Textarea
                   value={formData.detection_criteria || ''}
                   onChange={(e) => handleFieldChange('detection_criteria', e.target.value)}
-                  placeholder="장애 감지 기준이나 방법을 입력하세요"
+                  placeholder={tf('detectionCriteriaPlaceholder')}
                   rows={3}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">보고자</label>
+                <label className="text-sm font-medium">{tf('reporterLabel')}</label>
                 <Input
                   value={formData.reporter || ''}
                   onChange={(e) => handleFieldChange('reporter', e.target.value)}
-                  placeholder="보고자 이름을 입력하세요"
+                  placeholder={tf('reporterPlaceholder')}
                 />
               </div>
             </CardContent>
@@ -380,60 +384,60 @@ export default function IncidentEditPage() {
           {/* Status and Priority */}
           <Card>
             <CardHeader>
-              <CardTitle>상태 및 우선순위</CardTitle>
+              <CardTitle>{t('statusAndPriority')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">상태</label>
+                  <label className="text-sm font-medium">{tf('statusLabel')}</label>
                   <Select
                     value={formData.status}
                     onValueChange={(value) => handleFieldChange('status', value as IncidentStatus)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="상태 선택" />
+                      <SelectValue placeholder={tf('statusPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="investigating">조사 중</SelectItem>
-                      <SelectItem value="identified">원인 식별</SelectItem>
-                      <SelectItem value="monitoring">모니터링</SelectItem>
-                      <SelectItem value="resolved">해결됨</SelectItem>
+                      <SelectItem value="investigating">{ti('status.investigating')}</SelectItem>
+                      <SelectItem value="identified">{ti('status.identified')}</SelectItem>
+                      <SelectItem value="monitoring">{ti('status.monitoring')}</SelectItem>
+                      <SelectItem value="resolved">{ti('status.resolved')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">우선순위</label>
+                  <label className="text-sm font-medium">{tf('priorityLabel')}</label>
                   <Select
                     value={formData.priority}
                     onValueChange={(value) => handleFieldChange('priority', value as IncidentPriority)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="우선순위 선택" />
+                      <SelectValue placeholder={tf('priorityPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="P1">P1 - Critical</SelectItem>
-                      <SelectItem value="P2">P2 - High</SelectItem>
-                      <SelectItem value="P3">P3 - Medium</SelectItem>
-                      <SelectItem value="P4">P4 - Low</SelectItem>
+                      <SelectItem value="P1">{ti('priority.p1')}</SelectItem>
+                      <SelectItem value="P2">{ti('priority.p2')}</SelectItem>
+                      <SelectItem value="P3">{ti('priority.p3')}</SelectItem>
+                      <SelectItem value="P4">{ti('priority.p4')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">심각도</label>
+                  <label className="text-sm font-medium">{tf('severityLabel')}</label>
                   <Select
                     value={formData.severity}
                     onValueChange={(value) => handleFieldChange('severity', value as IncidentSeverity)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="심각도 선택" />
+                      <SelectValue placeholder={tf('severityPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="critical">치명적</SelectItem>
-                      <SelectItem value="high">높음</SelectItem>
-                      <SelectItem value="medium">중간</SelectItem>
-                      <SelectItem value="low">낮음</SelectItem>
+                      <SelectItem value="critical">{ti('severity.critical')}</SelectItem>
+                      <SelectItem value="high">{ti('severity.high')}</SelectItem>
+                      <SelectItem value="medium">{ti('severity.medium')}</SelectItem>
+                      <SelectItem value="low">{ti('severity.low')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -444,12 +448,12 @@ export default function IncidentEditPage() {
           {/* Affected Services */}
           <Card>
             <CardHeader>
-              <CardTitle>영향받는 서비스</CardTitle>
+              <CardTitle>{t('affectedServices')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  영향을 받는 서비스를 선택하세요 (복수 선택 가능)
+                  {tf('affectedServicesDescription')}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {availableServices.map((service) => (
@@ -469,7 +473,7 @@ export default function IncidentEditPage() {
                 </div>
                 {formData.affected_services && formData.affected_services.length > 0 && (
                   <div className="flex flex-wrap gap-1 pt-2 border-t">
-                    <span className="text-sm text-muted-foreground">선택된 서비스:</span>
+                    <span className="text-sm text-muted-foreground">{tf('selectedServices')}</span>
                     {formData.affected_services.map((service) => (
                       <Badge key={service} variant="outline">
                         {formatServiceName(service)}
