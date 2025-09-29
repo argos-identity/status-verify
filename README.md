@@ -6,8 +6,8 @@
 ---
 
 ## 0. Account
-- ** Email**: admin@argosidentity.com
-- ** Password**: admin123
+- **ID**: admin@argosidentity.com
+- **Password**: admin123
 
 ## 1. 프로젝트 개요
 

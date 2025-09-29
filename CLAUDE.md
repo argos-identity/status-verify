@@ -134,7 +134,9 @@ The frontend component is structured to easily accept API data:
 ## Port Configuration
 - verify-main: 3000
 - Backend API: 3001
+- verify-incidents: 3006
 - Watch Server: 3008
+- HAProxy (설치형): 80 (HTTP), 8404 (Statistics)
 
 ## Implementation Documentation
 
@@ -168,4 +170,14 @@ specs/001-prd-md/
 - Implementation details in `specs/001-prd-md/plan.md`
 - API contracts in `specs/001-prd-md/contracts/`
 
-Last updated: 2025-09-15
+## HAProxy 설정
+- **설치 방식**: Docker 없이 직접 설치
+- **설정 파일**: `haproxy-local.cfg` (로컬 시스템용)
+- **설치 가이드**: `README-haproxy.md` 참조
+- **라우팅**:
+  - `/` → verify-main (3000)
+  - `/api/*` → verify-monitor-api (3001)
+  - `/incidents/*` → verify-incidents (3006)
+  - `/socket.io/*` → verify-monitor-api (3001)
+
+Last updated: 2025-09-29
