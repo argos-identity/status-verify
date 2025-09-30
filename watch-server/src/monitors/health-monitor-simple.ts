@@ -4,6 +4,7 @@ import { ServiceHealthResult } from '../types';
 import apiLogger from '../utils/api-logger';
 import { getServiceConfigs } from '../test-data/health-check-data';
 import metricsService from '../services/metrics-service-simple';
+import autoDetectionClient from '../services/auto-detection-client';
 
 class HealthMonitor {
   private static instance: HealthMonitor;
@@ -192,6 +193,22 @@ class HealthMonitor {
         resultsCount: results.length
       });
       // Don't throw error here - we want to continue monitoring even if DB save fails
+    }
+
+    // Trigger auto-detection analysis for all services (in background)
+    if (autoDetectionClient.isAutoDetectionEnabled()) {
+      this.logger.debug('🤖 Triggering auto-detection analysis...');
+
+      // Extract service IDs from results
+      const serviceIds = results.map(r => r.serviceId);
+
+      // Fire and forget - don't wait for auto-detection to complete
+      autoDetectionClient.analyzeBatchInBackground(serviceIds)
+        .catch((error) => {
+          // Error already logged in client, just prevent unhandled promise rejection
+        });
+
+      this.logger.debug(`🤖 Auto-detection triggered for ${serviceIds.length} services`);
     }
 
     return results;

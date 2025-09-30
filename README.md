@@ -150,4 +150,18 @@
   - Backend API: 3001
   - Watch Server: 3008
 
+### 4.4 자동 인시던트 감지 시스템 ✨ NEW
+- **통합 완료**: Watch Server ↔ Backend API 실시간 연동
+- **감지 규칙**: 8개 규칙 (P1/P2/P3/P4 우선순위)
+- **Cooldown 메커니즘**: 중복 인시던트 방지 (15-60분)
+- **비동기 처리**: 헬스체크 성능 영향 없음
+- **활성화 방법**: `ENABLE_AUTO_INCIDENT_DETECTION=true` (.env)
+- **상세 문서**: [watch-server/AUTO-DETECTION-INTEGRATION.md](watch-server/AUTO-DETECTION-INTEGRATION.md)
+
+**감지 조건 예시**:
+- P1 Critical: 5회 연속 실패 (30분 cooldown)
+- P2 High: 3회 연속 실패, 오류율 >50%, 응답 시간 >30초 (15-30분 cooldown)
+- P3 Medium: 평균 응답 시간 >10초, 2회 연속 실패 (20-45분 cooldown)
+- P4 Low: 1회 실패, 평균 응답 시간 5-10초 (30-60분 cooldown)
+
 ---

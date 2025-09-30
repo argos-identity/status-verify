@@ -40,6 +40,9 @@ import authController from './controllers/auth-controller';
 // Admin routes
 import adminRoutes from './routes/admin-routes';
 
+// Auto-detection routes
+import autoDetectionRoutes from './routes/auto-detection-routes';
+
 export class App {
   public app: Application;
   public server: any;
@@ -179,6 +182,9 @@ export class App {
 
     // SLA routes
     router.use('/sla', slaController.createRouter());
+
+    // Auto-detection routes (public for internal service calls)
+    router.use('/auto-detection', autoDetectionRoutes);
 
     // Admin routes (always require admin role)
     const adminRouter = express.Router();
