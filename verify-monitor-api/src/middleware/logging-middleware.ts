@@ -831,4 +831,53 @@ export class LoggingMiddleware {
   }
 }
 
+/**
+ * Get a simple logger instance for general use
+ * @param context Optional context string to prefix all log messages
+ * @returns Logger object with info, error, warn, debug methods
+ */
+export function getLogger(context?: string) {
+  const prefix = context ? `[${context}]` : '';
+
+  return {
+    info: (message: string, metadata?: any) => {
+      const timestamp = new Date().toISOString();
+      if (metadata) {
+        console.log(`[INFO] ${timestamp} ${prefix} ${message}`, metadata);
+      } else {
+        console.log(`[INFO] ${timestamp} ${prefix} ${message}`);
+      }
+    },
+
+    error: (message: string, metadata?: any) => {
+      const timestamp = new Date().toISOString();
+      if (metadata) {
+        console.error(`[ERROR] ${timestamp} ${prefix} ${message}`, metadata);
+      } else {
+        console.error(`[ERROR] ${timestamp} ${prefix} ${message}`);
+      }
+    },
+
+    warn: (message: string, metadata?: any) => {
+      const timestamp = new Date().toISOString();
+      if (metadata) {
+        console.warn(`[WARN] ${timestamp} ${prefix} ${message}`, metadata);
+      } else {
+        console.warn(`[WARN] ${timestamp} ${prefix} ${message}`);
+      }
+    },
+
+    debug: (message: string, metadata?: any) => {
+      if (process.env.NODE_ENV === 'development' || process.env.LOG_LEVEL === 'debug') {
+        const timestamp = new Date().toISOString();
+        if (metadata) {
+          console.debug(`[DEBUG] ${timestamp} ${prefix} ${message}`, metadata);
+        } else {
+          console.debug(`[DEBUG] ${timestamp} ${prefix} ${message}`);
+        }
+      }
+    }
+  };
+}
+
 export default LoggingMiddleware;
