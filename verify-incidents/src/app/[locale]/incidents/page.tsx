@@ -199,8 +199,8 @@ placeholder={t('searchPlaceholder')}
                 </SelectContent>
               </Select>
 
-              <Select 
-                value={filters.priority} 
+              <Select
+                value={filters.priority}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, priority: value as any }))}
               >
                 <SelectTrigger className="w-[150px]">
@@ -211,6 +211,7 @@ placeholder={t('searchPlaceholder')}
                   <SelectItem value="P1">{t('priority.p1')}</SelectItem>
                   <SelectItem value="P2">{t('priority.p2')}</SelectItem>
                   <SelectItem value="P3">{t('priority.p3')}</SelectItem>
+                  <SelectItem value="P4">{t('priority.p4')}</SelectItem>
                 </SelectContent>
               </Select>
 

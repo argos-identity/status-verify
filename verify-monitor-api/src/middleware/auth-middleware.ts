@@ -280,7 +280,10 @@ export class AuthMiddleware {
         '/auth/login',
         '/auth/refresh',
         '/auth/password-reset/request',
-        '/auth/password-reset/confirm'
+        '/auth/password-reset/confirm',
+        '/auto-detection/analyze',
+        '/auto-detection/batch-analyze',
+        '/auto-detection/manual-analysis'
       ];
 
       // Check if this is a GET request to a public route

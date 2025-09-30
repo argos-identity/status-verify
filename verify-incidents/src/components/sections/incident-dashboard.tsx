@@ -25,6 +25,7 @@ interface IncidentStats {
     P1: number;
     P2: number;
     P3: number;
+    P4: number;
   };
   activeIncidents?: number;
   active: number;
@@ -99,6 +100,10 @@ const IncidentDashboard: React.FC<IncidentDashboardProps> = ({ stats, loading = 
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
                   <span className="text-xs text-muted-foreground">P3: {stats.byPriority.P3}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-xs text-muted-foreground">P4: {stats.byPriority.P4}</span>
                 </div>
               </>
             )}

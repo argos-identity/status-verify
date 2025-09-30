@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import autoDetectionController from '../controllers/auto-detection-controller';
+import { AuthMiddleware } from '../middleware/auth-middleware';
 
 const router = Router();
 
@@ -7,25 +8,34 @@ const router = Router();
  * Auto-Detection Routes
  * These routes are used by the watch server to trigger automatic incident detection
  *
- * Note: These endpoints do NOT require JWT authentication as they are internal service calls
- * However, you may want to add API key authentication for production use
+ * Authentication Strategy:
+ * - Development: Public access (no authentication required)
+ * - Production: API key authentication via X-API-Key header
  */
+
+// Conditional authentication: API key in production, public in development
+const conditionalApiKeyAuth = process.env.NODE_ENV === 'production'
+  ? AuthMiddleware.apiKey()
+  : (req: any, res: any, next: any) => {
+      console.log('🔓 Auto-detection endpoint accessed in development mode (no auth required)');
+      next();
+    };
 
 /**
  * @route POST /api/auto-detection/analyze
  * @desc Analyze a single service's health check data
- * @access Public (Internal service call)
+ * @access Public in dev, API key required in production
  * @body { serviceId: string, latestCheckId?: number }
  */
-router.post('/analyze', autoDetectionController.analyzeHealthCheck);
+router.post('/analyze', conditionalApiKeyAuth, autoDetectionController.analyzeHealthCheck);
 
 /**
  * @route POST /api/auto-detection/batch-analyze
  * @desc Analyze multiple services at once
- * @access Public (Internal service call)
+ * @access Public in dev, API key required in production
  * @body { serviceIds: string[] }
  */
-router.post('/batch-analyze', autoDetectionController.batchAnalyze);
+router.post('/batch-analyze', conditionalApiKeyAuth, autoDetectionController.batchAnalyze);
 
 /**
  * @route GET /api/auto-detection/rules
@@ -44,9 +54,9 @@ router.post('/clear-cooldowns', autoDetectionController.clearCooldowns);
 /**
  * @route POST /api/auto-detection/manual-analysis
  * @desc Manually trigger analysis for a service (for testing)
- * @access Public (Should be protected in production)
+ * @access Public in dev, API key required in production
  * @body { serviceId: string }
  */
-router.post('/manual-analysis', autoDetectionController.manualAnalysis);
+router.post('/manual-analysis', conditionalApiKeyAuth, autoDetectionController.manualAnalysis);
 
 export default router;

@@ -32,6 +32,8 @@ class AutoDetectionClient {
   private isEnabled: boolean;
   private timeout: number;
 
+  private apiKey: string | undefined;
+
   private constructor() {
     // Initialize logger
     this.logger = winston.createLogger({
@@ -55,11 +57,13 @@ class AutoDetectionClient {
     this.monitorApiUrl = process.env.MONITOR_API_URL || 'http://localhost:3001';
     this.isEnabled = process.env.ENABLE_AUTO_INCIDENT_DETECTION === 'true';
     this.timeout = parseInt(process.env.AUTO_DETECTION_TIMEOUT || '5000');
+    this.apiKey = process.env.WATCH_SERVER_API_KEY;
 
     if (this.isEnabled) {
       this.logger.info('🤖 Auto-Detection Client initialized', {
         apiUrl: this.monitorApiUrl,
-        timeout: `${this.timeout}ms`
+        timeout: `${this.timeout}ms`,
+        apiKeyConfigured: !!this.apiKey
       });
     } else {
       this.logger.info('⏸️  Auto-Detection Client disabled (ENABLE_AUTO_INCIDENT_DETECTION=false)');
@@ -93,7 +97,8 @@ class AutoDetectionClient {
         {
           timeout: this.timeout,
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(this.apiKey && { 'X-API-Key': this.apiKey })
           }
         }
       );
@@ -137,7 +142,8 @@ class AutoDetectionClient {
         {
           timeout: this.timeout * 2, // Double timeout for batch operations
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(this.apiKey && { 'X-API-Key': this.apiKey })
           }
         }
       );
@@ -258,11 +264,13 @@ class AutoDetectionClient {
     apiUrl: string;
     isEnabled: boolean;
     timeout: number;
+    apiKeyConfigured: boolean;
   } {
     return {
       apiUrl: this.monitorApiUrl,
       isEnabled: this.isEnabled,
-      timeout: this.timeout
+      timeout: this.timeout,
+      apiKeyConfigured: !!this.apiKey
     };
   }
 }

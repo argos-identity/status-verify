@@ -37,7 +37,7 @@ const UptimeBar: React.FC<UptimeBarProps> = ({ status, date, serviceName, index 
     if (hasP1) return 'bg-chart-3';      // Red for P1 Critical
     if (hasP2) return 'bg-chart-2';      // Orange for P2 High
     if (hasP3) return 'bg-chart-4';      // Yellow for P3 Medium
-    return 'bg-chart-1';                 // Green for P4 Low
+    return 'bg-chart-5';                 // Blue for P4 Monitoring
   };
 
   // Removed hardcoded statusColors - now using priority-based colors only
@@ -196,7 +196,7 @@ const ServiceStatusCard: React.FC<ServiceStatusProps> = ({ name, uptimePercentag
       statusColor = 'text-yellow-500'; // Yellow
     } else {
       currentStatus = t('p4Low');
-      statusColor = 'text-primary'; // Green
+      statusColor = 'text-chart-5'; // Blue for monitoring
     }
   }
 

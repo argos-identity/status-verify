@@ -269,7 +269,11 @@ export const useIncidentStats = () => {
 
       const total = incidents.length;
       const resolved = incidents.filter(i => i.status === 'resolved').length;
-      const active = total - resolved;
+      // P4 is monitoring status (not an actual incident), so exclude from active count
+      const active = incidents.filter(i =>
+        i.status !== 'resolved' &&
+        ['P1', 'P2', 'P3'].includes(i.priority)
+      ).length;
       const p1Count = incidents.filter(i => i.priority === 'P1').length;
 
       // Calculate byStatus counts
@@ -278,6 +282,14 @@ export const useIncidentStats = () => {
         investigating: incidents.filter(i => i.status === 'investigating').length,
         identified: incidents.filter(i => i.status === 'identified').length,
         monitoring: incidents.filter(i => i.status === 'monitoring').length,
+      };
+
+      // Calculate byPriority counts
+      const byPriority = {
+        P1: incidents.filter(i => i.priority === 'P1').length,
+        P2: incidents.filter(i => i.priority === 'P2').length,
+        P3: incidents.filter(i => i.priority === 'P3').length,
+        P4: incidents.filter(i => i.priority === 'P4').length,
       };
 
       // Get recent activity (last 5 incidents sorted by created_at)
@@ -296,6 +308,7 @@ export const useIncidentStats = () => {
         p1Count,
         resolvedPercentage: total > 0 ? Math.round((resolved / total) * 100) : 0,
         byStatus,
+        byPriority,
         recentActivity
       });
 
@@ -310,7 +323,11 @@ export const useIncidentStats = () => {
         console.info('API error, falling back to mock data for stats');
         const total = mockIncidents.length;
         const resolved = mockIncidents.filter(i => i.status === 'resolved').length;
-        const active = total - resolved;
+        // P4 is monitoring status (not an actual incident), so exclude from active count
+        const active = mockIncidents.filter(i =>
+          i.status !== 'resolved' &&
+          ['P1', 'P2', 'P3'].includes(i.priority)
+        ).length;
         const p1Count = mockIncidents.filter(i => i.priority === 'P1').length;
 
         // Calculate byStatus counts for mock data
@@ -321,6 +338,14 @@ export const useIncidentStats = () => {
           monitoring: mockIncidents.filter(i => i.status === 'monitoring').length,
         };
 
+        // Calculate byPriority counts for mock data
+        const byPriority = {
+          P1: mockIncidents.filter(i => i.priority === 'P1').length,
+          P2: mockIncidents.filter(i => i.priority === 'P2').length,
+          P3: mockIncidents.filter(i => i.priority === 'P3').length,
+          P4: mockIncidents.filter(i => i.priority === 'P4').length,
+        };
+
         setStats({
           total,
           resolved,
@@ -328,6 +353,7 @@ export const useIncidentStats = () => {
           p1Count,
           resolvedPercentage: Math.round((resolved / total) * 100),
           byStatus,
+          byPriority,
           recentActivity: [...mockIncidents]
             .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             .slice(0, 5)

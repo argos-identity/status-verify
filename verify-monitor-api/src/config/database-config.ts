@@ -458,7 +458,23 @@ const dbConfig: DatabaseConfig = {
 
 export const database = DatabaseConnection.getInstance(dbConfig);
 
-// Export the Prisma client instance
-export const prisma = database.getPrismaClient.bind(database);
+// Export the Prisma client instance directly
+// Note: This will throw an error if database is not connected yet
+// Make sure to call database.connect() before using prisma
+let _prismaCache: PrismaClient | null = null;
+
+export const prisma = new Proxy({} as PrismaClient, {
+  get(target, prop) {
+    try {
+      if (!_prismaCache) {
+        _prismaCache = database.getPrismaClient();
+      }
+      return (_prismaCache as any)[prop];
+    } catch (error) {
+      // If database is not connected, try to return a helpful error
+      throw new Error(`Database not connected. Call database.connect() first. Original error: ${error}`);
+    }
+  }
+});
 
 export default database;
