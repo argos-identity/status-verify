@@ -1,4 +1,4 @@
-import { redirect } from '@/i18n/routing';
+import { redirect } from 'next/navigation';
 
 export default function Page() {
   redirect('/incidents');

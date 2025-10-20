@@ -143,7 +143,7 @@ export default function LoginPage() {
             <div className="text-center text-sm text-muted-foreground">
               <p>Demo Account:</p>
               <p>Email: admin@argosidentity.com</p>
-              <p>Password: admin123</p>
+              <p>Password: Admin@123</p>
             </div>
           </CardContent>
         </Card>
