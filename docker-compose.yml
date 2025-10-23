@@ -128,7 +128,7 @@ services:
       MONITORING_INTERVAL: ${MONITORING_INTERVAL:-60000}
       PORT: 3008
       API_HOST: verify-monitor-api
-      API_PORT: 3001
+      API_PORT: 3003
       # Service endpoints to monitor
       SERVICE_ENDPOINTS: ${SERVICE_ENDPOINTS:-}
       # Monitoring configuration
