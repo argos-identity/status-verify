@@ -12,9 +12,9 @@ export async function GET(request: NextRequest) {
       ...Object.fromEntries(searchParams.entries())
     });
 
-    // Call the backend API (verify-monitor-api on port 3001)
+    // Call the backend API (verify-monitor-api on port 3003)
     // Use 127.0.0.1 instead of localhost to avoid IPv6 issues
-    const backendUrl = `http://127.0.0.1:3001/api/services/status-history?${params.toString()}`;
+    const backendUrl = `http://127.0.0.1:3003/api/services/status-history?${params.toString()}`;
 
     const response = await fetch(backendUrl, {
       method: 'GET',
