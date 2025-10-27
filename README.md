@@ -8,7 +8,7 @@
 ## 0. Account
 - **Admin URL**: http://serverIP:3006/auth/login?callbackUrl=/incidents/create
 - **ID**: admin@argosidentity.com
-- **Password**: admin123
+- **Password**: Admin@123
 
 ## 1. 프로젝트 개요
 
@@ -46,16 +46,16 @@
 ```
 
 ### 2.2 컴포넌트 구성
-1. **Web Pages** (포트 3003, 3005)
+1. **Web Pages** (포트 3000, 3006)
    - `verify-main`: 시스템 상태 페이지, 과거 인시던트 표시, 업타임 추적
    - `verify-incidents`: Incident 관리 애플리케이션, 운영팀 전용 관리 도구
 
-2. **Backend API**
+2. **Backend API (포트 3003)** 
    - REST API 서버
    - WebSocket 실시간 통신
    - PostgreSQL 데이터 관리
 
-3. **Watch Server** (Phase 5)
+3. **Watch Serve(포트 3008)** (Phase 5)
    - 스케줄링 기반 모니터링 (1분 간격)
    - 서비스 헬스체크
    - 메트릭 데이터 수집
