@@ -16,7 +16,7 @@
 ```
 ┌─────────────────────┐    ┌──────────────┐    ┌─────────┐    ┌──────────────┐
 │   Frontend App      │    │  Backend     │    │   DB    │    │   Watch      │
-│ • verify-main:3000  │◄──►│    API       │◄──►│  Postgre│◄───│   Server     │
+│ • verify-main:80    │◄──►│    API       │◄──►│  Postgre│◄───│   Server     │
 │                     │    │   :3001      │    │   SQL   │    │   :3008      │
 │                     │    │              │    │         │    │              │
 │                     │    │              │    │         │    │ (1분마다     │
@@ -149,7 +149,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URLS?.split(',') || ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3005'],
+    origin: process.env.CLIENT_URLS?.split(',') || ['http://localhost:80', 'http://localhost:3001', 'http://localhost:3005'],
     methods: ['GET', 'POST', 'PUT', 'DELETE']
   }
 });
@@ -2226,7 +2226,7 @@ PORT=3001
 NODE_ENV=development
 
 # CORS
-CLIENT_URLS="http://localhost:3000,http://localhost:3001,http://localhost:3005"
+CLIENT_URLS="http://localhost:80,http://localhost:3001,http://localhost:3005"
 
 # Logging
 LOG_LEVEL=info

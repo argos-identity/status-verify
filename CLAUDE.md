@@ -12,7 +12,7 @@ This is an SLA monitoring system consisting of one Next.js frontend application 
 
 ### Frontend Application (verify-main)
 ```bash
-# Start verify-main on port 3000
+# Start verify-main on port 80
 cd verify-main && npm run dev
 
 # Build application
@@ -45,7 +45,7 @@ npm run test              # Run health check tests
 ### Current Structure
 ```
 /sla-monitor/
-├── verify-main/          # System status page (Next.js, port 3000)
+├── verify-main/          # System status page (Next.js, port 80)
 ├── arch.jpeg            # Architecture diagram
 └── PRD.md              # Product Requirements Document
 ```
@@ -132,7 +132,7 @@ The frontend component is structured to easily accept API data:
 - UI components are separated from data concerns
 
 ## Port Configuration
-- verify-main: 3000
+- verify-main: 80
 - Backend API: 3001
 - verify-incidents: 3006
 - Watch Server: 3008
@@ -175,7 +175,7 @@ specs/001-prd-md/
 - **설정 파일**: `haproxy-local.cfg` (로컬 시스템용)
 - **설치 가이드**: `README-haproxy.md` 참조
 - **라우팅**:
-  - `/` → verify-main (3000)
+  - `/` → verify-main (80)
   - `/api/*` → verify-monitor-api (3001)
   - `/incidents/*` → verify-incidents (3006)
   - `/socket.io/*` → verify-monitor-api (3001)

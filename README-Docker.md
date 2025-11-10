@@ -10,7 +10,7 @@
 │                                                             │
 │  ┌─────────────┐  ┌─────────────┐                           │
 │  │ verify-main │  │verify-incidents│                         │
-│  │   :3000     │  │     :3006     │                         │
+│  │    :80      │  │     :3006     │                         │
 │  └─────────────┘  └─────────────┘                           │
 │          │                │              Frontend Network   │
 │          └────────────────┼─────────────────────────────────┤
@@ -59,7 +59,7 @@ cp .env.example .env
 ### 4. 접속 정보
 시작 후 다음 URL로 접속할 수 있습니다:
 
-- **시스템 상태 대시보드**: http://localhost:3000
+- **시스템 상태 대시보드**: http://localhost:80
 - **인시던트 관리**: http://localhost:3006
 - **API 서버**: http://localhost:3001
 - **Watch Server (모니터링)**: http://localhost:3008
@@ -141,7 +141,7 @@ JWT_EXPIRES_IN=24h
 
 # 포트 설정
 API_PORT=3001
-MAIN_PORT=3000
+MAIN_PORT=80
 INCIDENTS_PORT=3006
 
 # 자동 데이터 시딩
@@ -182,7 +182,7 @@ docker-compose ps
 
 # 특정 서비스 헬스 확인
 curl http://localhost:3001/api/health  # API 서버
-curl http://localhost:3000/api/health  # 메인 앱
+curl http://localhost:80/api/health  # 메인 앱
 curl http://localhost:3006/api/health  # 인시던트 앱
 ```
 
@@ -256,10 +256,10 @@ docker-compose up -d --no-deps verify-incidents
 1. **포트 충돌**
    ```bash
    # 포트 사용 확인
-   lsof -i :3000
+   lsof -i :80
 
    # .env에서 포트 변경
-   MAIN_PORT=3010
+   MAIN_PORT=8080
    ```
 
 2. **데이터베이스 연결 실패**

@@ -5,7 +5,7 @@ SLA 모니터링 시스템에서 HAProxy를 Docker 없이 직접 설치하여 �
 ## 개요
 
 HAProxy를 로컬 시스템에 설치하여 다음 서비스들을 프록시합니다:
-- **Main Dashboard** (포트 3000) - 시스템 상태 대시보드
+- **Main Dashboard** (포트 80) - 시스템 상태 대시보드
 - **API Server** (포트 3001) - 백엔드 REST API 및 WebSocket
 - **Incidents App** (포트 3006) - 장애 관리 애플리케이션
 
@@ -172,7 +172,7 @@ HAProxy가 프록시할 백엔드 서비스들을 실행해야 합니다:
 docker-compose up -d postgres verify-monitor-api watch-server
 
 # 2. 프론트엔드 애플리케이션들 개별 실행
-# verify-main (포트 3000)
+# verify-main (포트 80)
 cd verify-main && npm run dev &
 
 # verify-incidents (포트 3006)
@@ -188,7 +188,7 @@ docker-compose up -d verify-main verify-incidents
 - `/api/*` → API 백엔드 (포트 3001)
 - `/socket.io/*` → API 백엔드 (WebSocket)
 - `/incidents/*` → Incidents 앱 (포트 3006)
-- `/` (기본) → Main Dashboard (포트 3000)
+- `/` (기본) → Main Dashboard (포트 80)
 
 ### 로드 밸런싱
 - 각 백엔드에 대해 라운드 로빈 방식
@@ -223,12 +223,12 @@ sudo haproxy -f /etc/haproxy/haproxy.cfg -d
 ### 백엔드 연결 실패
 ```bash
 # 백엔드 서비스 상태 확인
-curl http://localhost:3000/api/health
+curl http://localhost:80/api/health
 curl http://localhost:3001/api/health
 curl http://localhost:3006/api/health
 
 # 포트 사용 확인
-sudo netstat -tlnp | grep -E ':300[016]'
+sudo netstat -tlnp | grep -E ':(80|3001|3006)'
 ```
 
 ## 9. 로그 및 모니터링

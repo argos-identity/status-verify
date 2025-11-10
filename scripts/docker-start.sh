@@ -64,7 +64,7 @@ $COMPOSE_CMD up $COMPOSE_FLAGS --build
 if [[ "$DETACHED" == "true" || "$DETACHED" == "-d" ]]; then
     echo -e "\n${GREEN}🎉 SLA Monitor System started successfully!${NC}"
     echo -e "\n${BLUE}📊 Service URLs:${NC}"
-    echo -e "  🌐 System Status Dashboard: http://localhost:3000"
+    echo -e "  🌐 System Status Dashboard: http://localhost:80"
     echo -e "  🚨 Incident Management: http://localhost:3006"
     echo -e "  🔌 API Server: http://localhost:3001"
     echo -e "  🔍 Watch Server: http://localhost:3008"
