@@ -30,7 +30,7 @@ if ! command -v docker &> /dev/null; then
 fi
 
 # Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
+if ! command -v docker compose &> /dev/null; then
     echo -e "${RED}Error: Docker Compose is not installed${NC}"
     echo "Please install Docker Compose: https://docs.docker.com/compose/install/"
     exit 1
@@ -69,7 +69,7 @@ if [ "$(docker ps -q -f name=sla-monitor-db)" ]; then
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "Stopping and removing existing container..."
-        docker-compose -f "$PROJECT_ROOT/docker-compose.yml" down postgres
+        docker compose -f "$PROJECT_ROOT/docker-compose.yml" down postgres
     else
         echo "Skipping database setup"
         exit 0
@@ -77,7 +77,7 @@ if [ "$(docker ps -q -f name=sla-monitor-db)" ]; then
 fi
 
 echo "Starting PostgreSQL container..."
-docker-compose -f "$PROJECT_ROOT/docker-compose.yml" up -d postgres
+docker compose -f "$PROJECT_ROOT/docker-compose.yml" up -d postgres
 
 echo -e "${GREEN}✓ PostgreSQL container started${NC}"
 echo ""
@@ -88,7 +88,7 @@ MAX_ATTEMPTS=30
 ATTEMPT=0
 
 while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-    if docker-compose -f "$PROJECT_ROOT/docker-compose.yml" exec -T postgres pg_isready -U "${DB_USER}" -d "${DB_NAME:-sla_monitor}" > /dev/null 2>&1; then
+    if docker compose -f "$PROJECT_ROOT/docker-compose.yml" exec -T postgres pg_isready -U "${DB_USER}" -d "${DB_NAME:-sla_monitor}" > /dev/null 2>&1; then
         echo -e "${GREEN}✓ PostgreSQL is ready${NC}"
         break
     fi

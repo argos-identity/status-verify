@@ -54,7 +54,7 @@ if ! command_exists docker; then
     MISSING_DEPS+=("Docker")
 fi
 
-if ! command_exists docker-compose; then
+if ! command_exists docker compose; then
     MISSING_DEPS+=("Docker Compose")
 fi
 
@@ -71,7 +71,7 @@ echo -e "${GREEN}✓ All prerequisites met${NC}"
 # Check if PostgreSQL is running
 print_section "Checking Database"
 
-if ! docker-compose -f "$PROJECT_ROOT/docker-compose.yml" ps | grep -q "sla-monitor-db.*Up"; then
+if ! docker compose -f "$PROJECT_ROOT/docker-compose.yml" ps | grep -q "sla-monitor-db.*Up"; then
     echo -e "${YELLOW}PostgreSQL is not running${NC}"
     read -p "Do you want to start PostgreSQL? (Y/n): " -n 1 -r
     echo
@@ -96,7 +96,7 @@ npm ci --only=production
 echo "Generating Prisma client..."
 npx prisma generate
 
-echo "Building TypeScript..."
+echo "verify-monitor-api Building TypeScript..."
 npm run build
 
 echo "Running database migrations..."
@@ -121,7 +121,7 @@ npm ci --only=production
 echo "Generating Prisma client..."
 npx prisma generate
 
-echo "Building TypeScript..."
+echo "watch-server Building TypeScript..."
 npm run build
 
 mkdir -p logs
@@ -135,7 +135,7 @@ cd "$PROJECT_ROOT/verify-main"
 echo "Installing dependencies..."
 npm ci --only=production
 
-echo "Building Next.js application..."
+echo "verify-main Building Next.js application..."
 npm run build
 
 mkdir -p logs
@@ -149,7 +149,7 @@ cd "$PROJECT_ROOT/verify-incidents"
 echo "Installing dependencies..."
 npm ci --only=production
 
-echo "Building Next.js application..."
+echo "verify-incidents Building Next.js application..."
 npm run build
 
 mkdir -p logs
