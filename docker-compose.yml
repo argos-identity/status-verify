@@ -11,8 +11,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: sla_monitor
-      POSTGRES_USER: ${DB_USER:-slamonitor}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-dev_password_123}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -37,8 +37,8 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${DB_USER:-slamonitor}:${DB_PASSWORD:-dev_password_123}@postgres:5432/sla_monitor
-      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_key_change_in_production}
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:3006}
@@ -123,7 +123,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${DB_USER:-slamonitor}:${DB_PASSWORD:-dev_password_123}@postgres:5432/sla_monitor
+      DATABASE_URL: ${DATABASE_URL}
       WATCH_MODE: ${WATCH_MODE:-continuous}
       MONITORING_INTERVAL: ${MONITORING_INTERVAL:-60000}
       PORT: 3008
