@@ -247,7 +247,7 @@ export class DatabaseConnection {
     connected: boolean;
     metrics: DatabaseMetrics;
     lastCheck: string;
-    connectionString?: string;
+    connectionString?: string | undefined;
   }> {
     const isHealthy = await this.isHealthy();
     
@@ -384,7 +384,7 @@ export class DatabaseConnection {
         await this.prisma.user.create({
           data: {
             id: '00000000-0000-0000-0000-000000000001',
-            name: 'System Administrator',
+            username: 'admin',
             email: 'admin@example.com',
             password_hash: hashedPassword,
             role: 'admin',
@@ -445,7 +445,7 @@ export class DatabaseConnection {
 
 // Export singleton instance
 const dbConfig: DatabaseConfig = {
-  url: process.env.DATABASE_URL,
+  url: process.env.DATABASE_URL!,  // Use non-null assertion since DATABASE_URL is validated by env-config
   maxConnections: parseInt(process.env.DB_MAX_CONNECTIONS || '10', 10),
   connectionTimeout: parseInt(process.env.DB_CONNECTION_TIMEOUT || '10000', 10),
   queryTimeout: parseInt(process.env.DB_QUERY_TIMEOUT || '5000', 10),

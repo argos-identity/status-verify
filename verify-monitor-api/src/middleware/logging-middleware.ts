@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuthRequest } from './auth-middleware';
 
 export interface LogEntry {
   timestamp: string;
@@ -55,7 +54,7 @@ export class LoggingMiddleware {
 
   // Request logging middleware
   static requestLogger() {
-    return (req: AuthRequest, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       const startTime = Date.now();
       
       // Generate or extract request ID
@@ -137,7 +136,7 @@ export class LoggingMiddleware {
         this.consoleSecurityLog(securityLog);
       },
 
-      logAuthorization: (req: AuthRequest, success: boolean, requiredPermission?: string, reason?: string) => {
+      logAuthorization: (req: Request, success: boolean, requiredPermission?: string, reason?: string) => {
         const securityLog: SecurityLogEntry = {
           timestamp: new Date().toISOString(),
           event: 'authorization',
@@ -179,7 +178,7 @@ export class LoggingMiddleware {
         this.consoleSecurityLog(securityLog);
       },
 
-      logDataAccess: (req: AuthRequest, resource: string, success: boolean, metadata?: any) => {
+      logDataAccess: (req: Request, resource: string, success: boolean, metadata?: any) => {
         const securityLog: SecurityLogEntry = {
           timestamp: new Date().toISOString(),
           event: 'data_access',
@@ -218,7 +217,7 @@ export class LoggingMiddleware {
             threshold: `${threshold}ms`,
             statusCode: res.statusCode,
             timestamp: new Date().toISOString(),
-            userId: (req as AuthRequest).user?.userId,
+            userId: (req as Request).user?.userId,
           });
         }
       });
@@ -229,7 +228,7 @@ export class LoggingMiddleware {
 
   // Error logging middleware
   static errorLogger() {
-    return (error: Error, req: AuthRequest, res: Response, next: NextFunction) => {
+    return (error: Error, req: Request, res: Response, next: NextFunction) => {
       const errorLog = {
         timestamp: new Date().toISOString(),
         error: {
@@ -280,7 +279,7 @@ export class LoggingMiddleware {
 
   // API usage analytics
   static analyticsLogger() {
-    return (req: AuthRequest, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       res.on('finish', () => {
         const analytics = {
           timestamp: new Date().toISOString(),

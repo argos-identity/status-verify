@@ -1,5 +1,4 @@
-import { Response, NextFunction } from 'express';
-import { AuthRequest } from './auth-middleware';
+import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/auth-service';
 
 export interface RolePermissions {
@@ -83,7 +82,7 @@ export class RBACMiddleware {
   };
 
   static checkPermission(permission: string) {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.user) {
           return res.status(401).json({
@@ -116,7 +115,7 @@ export class RBACMiddleware {
   }
 
   static checkAnyPermission(permissions: string[]) {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.user) {
           return res.status(401).json({
@@ -150,7 +149,7 @@ export class RBACMiddleware {
   }
 
   static checkRoleHierarchy(minimumRole: 'viewer' | 'reporter' | 'admin') {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.user) {
           return res.status(401).json({
@@ -182,9 +181,9 @@ export class RBACMiddleware {
   }
 
   static checkResourceOwnership(
-    getResourceUserId: (req: AuthRequest) => Promise<string | null>
+    getResourceUserId: (req: Request) => Promise<string | null>
   ) {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.user) {
           return res.status(401).json({
@@ -228,7 +227,7 @@ export class RBACMiddleware {
   }
 
   static automaticPermissionCheck() {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       try {
         const method = req.method.toUpperCase();
         const basePath = req.route?.path || req.path;
@@ -281,7 +280,7 @@ export class RBACMiddleware {
   }
 
   static checkIncidentAccess(action: 'read' | 'update' | 'delete' | 'comment') {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.user) {
           return res.status(401).json({
@@ -386,7 +385,7 @@ export class RBACMiddleware {
   }
 
   static debugPermissions() {
-    return (req: AuthRequest, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       if (req.user) {
         console.log('RBAC Debug:', {
           userId: req.user.userId,

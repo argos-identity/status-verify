@@ -1,18 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import AuthService from '../services/auth-service';
 
-export interface AuthRequest extends Request {
-  user?: {
-    userId: string;
-    email: string;
-    role: 'viewer' | 'reporter' | 'admin';
-    permissions: string[];
-  };
-}
-
 export class AuthMiddleware {
   static authenticate() {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       try {
         // Extract token from Authorization header
         const authHeader = req.headers.authorization;
@@ -72,7 +63,7 @@ export class AuthMiddleware {
   }
 
   static optional() {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       try {
         const authHeader = req.headers.authorization;
         if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -101,7 +92,7 @@ export class AuthMiddleware {
   }
 
   static requireRole(requiredRole: 'viewer' | 'reporter' | 'admin') {
-    return (req: AuthRequest, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       if (!req.user) {
         return res.status(401).json({
           error: 'Authentication required',
@@ -133,7 +124,7 @@ export class AuthMiddleware {
   }
 
   static requirePermission(permission: string) {
-    return (req: AuthRequest, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       if (!req.user) {
         return res.status(401).json({
           error: 'Authentication required',
@@ -155,7 +146,7 @@ export class AuthMiddleware {
   }
 
   static requireAnyPermission(permissions: string[]) {
-    return (req: AuthRequest, res: Response, next: NextFunction) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       if (!req.user) {
         return res.status(401).json({
           error: 'Authentication required',
@@ -184,7 +175,7 @@ export class AuthMiddleware {
     getResourceOwnerId: (req: Request) => Promise<string | null>,
     fallbackRole: 'reporter' | 'admin' = 'admin'
   ) {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.user) {
           return res.status(401).json({
@@ -262,7 +253,7 @@ export class AuthMiddleware {
   }
 
   static conditionalAuth() {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
       console.log(`🔍 Checking auth for: ${req.method} ${req.path}`);
 
       // Public GET endpoints that don't require authentication

@@ -9,16 +9,16 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 const envSchema = z.object({
   // Server Configuration
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().transform(Number).pipe(z.number().min(1).max(65535)).default('3001'),
+  PORT: z.string().transform(Number).pipe(z.number().min(1).max(65535)).default(3001),
   HOST: z.string().default('localhost'),
   
   // Database Configuration
   DATABASE_URL: z.string().min(1, 'Database URL is required'),
-  DB_MAX_CONNECTIONS: z.string().transform(Number).pipe(z.number().min(1).max(100)).default('10'),
-  DB_CONNECTION_TIMEOUT: z.string().transform(Number).pipe(z.number().min(1000)).default('10000'),
-  DB_QUERY_TIMEOUT: z.string().transform(Number).pipe(z.number().min(1000)).default('5000'),
-  DB_SLOW_QUERY_THRESHOLD: z.string().transform(Number).pipe(z.number().min(1)).default('100'),
-  DB_ENABLE_METRICS: z.string().transform(val => val !== 'false').default('true'),
+  DB_MAX_CONNECTIONS: z.string().transform(Number).pipe(z.number().min(1).max(100)).default(10),
+  DB_CONNECTION_TIMEOUT: z.string().transform(Number).pipe(z.number().min(1000)).default(10000),
+  DB_QUERY_TIMEOUT: z.string().transform(Number).pipe(z.number().min(1000)).default(5000),
+  DB_SLOW_QUERY_THRESHOLD: z.string().transform(Number).pipe(z.number().min(1)).default(100),
+  DB_ENABLE_METRICS: z.string().transform(val => val !== 'false').default(true),
   
   // JWT Configuration
   JWT_SECRET: z.string().min(32, 'JWT secret must be at least 32 characters'),
@@ -28,61 +28,61 @@ const envSchema = z.object({
   
   // CORS Configuration
   ALLOWED_ORIGINS: z.string().default('http://localhost:3000,http://localhost:3002,http://localhost:3005,http://localhost:3006,http://localhost:3001'),
-  CORS_CREDENTIALS: z.string().transform(val => val === 'true').default('true'),
+  CORS_CREDENTIALS: z.string().transform(val => val === 'true').default(true),
   
   // Socket.IO Configuration
   SOCKET_CORS_ORIGINS: z.string().optional(),
-  SOCKET_PING_TIMEOUT: z.string().transform(Number).pipe(z.number().min(10000)).default('60000'),
-  SOCKET_PING_INTERVAL: z.string().transform(Number).pipe(z.number().min(5000)).default('25000'),
+  SOCKET_PING_TIMEOUT: z.string().transform(Number).pipe(z.number().min(10000)).default(60000),
+  SOCKET_PING_INTERVAL: z.string().transform(Number).pipe(z.number().min(5000)).default(25000),
   
   // Rate Limiting
-  RATE_LIMIT_WINDOW_MS: z.string().transform(Number).pipe(z.number().min(60000)).default('900000'), // 15 minutes
-  RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).pipe(z.number().min(1)).default('100'),
-  RATE_LIMIT_SKIP_SUCCESSFUL: z.string().transform(val => val === 'true').default('false'),
+  RATE_LIMIT_WINDOW_MS: z.string().transform(Number).pipe(z.number().min(60000)).default(900000), // 15 minutes
+  RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).pipe(z.number().min(1)).default(100),
+  RATE_LIMIT_SKIP_SUCCESSFUL: z.string().transform(val => val === 'true').default(false),
   
   // Security Headers
-  HELMET_ENABLED: z.string().transform(val => val !== 'false').default('true'),
-  CSP_ENABLED: z.string().transform(val => val === 'true').default('false'),
+  HELMET_ENABLED: z.string().transform(val => val !== 'false').default(true),
+  CSP_ENABLED: z.string().transform(val => val === 'true').default(false),
   
   // Logging Configuration
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly']).default('info'),
   LOG_FILE: z.string().optional(),
   LOG_MAX_SIZE: z.string().default('20m'),
-  LOG_MAX_FILES: z.string().transform(Number).pipe(z.number().min(1)).default('14'),
+  LOG_MAX_FILES: z.string().transform(Number).pipe(z.number().min(1)).default(14),
   LOG_DATE_PATTERN: z.string().default('YYYY-MM-DD'),
   
   // Application Settings
   API_PREFIX: z.string().default('/api'),
   API_VERSION: z.string().default('v1'),
-  SWAGGER_ENABLED: z.string().transform(val => val === 'true').default('false'),
+  SWAGGER_ENABLED: z.string().transform(val => val === 'true').default(false),
   
   // Performance Settings
   REQUEST_SIZE_LIMIT: z.string().default('10mb'),
   URL_ENCODED_LIMIT: z.string().default('10mb'),
   JSON_LIMIT: z.string().default('10mb'),
-  COMPRESSION_ENABLED: z.string().transform(val => val !== 'false').default('true'),
-  
+  COMPRESSION_ENABLED: z.string().transform(val => val !== 'false').default(true),
+
   // Health Check Configuration
-  HEALTH_CHECK_ENABLED: z.string().transform(val => val !== 'false').default('true'),
+  HEALTH_CHECK_ENABLED: z.string().transform(val => val !== 'false').default(true),
   HEALTH_CHECK_PATH: z.string().default('/health'),
   
   // Watch Server Configuration (for monitoring)
-  WATCH_SERVER_ENABLED: z.string().transform(val => val === 'true').default('false'),
-  WATCH_SERVER_PORT: z.string().transform(Number).pipe(z.number().min(1).max(65535)).default('3008'),
-  WATCH_SERVER_INTERVAL: z.string().transform(Number).pipe(z.number().min(30000)).default('60000'), // 1 minute
+  WATCH_SERVER_ENABLED: z.string().transform(val => val === 'true').default(false),
+  WATCH_SERVER_PORT: z.string().transform(Number).pipe(z.number().min(1).max(65535)).default(3008),
+  WATCH_SERVER_INTERVAL: z.string().transform(Number).pipe(z.number().min(30000)).default(60000), // 1 minute
   
   // Incident Management
-  INCIDENT_AUTO_RESOLVE_HOURS: z.string().transform(Number).pipe(z.number().min(1)).default('24'),
-  INCIDENT_ESCALATION_MINUTES: z.string().transform(Number).pipe(z.number().min(5)).default('30'),
-  
+  INCIDENT_AUTO_RESOLVE_HOURS: z.string().transform(Number).pipe(z.number().min(1)).default(24),
+  INCIDENT_ESCALATION_MINUTES: z.string().transform(Number).pipe(z.number().min(5)).default(30),
+
   // SLA Configuration
-  SLA_CALCULATION_INTERVAL_MINUTES: z.string().transform(Number).pipe(z.number().min(1)).default('5'),
-  SLA_RETENTION_DAYS: z.string().transform(Number).pipe(z.number().min(1)).default('365'),
+  SLA_CALCULATION_INTERVAL_MINUTES: z.string().transform(Number).pipe(z.number().min(1)).default(5),
+  SLA_RETENTION_DAYS: z.string().transform(Number).pipe(z.number().min(1)).default(365),
   
   // Admin Configuration
   DEFAULT_ADMIN_EMAIL: z.string().email().default('admin@example.com'),
   DEFAULT_ADMIN_PASSWORD: z.string().min(8).default('admin123!'),
-  SETUP_MODE: z.string().transform(val => val === 'true').default('false'),
+  SETUP_MODE: z.string().transform(val => val === 'true').default(false),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
