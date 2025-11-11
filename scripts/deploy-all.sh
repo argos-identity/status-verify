@@ -93,6 +93,9 @@ cd "$PROJECT_ROOT/verify-monitor-api"
 echo "Installing dependencies..."
 npm ci --only=production
 
+echo "npm node_modules Installing dependencies..."
+npm install
+
 echo "Generating Prisma client..."
 npx prisma generate
 
@@ -118,6 +121,9 @@ cd "$PROJECT_ROOT/watch-server"
 echo "Installing dependencies..."
 npm ci --only=production
 
+echo "npm node_modules Installing dependencies..."
+npm install
+
 echo "Generating Prisma client..."
 npx prisma generate
 
@@ -135,6 +141,9 @@ cd "$PROJECT_ROOT/verify-main"
 echo "Installing dependencies..."
 npm ci --only=production
 
+echo "npm node_modules Installing dependencies..."
+npm install
+
 echo "verify-main Building Next.js application..."
 npm run build
 
@@ -148,6 +157,10 @@ cd "$PROJECT_ROOT/verify-incidents"
 
 echo "Installing dependencies..."
 npm ci --only=production
+
+echo "npm node_modules Installing dependencies..."
+npm install
+
 
 echo "verify-incidents Building Next.js application..."
 npm run build
