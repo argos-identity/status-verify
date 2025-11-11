@@ -142,7 +142,7 @@ echo "Installing dependencies..."
 npm ci --only=production
 
 echo "npm node_modules Installing dependencies..."
-npm install
+npm install --legacy-peer-deps
 
 echo "verify-main Building Next.js application..."
 npm run build
@@ -159,7 +159,7 @@ echo "Installing dependencies..."
 npm ci --only=production
 
 echo "npm node_modules Installing dependencies..."
-npm install
+npm install 
 
 
 echo "verify-incidents Building Next.js application..."

@@ -117,7 +117,7 @@ module.exports = {
     {
       name: 'verify-main',
       cwd: './verify-main',
-      script: './.next/standalone/server.js',
+      script: './.next/standalone/status-verify/verify-main/server.js',
 
       // 클러스터 모드 (Next.js standalone)
       instances: 2,
@@ -168,7 +168,7 @@ module.exports = {
     {
       name: 'verify-incidents',
       cwd: './verify-incidents',
-      script: './.next/standalone/server.js',
+      script: './.next/standalone/status-verify/verify-incidents/server.js',
 
       // 클러스터 모드
       instances: 2,
