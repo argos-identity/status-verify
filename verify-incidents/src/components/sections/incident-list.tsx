@@ -90,7 +90,7 @@ const SeverityBadge: React.FC<{ severity: Incident['severity'] }> = ({ severity 
 const IncidentCard: React.FC<{ incident: Incident }> = ({ incident }) => {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const t = useTranslations('incidents');
-  const resolutionTime = calculateResolutionTime(incident.created_at, incident.resolved_at);
+  const resolutionTime = calculateResolutionTime(incident.created_at, incident.resolved_at ?? undefined);
   
   return (
     <Card className="hover:shadow-md transition-shadow duration-200 border-l-4" 

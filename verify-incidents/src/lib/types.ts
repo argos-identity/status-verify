@@ -161,6 +161,7 @@ export interface User {
 export interface IncidentFormData {
   title: string;
   description: string;
+  status?: IncidentStatus;
   severity: IncidentSeverity;
   priority: IncidentPriority;
   affected_services: string[];

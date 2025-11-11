@@ -4,7 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:3003/api'
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'credentials',

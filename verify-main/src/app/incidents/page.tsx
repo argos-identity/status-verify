@@ -1,30 +1,22 @@
 'use client';
 
-import React from 'react';
-import Header from '@/components/sections/header';
-import Footer from '@/components/sections/footer';
-import IncidentHistory from '@/components/sections/incident-history';
-import { useIncidentHistory } from '@/hooks/use-incident-history';
+import dynamic from 'next/dynamic';
+
+// Import the client component with ssr: false to prevent prerendering
+// This ensures the component only loads on the client side, avoiding
+// issues with Context initialization and API calls during build
+const IncidentsClientPage = dynamic(() => import('./IncidentsClientPage'), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-muted-foreground">Loading incidents...</p>
+      </div>
+    </div>
+  ),
+});
 
 export default function IncidentsPage() {
-  const { incidents, isLoading, error } = useIncidentHistory();
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <div className="mx-auto max-w-[850px] px-10">
-        <div className="py-8">
-          <IncidentHistory
-            incidents={incidents}
-            isLoading={isLoading}
-            error={error ?? undefined}
-            showAllIncidents={true}
-          />
-        </div>
-      </div>
-
-      <Footer />
-    </div>
-  );
+  return <IncidentsClientPage />;
 }

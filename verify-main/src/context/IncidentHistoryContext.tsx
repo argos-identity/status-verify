@@ -79,8 +79,11 @@ export const IncidentHistoryProvider: React.FC<IncidentHistoryProviderProps> = (
   };
 
   useEffect(() => {
-    console.info('🚀 IncidentHistoryProvider initialized - making single API call');
-    fetchData();
+    // Only fetch data in browser environment
+    if (typeof window !== 'undefined') {
+      console.info('🚀 IncidentHistoryProvider initialized - making single API call');
+      fetchData();
+    }
   }, []);
 
   const value: IncidentHistoryContextType = {

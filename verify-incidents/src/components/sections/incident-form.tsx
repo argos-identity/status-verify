@@ -151,14 +151,14 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
     let completed = 0;
     const total = 8;
 
-    if (data?.title?.length >= 5) completed++;
-    if (data?.description?.length >= 20) completed++;
+    if ((data?.title?.length ?? 0) >= 5) completed++;
+    if ((data?.description?.length ?? 0) >= 20) completed++;
     if (data?.status) completed++;
     if (data?.severity) completed++;
     if (data?.priority) completed++;
     if ((data?.affected_services || []).length > 0) completed++;
-    if (data?.reporter?.length > 0) completed++;
-    if (data?.detection_criteria?.length >= 10) completed++;
+    if ((data?.reporter?.length ?? 0) > 0) completed++;
+    if ((data?.detection_criteria?.length ?? 0) >= 10) completed++;
 
     return Math.round((completed / total) * 100);
   }, []);

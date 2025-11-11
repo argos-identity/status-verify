@@ -32,7 +32,7 @@ export default function HistoryPage() {
   const stats = getIncidentStats();
   const avgResolutionTime = resolvedIncidents
     .map(incident => {
-      const time = calculateResolutionTime(incident.created_at, incident.resolved_at);
+      const time = calculateResolutionTime(incident.created_at, incident.resolved_at ?? undefined);
       if (!time) return 0;
       
       // 시간 문자열을 분 단위로 변환 (간단한 파싱)
@@ -75,7 +75,7 @@ export default function HistoryPage() {
         incident.severity,
         incident.created_at,
         incident.resolved_at || '',
-        calculateResolutionTime(incident.created_at, incident.resolved_at) || ''
+        calculateResolutionTime(incident.created_at, incident.resolved_at ?? undefined) || ''
       ])
     ].map(row => row.join(',')).join('\n');
 
