@@ -19,15 +19,19 @@ export interface LogEntry {
 
 export interface SecurityLogEntry {
   timestamp: string;
-  event: string;
+  event?: string;
+  type?: string;
+  severity?: string;
   userId?: string;
   ip: string;
   userAgent?: string;
-  path: string;
-  method: string;
-  success: boolean;
+  path?: string;
+  method?: string;
+  success?: boolean;
   reason?: string;
   metadata?: any;
+  requestId?: string;
+  details?: any;
 }
 
 export interface ExternalAPILogEntry {
@@ -822,6 +826,134 @@ export class LoggingMiddleware {
           details: {
             userId,
             logoutTime: new Date().toISOString(),
+          },
+        };
+        this.addSecurityLog(securityEntry);
+      },
+      logLogoutFailure: (req: Request, userId: string, reason: string) => {
+        const securityEntry: SecurityLogEntry = {
+          timestamp: new Date().toISOString(),
+          type: 'logout_failure',
+          severity: 'error',
+          userId,
+          ip: req.ip || 'unknown',
+          userAgent: req.get('User-Agent'),
+          requestId: req.requestId || 'unknown',
+          details: {
+            userId,
+            reason,
+          },
+        };
+        this.addSecurityLog(securityEntry);
+      },
+      logProfileUpdate: (req: Request, userId: string, changes: any) => {
+        const securityEntry: SecurityLogEntry = {
+          timestamp: new Date().toISOString(),
+          type: 'profile_update',
+          severity: 'info',
+          userId,
+          ip: req.ip || 'unknown',
+          userAgent: req.get('User-Agent'),
+          requestId: req.requestId || 'unknown',
+          details: {
+            userId,
+            changes,
+          },
+        };
+        this.addSecurityLog(securityEntry);
+      },
+      logPasswordChangeSuccess: (req: Request, userId: string) => {
+        const securityEntry: SecurityLogEntry = {
+          timestamp: new Date().toISOString(),
+          type: 'password_change_success',
+          severity: 'info',
+          userId,
+          ip: req.ip || 'unknown',
+          userAgent: req.get('User-Agent'),
+          requestId: req.requestId || 'unknown',
+          details: {
+            userId,
+            changeTime: new Date().toISOString(),
+          },
+        };
+        this.addSecurityLog(securityEntry);
+      },
+      logPasswordChangeFailure: (req: Request, userId: string, reason: string) => {
+        const securityEntry: SecurityLogEntry = {
+          timestamp: new Date().toISOString(),
+          type: 'password_change_failure',
+          severity: 'warning',
+          userId,
+          ip: req.ip || 'unknown',
+          userAgent: req.get('User-Agent'),
+          requestId: req.requestId || 'unknown',
+          details: {
+            userId,
+            reason,
+          },
+        };
+        this.addSecurityLog(securityEntry);
+      },
+      logPasswordResetRequest: (req: Request, email: string) => {
+        const securityEntry: SecurityLogEntry = {
+          timestamp: new Date().toISOString(),
+          type: 'password_reset_request',
+          severity: 'info',
+          userId: email,
+          ip: req.ip || 'unknown',
+          userAgent: req.get('User-Agent'),
+          requestId: req.requestId || 'unknown',
+          details: {
+            email,
+          },
+        };
+        this.addSecurityLog(securityEntry);
+      },
+      logPasswordResetSuccess: (req: Request, userId: string, email: string) => {
+        const securityEntry: SecurityLogEntry = {
+          timestamp: new Date().toISOString(),
+          type: 'password_reset_success',
+          severity: 'info',
+          userId,
+          ip: req.ip || 'unknown',
+          userAgent: req.get('User-Agent'),
+          requestId: req.requestId || 'unknown',
+          details: {
+            userId,
+            email,
+            resetTime: new Date().toISOString(),
+          },
+        };
+        this.addSecurityLog(securityEntry);
+      },
+      logPasswordResetFailure: (req: Request, email: string, reason: string) => {
+        const securityEntry: SecurityLogEntry = {
+          timestamp: new Date().toISOString(),
+          type: 'password_reset_failure',
+          severity: 'warning',
+          userId: email,
+          ip: req.ip || 'unknown',
+          userAgent: req.get('User-Agent'),
+          requestId: req.requestId || 'unknown',
+          details: {
+            email,
+            reason,
+          },
+        };
+        this.addSecurityLog(securityEntry);
+      },
+      logSessionRevoked: (req: Request, userId: string, sessionId: string) => {
+        const securityEntry: SecurityLogEntry = {
+          timestamp: new Date().toISOString(),
+          type: 'session_revoked',
+          severity: 'info',
+          userId,
+          ip: req.ip || 'unknown',
+          userAgent: req.get('User-Agent'),
+          requestId: req.requestId || 'unknown',
+          details: {
+            userId,
+            sessionId,
           },
         };
         this.addSecurityLog(securityEntry);

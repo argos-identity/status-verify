@@ -53,6 +53,23 @@ export class UptimeRecordModel {
     });
   }
 
+  static async findByDate(serviceId: string, date: Date): Promise<UptimeRecord | null> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return prisma.uptimeRecord.findFirst({
+      where: {
+        service_id: serviceId,
+        date: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+    });
+  }
+
   static async create(data: Omit<UptimeRecord, 'id' | 'created_at'>): Promise<UptimeRecord> {
     return prisma.uptimeRecord.create({
       data,
@@ -77,12 +94,34 @@ export class UptimeRecordModel {
   }
 
   static async getMonthlyStats(
-    serviceId: string, 
+    serviceId: string,
     months: number = 3,
     startDate?: Date
-  ): Promise<MonthlyUptimeData[]> {
+  ): Promise<Array<{
+    name: string;
+    year: number;
+    month: number;
+    uptime: string;
+    days: ('o' | 'po' | 'mo' | 'nd' | 'e')[];
+    totalDays: number;
+    operationalDays: number;
+    partialOutageDays: number;
+    majorOutageDays: number;
+    noDataDays: number;
+  }>> {
     const endDate = startDate || new Date();
-    const monthsData: MonthlyUptimeData[] = [];
+    const monthsData: Array<{
+      name: string;
+      year: number;
+      month: number;
+      uptime: string;
+      days: ('o' | 'po' | 'mo' | 'nd' | 'e')[];
+      totalDays: number;
+      operationalDays: number;
+      partialOutageDays: number;
+      majorOutageDays: number;
+      noDataDays: number;
+    }> = [];
     
     for (let i = 0; i < months; i++) {
       const monthStart = new Date(endDate);
@@ -108,7 +147,7 @@ export class UptimeRecordModel {
       
       // Generate days array for this month
       const daysInMonth = monthEnd.getDate();
-      const days: string[] = [];
+      const days: ('o' | 'po' | 'mo' | 'nd' | 'e')[] = [];
       
       for (let day = 1; day <= daysInMonth; day++) {
         const dayDate = new Date(monthStart);
@@ -131,15 +170,25 @@ export class UptimeRecordModel {
         : '0.00';
       
       // Format month name
-      const monthName = monthStart.toLocaleDateString('en-US', { 
-        month: 'long', 
-        year: 'numeric' 
+      const monthName = monthStart.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
       });
-      
+      const partialOutageDays = days.filter(status => status === 'po').length;
+      const majorOutageDays = days.filter(status => status === 'mo').length;
+      const noDataDays = days.filter(status => status === 'nd' || status === 'e').length;
+
       monthsData.push({
         name: monthName,
+        year: monthStart.getFullYear(),
+        month: monthStart.getMonth() + 1,
         uptime: uptimePercentage,
         days,
+        totalDays: daysInMonth,
+        operationalDays,
+        partialOutageDays,
+        majorOutageDays,
+        noDataDays,
       });
     }
     

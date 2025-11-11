@@ -187,7 +187,7 @@ export class WatchServerLogModel {
 
     // Get the most recent error message if any
     const failedLogs = logs.filter(log => !log.is_success);
-    const errorMessage = failedLogs.length > 0 ? failedLogs[0].error_message : null;
+    const errorMessage = failedLogs.length > 0 ? failedLogs[0]?.error_message : null;
 
     let status: 'o' | 'po' | 'mo' | 'nd';
 
@@ -202,7 +202,7 @@ export class WatchServerLogModel {
     return {
       status,
       responseTime: avgResponseTime,
-      errorMessage,
+      errorMessage: errorMessage ?? null,
     };
   }
 
@@ -270,7 +270,9 @@ export class WatchServerLogModel {
 
     for (let i = 0; i < sortedLogs.length; i++) {
       const log = sortedLogs[i];
-      
+
+      if (!log) continue;
+
       if (!log.is_success && !currentOutage) {
         // Start of new outage
         currentOutage = {
@@ -282,7 +284,7 @@ export class WatchServerLogModel {
         // End of outage
         const durationMs = log.check_time.getTime() - currentOutage.startTime.getTime();
         const durationMinutes = Math.round(durationMs / (1000 * 60));
-        
+
         outages.push({
           startTime: currentOutage.startTime,
           endTime: log.check_time,
@@ -290,7 +292,7 @@ export class WatchServerLogModel {
           errorType: currentOutage.errorType,
           errorMessage: currentOutage.errorMessage,
         });
-        
+
         currentOutage = null;
       }
     }
@@ -367,9 +369,7 @@ export class WatchServerLogModel {
     try {
       // This would typically make an HTTP request to the endpoint
       // For now, we'll simulate it
-      const response = await fetch(endpoint, {
-        timeout: timeoutMs,
-      });
+      const response = await fetch(endpoint);
       
       const responseTime = Date.now() - startTime;
       
@@ -397,7 +397,7 @@ export class WatchServerLogModel {
 
       result = {
         service_id: serviceId,
-        response_time: responseTime > timeoutMs ? null : responseTime,
+        response_time: responseTime > timeoutMs ? undefined : responseTime,
         is_success: false,
         error_message: errorMessage,
         error_type: errorType,

@@ -50,19 +50,18 @@ export class WebSocketController {
 
       // Add incident comment through service
       const comment = await IncidentService.addIncidentUpdate(data.incidentId, {
-        message: data.message,
+        description: data.message,
         user_id: socket.userId!,
         status: data.status,
-        is_public: data.isPublic,
       });
 
       // Broadcast to all participants in the incident room
       this.socketConfig.broadcastIncidentComment(data.incidentId, {
         id: comment.id,
-        message: comment.message,
+        message: comment.description,
         userId: socket.userId,
         status: comment.status,
-        isPublic: comment.is_public,
+        isPublic: true,
         createdAt: comment.created_at,
       });
 
@@ -117,10 +116,9 @@ export class WebSocketController {
       // Add status change comment if message provided
       if (data.message) {
         await IncidentService.addIncidentUpdate(data.incidentId, {
-          message: data.message,
+          description: data.message,
           user_id: socket.userId!,
           status: data.newStatus,
-          is_public: true,
         });
       }
 
@@ -178,9 +176,8 @@ export class WebSocketController {
       
       // Add assignment comment
       const comment = await IncidentService.addIncidentUpdate(data.incidentId, {
-        message: data.message || `Incident assigned to ${assigneeProfile.name}`,
+        description: data.message || `Incident assigned to ${assigneeProfile.name}`,
         user_id: socket.userId!,
-        is_public: true,
       });
 
       // Broadcast assignment to all participants

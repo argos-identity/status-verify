@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
+import { validationResult } from 'express-validator';
 import SystemService from '../services/system-service';
 import validationMiddleware from '../middleware/validation-middleware';
 import rbacMiddleware from '../middleware/rbac-middleware';
@@ -27,14 +28,10 @@ export class ServicesController {
       } = req.query;
 
       // Get all services with optional filters
-      const services = await SystemService.getAllServices({
-        includeStatus: includeStatus === 'true',
-        includeMetrics: includeMetrics === 'true',
-        statusFilter: status as string,
-      });
-      
+      const services = await SystemService.getAllServices();
+
       const duration = Date.now() - startTime;
-      
+
       this.logger.logResponse(
         req.requestId || 'unknown',
         200,
@@ -45,7 +42,7 @@ export class ServicesController {
       res.status(200).json({
         success: true,
         data: services,
-        count: services.length,
+        count: services.services?.length || 0,
         timestamp: new Date().toISOString(),
         responseTime: `${duration}ms`,
       });
@@ -69,31 +66,22 @@ export class ServicesController {
 
       // Validate service ID
       if (!serviceId || serviceId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Service ID is required',
         });
+        return;
       }
 
-      // Parse query parameters
-      const {
-        includeMetrics = 'true',
-        includeIncidents = 'false',
-        timeRange = '24h'
-      } = req.query;
-
       // Get service details
-      const service = await SystemService.getService(serviceId, {
-        includeMetrics: includeMetrics === 'true',
-        includeIncidents: includeIncidents === 'true',
-        timeRange: timeRange as string,
-      });
+      const service = await SystemService.getService(serviceId);
 
       if (!service) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'Service not found',
         });
+        return;
       }
       
       const duration = Date.now() - startTime;
@@ -125,25 +113,22 @@ export class ServicesController {
         req.requestId || 'unknown',
         'POST',
         '/api/services',
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate request body
-      const validationResult = validationMiddleware.validateService(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Create new service
-      const service = await SystemService.createService(
-        req.body,
-        req.user?.userId || 'system'
-      );
+      const service = await SystemService.createService(req.body);
       
       const duration = Date.now() - startTime;
       
@@ -176,40 +161,38 @@ export class ServicesController {
         req.requestId || 'unknown',
         'PUT',
         `/api/services/${serviceId}`,
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate service ID
       if (!serviceId || serviceId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Service ID is required',
         });
+        return;
       }
 
       // Validate request body
-      const validationResult = validationMiddleware.validateServiceUpdate(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Update service
-      const service = await SystemService.updateService(
-        serviceId,
-        req.body,
-        req.user?.userId || 'system'
-      );
+      const service = await SystemService.updateService(serviceId, req.body);
 
       if (!service) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'Service not found',
         });
+        return;
       }
       
       const duration = Date.now() - startTime;
@@ -248,24 +231,17 @@ export class ServicesController {
 
       // Validate service ID
       if (!serviceId || serviceId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Service ID is required',
         });
+        return;
       }
 
       // Delete service
-      const success = await SystemService.deleteService(
-        serviceId,
-        req.user?.userId || 'system'
-      );
+      await SystemService.deleteService(serviceId);
 
-      if (!success) {
-        return next({
-          status: 404,
-          message: 'Service not found',
-        });
-      }
+      // Assume success if no error thrown
       
       const duration = Date.now() - startTime;
       
@@ -302,20 +278,22 @@ export class ServicesController {
 
       // Validate service ID
       if (!serviceId || serviceId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Service ID is required',
         });
+        return;
       }
 
       // Get service status
       const status = await SystemService.getServiceStatus(serviceId);
 
       if (!status) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'Service not found',
         });
+        return;
       }
       
       const duration = Date.now() - startTime;
@@ -348,40 +326,38 @@ export class ServicesController {
         req.requestId || 'unknown',
         'PUT',
         `/api/services/${serviceId}/status`,
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate service ID
       if (!serviceId || serviceId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Service ID is required',
         });
+        return;
       }
 
       // Validate status update
-      const validationResult = validationMiddleware.validateServiceStatus(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Update service status
-      const updatedStatus = await SystemService.updateServiceStatus(
-        serviceId,
-        req.body,
-        req.user?.userId || 'system'
-      );
+      const updatedStatus = await SystemService.updateServiceStatus(serviceId, req.body);
 
       if (!updatedStatus) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'Service not found',
         });
+        return;
       }
       
       const duration = Date.now() - startTime;
@@ -420,10 +396,11 @@ export class ServicesController {
 
       // Validate service ID
       if (!serviceId || serviceId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Service ID is required',
         });
+        return;
       }
 
       // Get service dependencies
@@ -464,23 +441,22 @@ export class ServicesController {
 
       // Validate service ID
       if (!serviceId || serviceId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Service ID is required',
         });
+        return;
       }
 
       // Run health check
-      const healthCheck = await SystemService.runServiceHealthCheck(
-        serviceId,
-        req.user?.userId || 'system'
-      );
+      const healthCheck = await SystemService.runServiceHealthCheck(serviceId);
 
       if (!healthCheck) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'Service not found',
         });
+        return;
       }
 
       const duration = Date.now() - startTime;

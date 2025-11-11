@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
+import { validationResult } from 'express-validator';
 import SLAService from '../services/sla-service';
 import validationMiddleware from '../middleware/validation-middleware';
 import rbacMiddleware from '../middleware/rbac-middleware';
@@ -278,7 +279,7 @@ export class SLAController {
       res.status(200).json({
         success: true,
         data: compliance,
-        count: compliance.length,
+        count: compliance.services?.length || 0,
         parameters: {
           timeRange,
           onlyViolations: onlyViolations === 'true',
@@ -355,33 +356,33 @@ export class SLAController {
         req.requestId || 'unknown',
         'PUT',
         `/api/sla/targets/${serviceId}`,
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate service ID
       if (!serviceId || serviceId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Service ID is required',
         });
+        return;
       }
 
       // Validate request body
-      const validationResult = validationMiddleware.validateSLATargets(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Update SLA targets
       const targets = await SLAService.updateSLATargets(
         serviceId,
-        req.body,
-        req.user?.userId || 'system'
+        req.body
       );
 
       if (!targets) {
@@ -434,13 +435,15 @@ export class SLAController {
       } = req.query;
 
       // Get SLA violations
-      const violations = await SLAService.getSLAViolations({
-        serviceId: serviceId as string,
-        timeRange: timeRange as string,
-        severity: severity as string,
-        limit: parseInt(limit as string, 10),
-        offset: parseInt(offset as string, 10),
-      });
+      const violations = await SLAService.getSLAViolations(
+        serviceId as string,
+        {
+          timeRange: timeRange as string,
+          severity: severity as string,
+          limit: parseInt(limit as string, 10),
+          offset: parseInt(offset as string, 10),
+        }
+      );
       
       const duration = Date.now() - startTime;
       
@@ -457,7 +460,7 @@ export class SLAController {
         pagination: {
           limit: parseInt(limit as string, 10),
           offset: parseInt(offset as string, 10),
-          total: violations.length,
+          total: violations.total || 0,
         },
         filters: {
           serviceId,
@@ -482,31 +485,30 @@ export class SLAController {
         req.requestId || 'unknown',
         'POST',
         `/api/sla/violations/${violationId}/acknowledge`,
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate violation ID
       if (!violationId || violationId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Violation ID is required',
         });
+        return;
       }
 
       // Acknowledge SLA violation
       const result = await SLAService.acknowledgeSLAViolation(
         violationId,
-        req.user?.userId || 'system',
-        req.body.reason,
-        req.body.remediation
+        req.user?.userId || 'system'
       );
 
       if (!result) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'SLA violation not found',
         });
+        return;
       }
       
       const duration = Date.now() - startTime;
@@ -566,13 +568,17 @@ export class SLAController {
         : [];
 
       // Generate SLA report
-      const report = await SLAService.generateSLAReport({
-        serviceIds: serviceIdArray,
-        timeRange: timeRange as string,
-        format: format as string,
-        includeCharts: includeCharts === 'true',
-        includeRecommendations: includeRecommendations === 'true',
-      });
+      const now = new Date();
+      const startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const report = await SLAService.generateSLAReport(
+        serviceIdArray,
+        startDate,
+        now,
+        {
+          format: format as string,
+          includeCharts: includeCharts === 'true',
+        } as any
+      );
       
       const duration = Date.now() - startTime;
       
@@ -618,33 +624,33 @@ export class SLAController {
         req.requestId || 'unknown',
         'POST',
         `/api/sla/response-times/${serviceId}/record`,
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate service ID
       if (!serviceId || serviceId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Service ID is required',
         });
+        return;
       }
 
       // Validate request body
-      const validationResult = validationMiddleware.validateResponseTimeRecord(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Record response time
       const record = await SLAService.recordResponseTime(
         serviceId,
-        req.body,
-        req.user?.userId || 'system'
+        req.body
       );
 
       if (!record) {

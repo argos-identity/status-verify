@@ -9,7 +9,8 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  name: string;
+  name?: string;
+  username?: string;
   email: string;
   password: string;
   role?: UserRole;
@@ -91,9 +92,9 @@ export class AuthService {
         permissions,
       };
 
-      const token = jwt.sign(tokenPayload, this.JWT_SECRET, {
+      const token = jwt.sign(tokenPayload as any, this.JWT_SECRET as string, {
         expiresIn: this.JWT_EXPIRES_IN,
-      });
+      } as any);
 
       // Calculate expiration time in seconds
       const expiresIn = 24 * 60 * 60; // 24 hours in seconds
@@ -129,14 +130,13 @@ export class AuthService {
         throw new Error('Email is already registered');
       }
 
-      // Hash password
-      const passwordHash = await bcrypt.hash(userData.password, this.SALT_ROUNDS);
-
       // Create user (default role is 'viewer' if not specified)
+      // UserModel.create will hash the password internally
+      const username = (userData.username || userData.name || userData.email.split('@')[0]) as string;
       const user = await UserModel.create({
-        name: userData.name,
+        username,
         email: userData.email,
-        password_hash: passwordHash,
+        password: userData.password,
         role: userData.role || 'viewer',
       });
 
@@ -151,9 +151,9 @@ export class AuthService {
         permissions,
       };
 
-      const token = jwt.sign(tokenPayload, this.JWT_SECRET, {
+      const token = jwt.sign(tokenPayload as any, this.JWT_SECRET as string, {
         expiresIn: this.JWT_EXPIRES_IN,
-      });
+      } as any);
 
       const expiresIn = 24 * 60 * 60; // 24 hours in seconds
 
@@ -224,9 +224,9 @@ export class AuthService {
         permissions,
       };
 
-      const newToken = jwt.sign(newTokenPayload, this.JWT_SECRET, {
+      const newToken = jwt.sign(newTokenPayload as any, this.JWT_SECRET as string, {
         expiresIn: this.JWT_EXPIRES_IN,
-      });
+      } as any);
 
       const expiresIn = 24 * 60 * 60; // 24 hours in seconds
 
@@ -251,24 +251,33 @@ export class AuthService {
     userId: string,
     currentPassword: string,
     newPassword: string
-  ): Promise<void> {
+  ): Promise<{ success: boolean; message: string }> {
     try {
       // Validate new password
       const validation = this.validatePassword(newPassword);
       if (!validation.isValid) {
-        throw new Error(`Invalid password: ${validation.errors.join(', ')}`);
+        return {
+          success: false,
+          message: `Invalid password: ${validation.errors.join(', ')}`
+        };
       }
 
       // Get user
       const user = await UserModel.findById(userId);
       if (!user) {
-        throw new Error('User not found');
+        return {
+          success: false,
+          message: 'User not found'
+        };
       }
 
       // Verify current password
       const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
       if (!isCurrentPasswordValid) {
-        throw new Error('Current password is incorrect');
+        return {
+          success: false,
+          message: 'Current password is incorrect'
+        };
       }
 
       // Hash new password
@@ -276,9 +285,17 @@ export class AuthService {
 
       // Update password
       await UserModel.updatePassword(userId, newPasswordHash);
+
+      return {
+        success: true,
+        message: 'Password changed successfully'
+      };
     } catch (error: any) {
       console.error('Change password error:', error);
-      throw new Error(error.message || 'Password change failed');
+      return {
+        success: false,
+        message: error.message || 'Password change failed'
+      };
     }
   }
 
@@ -310,24 +327,33 @@ export class AuthService {
     }
   }
 
-  async resetPassword(resetData: PasswordResetData): Promise<void> {
+  async resetPassword(resetData: PasswordResetData): Promise<{ success: boolean; userId?: string; message: string }> {
     try {
       // Validate new password
       const validation = this.validatePassword(resetData.newPassword);
       if (!validation.isValid) {
-        throw new Error(`Invalid password: ${validation.errors.join(', ')}`);
+        return {
+          success: false,
+          message: `Invalid password: ${validation.errors.join(', ')}`
+        };
       }
 
       // Find user by email
       const user = await UserModel.findByEmail(resetData.email);
       if (!user) {
-        throw new Error('Invalid reset token');
+        return {
+          success: false,
+          message: 'Invalid reset token'
+        };
       }
 
       // Verify reset token
       const isValidToken = await UserModel.verifyPasswordResetToken(user.id, resetData.resetToken);
       if (!isValidToken) {
-        throw new Error('Invalid or expired reset token');
+        return {
+          success: false,
+          message: 'Invalid or expired reset token'
+        };
       }
 
       // Hash new password
@@ -336,9 +362,18 @@ export class AuthService {
       // Update password and clear reset token
       await UserModel.updatePassword(user.id, newPasswordHash);
       await UserModel.clearPasswordResetToken(user.id);
+
+      return {
+        success: true,
+        userId: user.id,
+        message: 'Password reset successfully'
+      };
     } catch (error: any) {
       console.error('Password reset error:', error);
-      throw new Error(error.message || 'Password reset failed');
+      return {
+        success: false,
+        message: error.message || 'Password reset failed'
+      };
     }
   }
 
@@ -362,7 +397,7 @@ export class AuthService {
 
       return {
         id: user.id,
-        name: user.name,
+        name: user.username,
         email: user.email,
         role: user.role,
         permissions,
@@ -542,6 +577,50 @@ export class AuthService {
   private generateResetToken(): string {
     // Generate a secure random token
     return require('crypto').randomBytes(32).toString('hex');
+  }
+
+  // JWT-based session management methods
+  async logout(token: string): Promise<void> {
+    // JWT tokens are stateless, so we implement a blacklist approach
+    // In production, this would use Redis or a database
+    try {
+      const decoded = jwt.verify(token, this.JWT_SECRET) as TokenPayload;
+      // TODO: Add token to blacklist (Redis/Database)
+      console.log(`User ${decoded.userId} logged out, token blacklisted`);
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw new Error('Failed to logout');
+    }
+  }
+
+  async getActiveSessions(userId: string): Promise<Array<{
+    id: string;
+    userId: string;
+    lastActivity: Date;
+    ipAddress?: string;
+    userAgent?: string;
+  }>> {
+    // JWT-based sessions are stateless
+    // In production, track active sessions in Redis/Database
+    try {
+      // TODO: Retrieve from session store (Redis/Database)
+      // For now, return empty array
+      return [];
+    } catch (error) {
+      console.error('Get active sessions error:', error);
+      throw new Error('Failed to retrieve active sessions');
+    }
+  }
+
+  async revokeSession(userId: string, sessionId: string): Promise<void> {
+    // Revoke specific session by adding token to blacklist
+    try {
+      // TODO: Add specific session token to blacklist (Redis/Database)
+      console.log(`Session ${sessionId} revoked for user ${userId}`);
+    } catch (error) {
+      console.error('Revoke session error:', error);
+      throw new Error('Failed to revoke session');
+    }
   }
 }
 

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
+import { validationResult } from 'express-validator';
 import AuthService from '../services/auth-service';
 import validationMiddleware from '../middleware/validation-middleware';
 import rbacMiddleware from '../middleware/rbac-middleware';
@@ -20,20 +21,22 @@ export class AuthController {
       // Validate request body
       if (!req.body.email || !req.body.password) {
         this.logger.logAuthFailure(req, req.body.email || 'unknown', 'validation_failed');
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Email and password are required',
         });
+        return;
       }
 
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(req.body.email)) {
         this.logger.logAuthFailure(req, req.body.email, 'invalid_email');
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Invalid email format',
         });
+        return;
       }
 
       // Attempt login
@@ -68,8 +71,8 @@ export class AuthController {
       });
     } catch (error: any) {
       this.logger.logAuthFailure(req, req.body?.email || 'unknown', error.message || 'system_error');
-      next({
-        status: 401,
+      res.status(401).json({
+        success: false,
         message: error.message || 'Authentication failed',
       });
     }
@@ -82,10 +85,11 @@ export class AuthController {
 
       // Validate refresh token
       if (!req.body.refreshToken) {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Refresh token is required',
         });
+        return;
       }
 
       // Refresh tokens
@@ -107,8 +111,8 @@ export class AuthController {
         responseTime: `${duration}ms`,
       });
     } catch (error: any) {
-      next({
-        status: 401,
+      res.status(401).json({
+        success: false,
         message: error.message || 'Token refresh failed',
       });
     }
@@ -124,33 +128,32 @@ export class AuthController {
       const refreshToken = req.body.refreshToken;
 
       if (!accessToken) {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Access token is required',
         });
+        return;
       }
 
       // Logout user
-      const logoutResult = await AuthService.logout(
-        accessToken,
-        refreshToken,
-        req.user?.userId || 'unknown',
-        clientIp
-      );
+      await AuthService.logout(accessToken);
 
       const duration = Date.now() - startTime;
-      
-      this.logger.logLogout(req.user?.userId || 'unknown', clientIp);
+
+      this.logger.logLogout(req, req.user?.userId || 'unknown');
 
       res.status(200).json({
         success: true,
-        message: logoutResult.message,
+        message: 'Logged out successfully',
         timestamp: new Date().toISOString(),
         responseTime: `${duration}ms`,
       });
     } catch (error: any) {
-      this.logger.logLogoutFailure(req.user?.userId || 'unknown', req.ip || 'unknown');
-      next(error);
+      this.logger.logLogoutFailure(req, req.user?.userId || 'unknown', error.message || 'logout_failed');
+      res.status(500).json({
+        success: false,
+        message: 'Logout failed',
+      });
     }
   }
 
@@ -162,10 +165,11 @@ export class AuthController {
       const profile = await AuthService.getUserProfile(req.user!.userId);
 
       if (!profile) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'User profile not found',
         });
+        return;
       }
 
       const duration = Date.now() - startTime;
@@ -178,15 +182,18 @@ export class AuthController {
           email: profile.email,
           role: profile.role,
           permissions: profile.permissions,
-          isActive: profile.is_active,
-          lastLogin: profile.last_login,
-          createdAt: profile.created_at,
+          isActive: profile.isActive,
+          lastLogin: profile.lastLoginAt,
+          createdAt: profile.createdAt,
         },
         timestamp: new Date().toISOString(),
         responseTime: `${duration}ms`,
       });
     } catch (error: any) {
-      next(error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to get profile',
+      });
     }
   }
 
@@ -195,13 +202,14 @@ export class AuthController {
       const startTime = Date.now();
 
       // Validate request body
-      const validationResult = validationMiddleware.validateProfileUpdate(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Update profile
@@ -211,68 +219,71 @@ export class AuthController {
       );
 
       if (!updatedProfile) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'User profile not found',
         });
+        return;
       }
 
       const duration = Date.now() - startTime;
 
-      this.logger.logProfileUpdate(req.user!.userId, req.ip || 'unknown');
+      this.logger.logProfileUpdate(req, req.user!.userId, req.body);
 
       res.status(200).json({
         success: true,
         data: {
           id: updatedProfile.id,
-          name: updatedProfile.name,
+          username: updatedProfile.username,
           email: updatedProfile.email,
           role: updatedProfile.role,
-          permissions: updatedProfile.permissions,
         },
         message: 'Profile updated successfully',
         timestamp: new Date().toISOString(),
         responseTime: `${duration}ms`,
       });
     } catch (error: any) {
-      next(error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update profile',
+      });
     }
   }
 
   public async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const startTime = Date.now();
-      const clientIp = req.ip || req.connection.remoteAddress;
 
       // Validate request body
-      const validationResult = validationMiddleware.validatePasswordChange(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Change password
       const changeResult = await AuthService.changePassword(
         req.user!.userId,
         req.body.currentPassword,
-        req.body.newPassword,
-        clientIp
+        req.body.newPassword
       );
 
       if (!changeResult.success) {
-        this.logger.logPasswordChangeFailure(req.user!.userId, clientIp);
-        return next({
-          status: 400,
+        this.logger.logPasswordChangeFailure(req, req.user!.userId, changeResult.message);
+        res.status(400).json({
+          success: false,
           message: changeResult.message,
         });
+        return;
       }
 
       const duration = Date.now() - startTime;
-      
-      this.logger.logPasswordChangeSuccess(req.user!.userId, clientIp);
+
+      this.logger.logPasswordChangeSuccess(req, req.user!.userId);
 
       res.status(200).json({
         success: true,
@@ -281,34 +292,33 @@ export class AuthController {
         responseTime: `${duration}ms`,
       });
     } catch (error: any) {
-      this.logger.logPasswordChangeFailure(req.user?.userId || 'unknown', req.ip || 'unknown');
-      next(error);
+      this.logger.logPasswordChangeFailure(req, req.user?.userId || 'unknown', error.message || 'password_change_failed');
+      res.status(500).json({
+        success: false,
+        message: 'Failed to change password',
+      });
     }
   }
 
   public async requestPasswordReset(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const startTime = Date.now();
-      const clientIp = req.ip || req.connection.remoteAddress;
 
       // Validate email
       if (!req.body.email) {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Email is required',
         });
+        return;
       }
 
       // Request password reset
-      const resetResult = await AuthService.requestPasswordReset(
-        req.body.email,
-        clientIp,
-        req.headers['user-agent'] || 'unknown'
-      );
+      await AuthService.requestPasswordReset(req.body.email);
 
       const duration = Date.now() - startTime;
-      
-      this.logger.logPasswordResetRequest(req.body.email, clientIp);
+
+      this.logger.logPasswordResetRequest(req, req.body.email);
 
       // Always return success for security (don't reveal if email exists)
       res.status(200).json({
@@ -318,43 +328,47 @@ export class AuthController {
         responseTime: `${duration}ms`,
       });
     } catch (error: any) {
-      next(error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to process password reset request',
+      });
     }
   }
 
   public async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const startTime = Date.now();
-      const clientIp = req.ip || req.connection.remoteAddress;
 
       // Validate request body
-      const validationResult = validationMiddleware.validatePasswordReset(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Reset password
-      const resetResult = await AuthService.resetPassword(
-        req.body.token,
-        req.body.newPassword,
-        clientIp
-      );
+      const resetResult = await AuthService.resetPassword({
+        email: req.body.email,
+        resetToken: req.body.token,
+        newPassword: req.body.newPassword,
+      });
 
       if (!resetResult.success) {
-        this.logger.logPasswordResetFailure('unknown', clientIp);
-        return next({
-          status: 400,
+        this.logger.logPasswordResetFailure(req, 'unknown', resetResult.message);
+        res.status(400).json({
+          success: false,
           message: resetResult.message,
         });
+        return;
       }
 
       const duration = Date.now() - startTime;
-      
-      this.logger.logPasswordResetSuccess(resetResult.userId!, clientIp);
+
+      this.logger.logPasswordResetSuccess(req, resetResult.userId || 'unknown', 'unknown');
 
       res.status(200).json({
         success: true,
@@ -363,8 +377,11 @@ export class AuthController {
         responseTime: `${duration}ms`,
       });
     } catch (error: any) {
-      this.logger.logPasswordResetFailure('unknown', req.ip || 'unknown');
-      next(error);
+      this.logger.logPasswordResetFailure(req, 'unknown', error.message || 'password_reset_failed');
+      res.status(500).json({
+        success: false,
+        message: 'Failed to reset password',
+      });
     }
   }
 
@@ -419,29 +436,19 @@ export class AuthController {
       const { sessionId } = req.params;
 
       if (!sessionId) {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Session ID is required',
         });
+        return;
       }
 
       // Revoke session
-      const revokeResult = await AuthService.revokeSession(
-        sessionId,
-        req.user!.userId,
-        req.ip || 'unknown'
-      );
-
-      if (!revokeResult.success) {
-        return next({
-          status: 404,
-          message: 'Session not found or already revoked',
-        });
-      }
+      await AuthService.revokeSession(req.user!.userId, sessionId);
 
       const duration = Date.now() - startTime;
-      
-      this.logger.logSessionRevoked(req.user!.userId, sessionId, req.ip || 'unknown');
+
+      this.logger.logSessionRevoked(req, req.user!.userId, sessionId);
 
       res.status(200).json({
         success: true,
@@ -450,7 +457,10 @@ export class AuthController {
         responseTime: `${duration}ms`,
       });
     } catch (error: any) {
-      next(error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to revoke session',
+      });
     }
   }
 

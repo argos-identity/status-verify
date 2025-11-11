@@ -350,7 +350,7 @@ export class SocketConfig {
   public notifyUsersWithPermission(permission: string, event: string, data: any): void {
     this.io.fetchSockets().then(sockets => {
       sockets.forEach(socket => {
-        const authSocket = socket as AuthenticatedSocket;
+        const authSocket = socket as unknown as AuthenticatedSocket;
         if (authSocket.userPermissions?.includes(permission)) {
           socket.emit(event, {
             ...data,

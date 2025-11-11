@@ -1,14 +1,6 @@
 import { Request, Response } from 'express';
 import AdminService from '../services/admin-service';
 
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    username: string;
-    role: string;
-  };
-}
-
 interface ResetDataRequest {
   preserveUsers?: boolean;
   reseedServices?: boolean;
@@ -27,7 +19,7 @@ class AdminController {
    * GET /api/admin/database/stats
    * Get current database statistics
    */
-  getDatabaseStats = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  getDatabaseStats = async (req: Request, res: Response): Promise<void> => {
     try {
       const stats = await this.adminService.getDatabaseStats();
 
@@ -50,7 +42,7 @@ class AdminController {
    * GET /api/admin/database/reset/validate
    * Validate if reset can be performed in current environment
    */
-  validateResetEnvironment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  validateResetEnvironment = async (req: Request, res: Response): Promise<void> => {
     try {
       const validation = this.adminService.validateResetEnvironment();
 
@@ -73,7 +65,7 @@ class AdminController {
    * POST /api/admin/database/reset-token
    * Generate a reset confirmation token
    */
-  generateResetToken = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  generateResetToken = async (req: Request, res: Response): Promise<void> => {
     try {
       const token = this.adminService.generateResetToken();
 
@@ -100,7 +92,7 @@ class AdminController {
    * POST /api/admin/database/reset-data
    * Reset database data (excluding users by default)
    */
-  resetData = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  resetData = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
         preserveUsers = true,
@@ -130,7 +122,7 @@ class AdminController {
       });
 
       // Log the admin action
-      console.log(`🔐 Database reset performed by user: ${req.user?.username} (${req.user?.id})`);
+      console.log(`🔐 Database reset performed by user: ${req.user?.username} (${req.user?.userId})`);
       console.log(`📊 Records before reset: ${statsBefore.totalRecords}`);
       console.log(`🗑️  Records deleted: ${Object.values(result.deletedCounts).reduce((sum, count) => sum + count, 0)}`);
 
@@ -140,7 +132,7 @@ class AdminController {
           ...result,
           statsBefore,
           performedBy: {
-            userId: req.user?.id,
+            userId: req.user?.userId,
             username: req.user?.username,
           },
         },
@@ -161,7 +153,7 @@ class AdminController {
    * POST /api/admin/database/reset-all
    * Reset entire database including users (dangerous)
    */
-  resetAll = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  resetAll = async (req: Request, res: Response): Promise<void> => {
     try {
       const {
         confirmationToken,
@@ -195,7 +187,7 @@ class AdminController {
       });
 
       // Log the dangerous admin action
-      console.log(`🚨 FULL DATABASE RESET performed by user: ${req.user?.username} (${req.user?.id})`);
+      console.log(`🚨 FULL DATABASE RESET performed by user: ${req.user?.username} (${req.user?.userId})`);
       console.log(`📊 Records before reset: ${statsBefore.totalRecords}`);
       console.log(`🗑️  All records deleted including users`);
 
@@ -206,7 +198,7 @@ class AdminController {
           statsBefore,
           warning: 'Full database reset completed. All user accounts have been deleted.',
           performedBy: {
-            userId: req.user?.id,
+            userId: req.user?.userId,
             username: req.user?.username,
           },
         },
@@ -227,7 +219,7 @@ class AdminController {
    * GET /api/admin/system/health
    * Get system health and admin capabilities
    */
-  getSystemHealth = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  getSystemHealth = async (req: Request, res: Response): Promise<void> => {
     try {
       const stats = await this.adminService.getDatabaseStats();
       const validation = this.adminService.validateResetEnvironment();
@@ -247,7 +239,7 @@ class AdminController {
           },
           admin: {
             currentUser: {
-              id: req.user?.id,
+              userId: req.user?.userId,
               username: req.user?.username,
               role: req.user?.role,
             },

@@ -176,12 +176,12 @@ export class APIResponseTimeModel {
     const len = responseTimes.length;
 
     return {
-      p50: responseTimes[Math.floor(len * 0.5)],
-      p90: responseTimes[Math.floor(len * 0.9)],
-      p95: responseTimes[Math.floor(len * 0.95)],
-      p99: responseTimes[Math.floor(len * 0.99)],
-      min: responseTimes[0],
-      max: responseTimes[len - 1],
+      p50: responseTimes[Math.floor(len * 0.5)] || 0,
+      p90: responseTimes[Math.floor(len * 0.9)] || 0,
+      p95: responseTimes[Math.floor(len * 0.95)] || 0,
+      p99: responseTimes[Math.floor(len * 0.99)] || 0,
+      min: responseTimes[0] || 0,
+      max: responseTimes[len - 1] || 0,
     };
   }
 

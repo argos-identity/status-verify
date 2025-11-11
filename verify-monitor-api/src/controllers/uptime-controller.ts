@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
+import { validationResult } from 'express-validator';
 import UptimeService from '../services/uptime-service';
 import validationMiddleware from '../middleware/validation-middleware';
 import rbacMiddleware from '../middleware/rbac-middleware';
@@ -153,26 +154,27 @@ export class UptimeController {
         req.requestId || 'unknown',
         'POST',
         `/api/uptime/${serviceId}/events`,
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate service ID
       if (!serviceId || serviceId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Service ID is required',
         });
+        return;
       }
 
       // Validate request body
-      const validationResult = validationMiddleware.validateUptimeEvent(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Record uptime event (simplified implementation for now)
@@ -346,41 +348,44 @@ export class UptimeController {
         req.requestId || 'unknown',
         'POST',
         '/api/uptime/bulk',
-        req.user?.userId,
-        { eventCount: req.body?.events?.length || 0 }
+        req.user?.userId
       );
 
       // Validate request body
       if (!req.body.events || !Array.isArray(req.body.events)) {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Events array is required',
         });
+        return;
       }
 
       if (req.body.events.length === 0) {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'At least one event is required',
         });
+        return;
       }
 
       if (req.body.events.length > 1000) {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Maximum 1000 events allowed per request',
         });
+        return;
       }
 
       // Validate each event
       for (const event of req.body.events) {
-        const validationResult = validationMiddleware.validateBulkUptimeEvent(event);
-        if (!validationResult.isValid) {
-          return next({
-            status: 400,
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          res.status(400).json({
+            success: false,
             message: 'Validation failed for bulk events',
-            details: validationResult.errors,
+            errors: errors.array(),
           });
+          return;
         }
       }
 

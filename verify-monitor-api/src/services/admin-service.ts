@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { resetDatabaseData, reseedEssentialData } from '../../prisma/reset-data';
+import { resetDatabaseData, reseedEssentialData } from '../utils/reset-data';
 
 interface ResetDataOptions {
   preserveUsers?: boolean;

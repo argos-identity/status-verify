@@ -103,7 +103,7 @@ export class RBACMiddleware {
           });
         }
 
-        next();
+        return next();
       } catch (error) {
         console.error('Permission check error:', error);
         return res.status(500).json({
@@ -169,7 +169,7 @@ export class RBACMiddleware {
           });
         }
 
-        next();
+        return next();
       } catch (error) {
         console.error('Role check error:', error);
         return res.status(500).json({

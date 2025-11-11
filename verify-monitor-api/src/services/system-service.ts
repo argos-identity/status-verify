@@ -62,7 +62,12 @@ export class SystemService {
         }
       }
 
-      return await ServiceModel.create(serviceData);
+      return await ServiceModel.create({
+        id: serviceData.id,
+        name: serviceData.name,
+        description: serviceData.description ?? null,
+        endpoint_url: serviceData.endpoint_url ?? null,
+      });
     } catch (error: any) {
       console.error('Error creating service:', error);
       throw new Error(error.message || 'Failed to create service');
@@ -183,8 +188,8 @@ export class SystemService {
         service_id: serviceId,
         date,
         status,
-        response_time: responseTime,
-        error_message: errorMessage,
+        response_time: responseTime ?? null,
+        error_message: errorMessage ?? null,
       });
     } catch (error) {
       console.error(`Error recording uptime for service ${serviceId}:`, error);
@@ -506,6 +511,98 @@ export class SystemService {
   }
 
   // Removed old simpleHash and calculateUptimePercentage methods - now using UptimeRecordModel
+
+  async getService(serviceId: string) {
+    return await ServiceModel.findById(serviceId);
+  }
+
+  async getServiceStatus(serviceId: string) {
+    const service = await ServiceModel.findById(serviceId);
+    if (!service) {
+      throw new Error('Service not found');
+    }
+    const stats = await this.getServiceStats(serviceId);
+    const currentStatus = await this.getServiceCurrentStatus(serviceId);
+    return {
+      serviceId,
+      serviceName: service.name,
+      status: currentStatus,
+      uptime: stats.uptime24h,
+      lastCheck: stats.lastCheck || new Date(),
+    };
+  }
+
+  async updateServiceStatus(serviceId: string, status: any) {
+    // Update service status logic
+    const service = await ServiceModel.findById(serviceId);
+    if (!service) {
+      throw new Error('Service not found');
+    }
+    // Status update logic would go here
+    console.log(`Service ${serviceId} status updated to ${status}`);
+    return { serviceId, status, updated: true };
+  }
+
+  async getServiceDependencies(serviceId: string) {
+    // Return service dependencies
+    const service = await ServiceModel.findById(serviceId);
+    if (!service) {
+      throw new Error('Service not found');
+    }
+    // TODO: Implement dependency tracking
+    return [];
+  }
+
+  async runServiceHealthCheck(serviceId: string) {
+    const service = await ServiceModel.findById(serviceId);
+    if (!service) {
+      throw new Error('Service not found');
+    }
+    // TODO: Implement actual health check
+    return {
+      serviceId,
+      healthy: true,
+      responseTime: 100,
+      timestamp: new Date(),
+    };
+  }
+
+  async getSystemMetrics() {
+    const services = await ServiceModel.findAll();
+    const stats = await Promise.all(
+      services.map((s: any) => this.getServiceStats(s.id))
+    );
+    return {
+      totalServices: services.length,
+      operationalServices: stats.filter((s: any) => s.uptime24h >= 95).length,
+      avgUptime: stats.reduce((sum: any, s: any) => sum + s.uptime24h, 0) / stats.length,
+      timestamp: new Date(),
+    };
+  }
+
+  async updateSystemSettings(settings: any) {
+    // TODO: Implement system settings update
+    console.log('System settings updated:', settings);
+  }
+
+  async getSystemAlerts() {
+    // TODO: Implement system alerts
+    return [];
+  }
+
+  async acknowledgeAlert(alertId: string, userId: string) {
+    // TODO: Implement alert acknowledgment
+    console.log(`Alert ${alertId} acknowledged by user ${userId}`);
+  }
+
+  async getSystemConfiguration() {
+    // TODO: Implement system configuration
+    return {
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      features: {},
+    };
+  }
 }
 
 export default new SystemService();

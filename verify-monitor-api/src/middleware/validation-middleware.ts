@@ -28,8 +28,8 @@ export class ValidationMiddleware {
           timestamp: new Date().toISOString(),
         });
       }
-      
-      next();
+
+      return next();
     };
   }
 
@@ -55,75 +55,6 @@ export class ValidationMiddleware {
         .optional()
         .isURL()
         .withMessage('Endpoint URL must be a valid URL'),
-    ];
-  }
-
-  // Incident validation rules
-  static validateIncident() {
-    return [
-      body('title')
-        .isString()
-        .trim()
-        .isLength({ min: 1, max: 200 })
-        .withMessage('Title must be between 1 and 200 characters'),
-      body('description')
-        .optional()
-        .isString()
-        .trim()
-        .isLength({ min: 1, max: 2000 })
-        .withMessage('Description must be between 1 and 2000 characters'),
-      body('severity')
-        .isIn(['low', 'medium', 'high', 'critical'])
-        .withMessage('Severity must be one of: low, medium, high, critical'),
-      body('affected_services')
-        .isArray({ min: 1 })
-        .withMessage('At least one affected service must be specified')
-        .custom((services: string[]) => {
-          const invalidServices = services.filter(id => !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id));
-          if (invalidServices.length > 0) {
-            throw new Error(`Invalid service IDs: ${invalidServices.join(', ')}`);
-          }
-          return true;
-        }),
-    ];
-  }
-
-  // Incident update validation rules
-  static validateIncidentUpdate() {
-    return [
-      body('title')
-        .optional()
-        .isString()
-        .trim()
-        .isLength({ min: 1, max: 200 })
-        .withMessage('Title must be between 1 and 200 characters'),
-      body('description')
-        .optional()
-        .isString()
-        .trim()
-        .isLength({ min: 1, max: 2000 })
-        .withMessage('Description must be between 1 and 2000 characters'),
-      body('severity')
-        .optional()
-        .isIn(['low', 'medium', 'high', 'critical'])
-        .withMessage('Severity must be one of: low, medium, high, critical'),
-      body('status')
-        .optional()
-        .isIn(['investigating', 'identified', 'monitoring', 'resolved'])
-        .withMessage('Status must be one of: investigating, identified, monitoring, resolved'),
-      body('affected_services')
-        .optional()
-        .isArray({ min: 1 })
-        .withMessage('At least one affected service must be specified')
-        .custom((services: string[]) => {
-          if (services && Array.isArray(services)) {
-            const invalidServices = services.filter(id => !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id));
-            if (invalidServices.length > 0) {
-              throw new Error(`Invalid service IDs: ${invalidServices.join(', ')}`);
-            }
-          }
-          return true;
-        }),
     ];
   }
 
@@ -375,8 +306,9 @@ export class ValidationMiddleware {
   } = {}) {
     return (req: Request, res: Response, next: NextFunction) => {
       const { maxSize = 5 * 1024 * 1024, allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'], required = false } = options;
+      const file = (req as any).file;
 
-      if (!req.file) {
+      if (!file) {
         if (required) {
           return res.status(400).json({
             error: 'File required',
@@ -387,26 +319,26 @@ export class ValidationMiddleware {
       }
 
       // Check file size
-      if (req.file.size > maxSize) {
+      if (file.size > maxSize) {
         return res.status(400).json({
           error: 'File too large',
           message: `File size must be less than ${maxSize / (1024 * 1024)}MB`,
-          actualSize: req.file.size,
+          actualSize: file.size,
           maxSize,
         });
       }
 
       // Check file type
-      if (!allowedTypes.includes(req.file.mimetype)) {
+      if (!allowedTypes.includes(file.mimetype)) {
         return res.status(400).json({
           error: 'Invalid file type',
           message: `Allowed file types: ${allowedTypes.join(', ')}`,
-          actualType: req.file.mimetype,
+          actualType: file.mimetype,
           allowedTypes,
         });
       }
 
-      next();
+      return next();
     };
   }
 
@@ -424,7 +356,7 @@ export class ValidationMiddleware {
       }
 
       const isValidType = expectedTypes.some(type => contentType.includes(type));
-      
+
       if (!isValidType) {
         return res.status(400).json({
           error: 'Invalid Content-Type',
@@ -434,7 +366,7 @@ export class ValidationMiddleware {
         });
       }
 
-      next();
+      return next();
     };
   }
 
@@ -556,6 +488,70 @@ export class ValidationMiddleware {
       isValid: errors.length === 0,
       errors,
     };
+  }
+
+  static validatePasswordReset() {
+    return [
+      body('email').isEmail().withMessage('Valid email is required'),
+      body('resetToken').notEmpty().withMessage('Reset token is required'),
+      body('newPassword')
+        .isLength({ min: 8 })
+        .withMessage('Password must be at least 8 characters long')
+        .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
+        .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
+        .matches(/[0-9]/).withMessage('Password must contain at least one number')
+        .matches(/[@$!%*?&]/).withMessage('Password must contain at least one special character'),
+    ];
+  }
+
+  static validateProfileUpdate() {
+    return [
+      body('name').optional().isLength({ min: 1, max: 100 }).withMessage('Name must be between 1 and 100 characters'),
+      body('email').optional().isEmail().withMessage('Valid email is required'),
+    ];
+  }
+
+  static validateServiceUpdate() {
+    return [
+      body('name').optional().isLength({ min: 1, max: 100 }).withMessage('Service name must be between 1 and 100 characters'),
+      body('description').optional().isLength({ max: 500 }).withMessage('Description must be 500 characters or less'),
+      body('endpoint_url').optional().isURL().withMessage('Valid endpoint URL is required'),
+    ];
+  }
+
+  static validateServiceStatus() {
+    return [
+      body('status').isIn(['operational', 'degraded', 'partial', 'outage']).withMessage('Invalid status value'),
+    ];
+  }
+
+  static validateSystemSettings() {
+    return [
+      body('settings').isObject().withMessage('Settings must be an object'),
+    ];
+  }
+
+  static validateResponseTimeRecord() {
+    return [
+      body('serviceId').notEmpty().withMessage('Service ID is required'),
+      body('responseTime').isNumeric().withMessage('Response time must be a number'),
+    ];
+  }
+
+  static validateUptimeEvent() {
+    return [
+      body('serviceId').notEmpty().withMessage('Service ID is required'),
+      body('status').isIn(['operational', 'degraded', 'partial', 'outage']).withMessage('Invalid status'),
+      body('timestamp').optional().isISO8601().withMessage('Invalid timestamp format'),
+    ];
+  }
+
+  static validateBulkUptimeEvent() {
+    return [
+      body('events').isArray().withMessage('Events must be an array'),
+      body('events.*.serviceId').notEmpty().withMessage('Service ID is required for each event'),
+      body('events.*.status').isIn(['operational', 'degraded', 'partial', 'outage']).withMessage('Invalid status'),
+    ];
   }
 }
 

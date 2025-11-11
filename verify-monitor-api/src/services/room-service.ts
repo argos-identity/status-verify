@@ -62,7 +62,7 @@ export class RoomService {
   private rooms: Map<string, Room> = new Map();
   private typingIndicators: Map<string, Map<string, TypingIndicator>> = new Map(); // roomId -> userId -> typing info
   private roomActivities: Map<string, RoomActivity[]> = new Map(); // roomId -> activities
-  private cleanupInterval: NodeJS.Timeout;
+  private cleanupInterval!: NodeJS.Timeout;
 
   constructor(io: SocketIOServer) {
     this.io = io;

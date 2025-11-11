@@ -139,16 +139,19 @@ export class APICallLogModel {
   static async getDailyMetrics(serviceId: string, days: number = 30): Promise<DailyCallMetrics[]> {
     const logs = await this.findByService(serviceId, days);
 
-    return logs.map(log => ({
-      date: log.date.toISOString().split('T')[0],
-      totalCalls: log.total_calls,
-      successCalls: log.success_calls,
-      errorCalls: log.error_calls,
-      successRate: log.total_calls > 0 
-        ? parseFloat(((log.success_calls / log.total_calls) * 100).toFixed(2))
-        : 0,
-      avgResponseTime: log.avg_response_time || 0,
-    }));
+    return logs.map(log => {
+      const dateStr = log.date.toISOString().split('T')[0] as string;
+      return {
+        date: dateStr,
+        totalCalls: log.total_calls,
+        successCalls: log.success_calls,
+        errorCalls: log.error_calls,
+        successRate: log.total_calls > 0
+          ? parseFloat(((log.success_calls / log.total_calls) * 100).toFixed(2))
+          : 0,
+        avgResponseTime: log.avg_response_time || 0,
+      };
+    });
   }
 
   static async getMonthlyAggregates(
@@ -292,12 +295,15 @@ export class APICallLogModel {
       ? parseFloat(((totalSuccessCalls / totalCalls) * 100).toFixed(2))
       : 0;
 
-    const dailySuccessRates = logs.map(log => ({
-      date: log.date.toISOString().split('T')[0],
-      successRate: log.total_calls > 0 
-        ? parseFloat(((log.success_calls / log.total_calls) * 100).toFixed(2))
-        : 0,
-    }));
+    const dailySuccessRates = logs.map(log => {
+      const dateStr = log.date.toISOString().split('T')[0] as string;
+      return {
+        date: dateStr,
+        successRate: log.total_calls > 0
+          ? parseFloat(((log.success_calls / log.total_calls) * 100).toFixed(2))
+          : 0,
+      };
+    });
 
     // Calculate trend (compare first half vs second half)
     const mid = Math.floor(dailySuccessRates.length / 2);
@@ -349,13 +355,16 @@ export class APICallLogModel {
 
     return logs
       .filter(log => log.error_calls > 0)
-      .map(log => ({
-        date: log.date.toISOString().split('T')[0],
-        errorCalls: log.error_calls,
-        errorRate: log.total_calls > 0 
-          ? parseFloat(((log.error_calls / log.total_calls) * 100).toFixed(2))
-          : 0,
-      }))
+      .map(log => {
+        const dateStr = log.date.toISOString().split('T')[0] as string;
+        return {
+          date: dateStr,
+          errorCalls: log.error_calls,
+          errorRate: log.total_calls > 0
+            ? parseFloat(((log.error_calls / log.total_calls) * 100).toFixed(2))
+            : 0,
+        };
+      })
       .sort((a, b) => b.errorRate - a.errorRate)
       .slice(0, limit);
   }

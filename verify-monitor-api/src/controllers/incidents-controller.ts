@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Router } from 'express';
+import { validationResult } from 'express-validator';
 import IncidentService from '../services/incident-service';
 import validationMiddleware from '../middleware/validation-middleware';
 import rbacMiddleware from '../middleware/rbac-middleware';
@@ -16,26 +17,23 @@ export class IncidentsController {
         req.requestId || 'unknown',
         'POST',
         '/api/incidents',
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate request body
-      const validationResult = validationMiddleware.validateIncident(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Create incident with reporter field
       const incident = await IncidentService.createIncident(
-        {
-          ...req.body,
-          reporter: req.body.reporter || req.user?.name || 'Unknown'
-        },
+        req.body,
         req.user?.userId || 'system'
       );
       
@@ -75,10 +73,11 @@ export class IncidentsController {
 
       // Validate incident ID
       if (!incidentId || incidentId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Incident ID is required',
         });
+        return;
       }
 
       // Parse query parameters
@@ -88,16 +87,14 @@ export class IncidentsController {
       } = req.query;
 
       // Get incident
-      const incident = await IncidentService.getIncident(incidentId, {
-        includeUpdates: includeUpdates === 'true',
-        includeTimeline: includeTimeline === 'true',
-      });
+      const incident = await IncidentService.getIncident(incidentId);
 
       if (!incident) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'Incident not found',
         });
+        return;
       }
       
       const duration = Date.now() - startTime;
@@ -130,26 +127,27 @@ export class IncidentsController {
         req.requestId || 'unknown',
         'PUT',
         `/api/incidents/${incidentId}`,
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate incident ID
       if (!incidentId || incidentId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Incident ID is required',
         });
+        return;
       }
 
       // Validate request body
-      const validationResult = validationMiddleware.validateIncidentUpdate(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Update incident
@@ -251,26 +249,27 @@ export class IncidentsController {
         req.requestId || 'unknown',
         'POST',
         `/api/incidents/${incidentId}/updates`,
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate incident ID
       if (!incidentId || incidentId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Incident ID is required',
         });
+        return;
       }
 
       // Validate request body
-      const validationResult = validationMiddleware.validateIncidentUpdate(req.body);
-      if (!validationResult.isValid) {
-        return next({
-          status: 400,
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          success: false,
           message: 'Validation failed',
-          details: validationResult.errors,
+          errors: errors.array(),
         });
+        return;
       }
 
       // Add incident update
@@ -340,18 +339,17 @@ export class IncidentsController {
       } = req.query;
 
       // Get incident updates
-      const updates = await IncidentService.getIncidentUpdates(incidentId, {
-        limit: parseInt(limit as string, 10),
-        offset: parseInt(offset as string, 10),
-        orderBy: orderBy as string,
-        orderDirection: orderDirection as 'asc' | 'desc',
-      });
+      const updates = await IncidentService.getIncidentUpdates(
+        incidentId,
+        parseInt(limit as string, 10)
+      );
 
       if (updates === null) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'Incident not found',
         });
+        return;
       }
       
       const duration = Date.now() - startTime;
@@ -369,7 +367,7 @@ export class IncidentsController {
         pagination: {
           limit: parseInt(limit as string, 10),
           offset: parseInt(offset as string, 10),
-          total: updates.length,
+          total: updates.total || 0,
         },
         timestamp: new Date().toISOString(),
         responseTime: `${duration}ms`,
@@ -418,7 +416,7 @@ export class IncidentsController {
 
       if (serviceId) {
         incidents = incidents.filter(incident =>
-          incident.affected_services.includes(serviceId)
+          incident.affected_services.includes(serviceId as string)
         );
       }
 
@@ -545,11 +543,7 @@ export class IncidentsController {
       } = req.query;
 
       // Get active incidents
-      const incidents = await IncidentService.getActiveIncidents({
-        severity: severity as string,
-        serviceId: serviceId as string,
-        assignedTo: assignedTo as string,
-      });
+      const incidents = await IncidentService.getActiveIncidents();
       
       const duration = Date.now() - startTime;
       
@@ -587,39 +581,40 @@ export class IncidentsController {
         req.requestId || 'unknown',
         'POST',
         `/api/incidents/${incidentId}/assign`,
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate incident ID
       if (!incidentId || incidentId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Incident ID is required',
         });
+        return;
       }
 
       // Validate assignee
       if (!req.body.assigneeId) {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Assignee ID is required',
         });
+        return;
       }
 
       // Assign incident
       const result = await IncidentService.assignIncident(
         incidentId,
-        req.body.assigneeId,
         req.user?.userId || 'system',
-        req.body.message
+        req.body.assigneeId
       );
 
       if (!result) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'Incident not found',
         });
+        return;
       }
       
       const duration = Date.now() - startTime;
@@ -653,31 +648,31 @@ export class IncidentsController {
         req.requestId || 'unknown',
         'POST',
         `/api/incidents/${incidentId}/escalate`,
-        req.user?.userId,
-        req.body
+        req.user?.userId
       );
 
       // Validate incident ID
       if (!incidentId || incidentId.trim() === '') {
-        return next({
-          status: 400,
+        res.status(400).json({
+          success: false,
           message: 'Incident ID is required',
         });
+        return;
       }
 
       // Escalate incident
       const result = await IncidentService.escalateIncident(
         incidentId,
         req.user?.userId || 'system',
-        req.body.reason,
-        req.body.newSeverity
+        req.body.reason
       );
 
       if (!result) {
-        return next({
-          status: 404,
+        res.status(404).json({
+          success: false,
           message: 'Incident not found',
         });
+        return;
       }
 
       const duration = Date.now() - startTime;

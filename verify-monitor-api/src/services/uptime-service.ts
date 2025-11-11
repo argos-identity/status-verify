@@ -98,7 +98,7 @@ export class UptimeService {
           id: service.id,
           name: service.name,
         },
-        months: enhancedMonthsData,
+        months: enhancedMonthsData as any,
       };
     } catch (error: any) {
       console.error(`Error getting uptime for service ${serviceId}:`, error);
@@ -158,8 +158,8 @@ export class UptimeService {
         service_id: serviceId,
         date,
         status,
-        response_time: responseTime,
-        error_message: errorMessage,
+        response_time: responseTime ?? null,
+        error_message: errorMessage ?? null,
       });
     } catch (error: any) {
       console.error(`Error recording uptime for service ${serviceId}:`, error);
@@ -246,10 +246,11 @@ export class UptimeService {
 
       while (currentDate <= endDate) {
         const dayData = await UptimeRecordModel.findByDate(serviceId, currentDate);
-        
+        const dateStr = currentDate.toISOString().split('T')[0] as string;
+
         if (dayData) {
           dayStatuses.push({
-            date: currentDate.toISOString().split('T')[0],
+            date: dateStr,
             status: dayData.status,
             uptime: this.calculateDayUptime(dayData.status),
             incidents: 0, // Would need incident integration
@@ -258,7 +259,7 @@ export class UptimeService {
         } else {
           // No data for this day
           dayStatuses.push({
-            date: currentDate.toISOString().split('T')[0],
+            date: dateStr,
             status: 'nd',
             uptime: 0,
             incidents: 0,
@@ -453,8 +454,8 @@ export class UptimeService {
 
           // Find best and worst days
           const sortedDays = [...dailyData].sort((a, b) => a.uptime - b.uptime);
-          const worstDay = sortedDays[0];
-          const bestDay = sortedDays[sortedDays.length - 1];
+          const worstDay = sortedDays[0] || { date: '', uptime: 0 };
+          const bestDay = sortedDays[sortedDays.length - 1] || { date: '', uptime: 100 };
 
           // Count incidents (simplified - would need incident integration)
           const incidents = dailyData.filter(day => day.incidents > 0).length;
@@ -462,8 +463,8 @@ export class UptimeService {
 
           // Calculate average response time
           const responseTimes = dailyData.filter(day => day.avgResponseTime).map(day => day.avgResponseTime!);
-          const avgResponseTime = responseTimes.length > 0 
-            ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length 
+          const avgResponseTime = responseTimes.length > 0
+            ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
             : 0;
 
           serviceReports.push({
@@ -475,11 +476,11 @@ export class UptimeService {
             incidents,
             avgResponseTime: Math.round(avgResponseTime),
             worstDay: {
-              date: worstDay.date,
+              date: worstDay.date as string,
               uptime: worstDay.uptime,
             },
             bestDay: {
-              date: bestDay.date,
+              date: bestDay.date as string,
               uptime: bestDay.uptime,
             },
           });
@@ -510,7 +511,7 @@ export class UptimeService {
           start: startDate.toISOString(),
           end: endDate.toISOString(),
         },
-        services: serviceReports,
+        services: serviceReports as any,
         summary: {
           averageUptime: parseFloat(averageUptime.toFixed(2)),
           totalServices: services.length,

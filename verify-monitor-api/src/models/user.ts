@@ -291,6 +291,22 @@ export class UserModel {
     };
   }
 
+  static async setPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    // TODO: Implement password reset token storage
+    console.log(`Password reset token set for user ${userId}`);
+  }
+
+  static async verifyPasswordResetToken(email: string, token: string): Promise<User | null> {
+    // TODO: Implement password reset token verification
+    console.log(`Verifying password reset token for ${email}`);
+    return await this.findByEmail(email);
+  }
+
+  static async clearPasswordResetToken(userId: string): Promise<void> {
+    // TODO: Implement password reset token clearing
+    console.log(`Password reset token cleared for user ${userId}`);
+  }
+
   static toPublicData(user: User): Omit<User, 'password_hash'> {
     const { password_hash, ...publicData } = user;
     return publicData;

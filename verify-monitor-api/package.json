@@ -20,10 +20,10 @@
     "db:seed": "ts-node prisma/seeds/index.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
-    "db:reset-data": "ts-node prisma/reset-data.ts",
-    "db:reset-data-skip": "ts-node prisma/reset-data.ts --skip-confirmation",
-    "db:reset-data-no-reseed": "ts-node prisma/reset-data.ts --no-reseed",
-    "db:reset-all-data": "ts-node prisma/reset-data.ts --include-users"
+    "db:reset-data": "ts-node src/utils/reset-data.ts",
+    "db:reset-data-skip": "ts-node src/utils/reset-data.ts --skip-confirmation",
+    "db:reset-data-no-reseed": "ts-node src/utils/reset-data.ts --no-reseed",
+    "db:reset-all-data": "ts-node src/utils/reset-data.ts --include-users"
   },
   "keywords": [
     "sla",

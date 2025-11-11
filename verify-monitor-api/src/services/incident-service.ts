@@ -31,9 +31,20 @@ export interface CreateUpdateData {
   status?: IncidentStatus;
 }
 
-export interface IncidentWithDetails extends Incident {
+export interface IncidentWithDetails {
+  id: string;
+  title: string;
+  description: string | null;
+  status: IncidentStatus;
+  severity: IncidentSeverity;
+  priority: IncidentPriority;
+  affected_services: string[];
+  reporter: string | null;
+  detection_criteria: string | null;
+  created_at: Date;
+  resolved_at: Date | null;
   updates?: IncidentUpdate[];
-  reporter?: {
+  reporter_details?: {
     id: string;
     name: string;
     email: string;
@@ -283,26 +294,20 @@ export class IncidentService {
 
   async getIncidentUpdates(
     incidentId: string,
-    limit: number = 20,
-    offset: number = 0,
-    publicOnly: boolean = false
+    limit: number = 20
   ): Promise<{
     updates: Array<IncidentUpdate & { user: { id: string; name: string; email: string } }>;
     total: number;
     hasMore: boolean;
   }> {
     try {
-      const { updates, total } = await IncidentUpdateModel.findByIncident(
-        incidentId, 
-        limit, 
-        offset, 
-        publicOnly
-      );
+      const updates = await IncidentUpdateModel.findByIncident(incidentId);
+      const total = updates.length;
 
       return {
-        updates,
+        updates: updates.slice(0, limit) as any,
         total,
-        hasMore: offset + limit < total,
+        hasMore: total > limit,
       };
     } catch (error) {
       console.error(`Error getting updates for incident ${incidentId}:`, error);
@@ -563,8 +568,8 @@ export class IncidentService {
 
       // Filter incidents that were active on the target date
       const relevantIncidents = allIncidents.filter(incident => {
-        // Use created_at as the start time if started_at is not available
-        const incidentStart = new Date(incident.started_at || incident.created_at);
+        // Use created_at as the start time
+        const incidentStart = new Date(incident.created_at);
         const incidentEnd = incident.resolved_at ? new Date(incident.resolved_at) : new Date();
 
         // Check if incident overlaps with target date
@@ -580,8 +585,8 @@ export class IncidentService {
 
       // Calculate durations and format response
       const formattedIncidents = filteredIncidents.map(incident => {
-        // Use created_at as the start time if started_at is not available
-        const incidentStart = new Date(incident.started_at || incident.created_at);
+        // Use created_at as the start time
+        const incidentStart = new Date(incident.created_at);
         const incidentEnd = incident.resolved_at ? new Date(incident.resolved_at) : new Date();
 
         // Calculate overlap with target date
@@ -604,11 +609,11 @@ export class IncidentService {
           severity: incident.severity,
           status: incident.status,
           affected_services: incident.affected_services,
-          started_at: incident.started_at || incident.created_at,
+          started_at: incident.created_at,
           resolved_at: incident.resolved_at,
           major_outage_duration: majorOutageDuration,
           partial_outage_duration: partialOutageDuration,
-          description: incident.description,
+          description: incident.description || '',
         };
       });
 
@@ -680,6 +685,100 @@ export class IncidentService {
       isValid: errors.length === 0,
       errors,
     };
+  }
+
+  async assignIncident(
+    incidentId: string,
+    userId: string,
+    assigneeId: string
+  ): Promise<Incident> {
+    try {
+      // Check if incident exists
+      const incident = await IncidentModel.findById(incidentId);
+      if (!incident) {
+        throw new Error('Incident not found');
+      }
+
+      // Check user permissions
+      if (!await UserModel.hasPermission(userId, 'manage_incidents')) {
+        throw new Error('User does not have permission to assign incidents');
+      }
+
+      // Check if assignee exists
+      const assignee = await UserModel.findById(assigneeId);
+      if (!assignee) {
+        throw new Error('Assignee not found');
+      }
+
+      // Update incident with assignee
+      const updatedIncident = await IncidentModel.update(incidentId, {
+        // TODO: Add assigned_to field to IncidentUpdateData type
+      });
+
+      // Add update notification
+      await IncidentUpdateModel.create({
+        incident_id: incidentId,
+        description: `Incident assigned to ${assignee.username}`,
+        user_id: userId,
+        status: incident.status,
+      });
+
+      return updatedIncident;
+    } catch (error: any) {
+      console.error(`Error assigning incident ${incidentId}:`, error);
+      throw new Error(error.message || 'Failed to assign incident');
+    }
+  }
+
+  async escalateIncident(
+    incidentId: string,
+    userId: string,
+    reason: string
+  ): Promise<Incident> {
+    try {
+      // Check if incident exists
+      const incident = await IncidentModel.findById(incidentId);
+      if (!incident) {
+        throw new Error('Incident not found');
+      }
+
+      // Check user permissions
+      if (!await UserModel.hasPermission(userId, 'manage_incidents')) {
+        throw new Error('User does not have permission to escalate incidents');
+      }
+
+      // Escalate severity
+      const severityHierarchy: Record<IncidentSeverity, IncidentSeverity> = {
+        low: 'medium',
+        medium: 'high',
+        high: 'critical',
+        critical: 'critical', // Already max
+      };
+
+      const newSeverity = severityHierarchy[incident.severity];
+
+      // Update incident with escalated severity
+      const updatedIncident = await IncidentModel.update(incidentId, {
+        severity: newSeverity,
+        priority: 'P2', // Auto-set priority to high (P2)
+      });
+
+      // Add escalation update
+      await IncidentUpdateModel.create({
+        incident_id: incidentId,
+        description: `Incident escalated to ${newSeverity} severity. Reason: ${reason}`,
+        user_id: userId,
+        status: incident.status,
+      });
+
+      // Update system status
+      await this.updateSystemStatusIfNeeded();
+
+      return updatedIncident;
+    } catch (error: any) {
+      console.error(`Error escalating incident ${incidentId}:`, error);
+      throw new Error(error.message || 'Failed to escalate incident');
+    }
   }
 }
 

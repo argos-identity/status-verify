@@ -33,7 +33,7 @@ export class AuthMiddleware {
           permissions: tokenPayload.permissions,
         };
 
-        next();
+        return next();
       } catch (error: any) {
         console.error('Authentication error:', error);
         
@@ -119,7 +119,7 @@ export class AuthMiddleware {
         });
       }
 
-      next();
+      return next();
     };
   }
 
@@ -141,7 +141,7 @@ export class AuthMiddleware {
         });
       }
 
-      next();
+      return next();
     };
   }
 
@@ -154,7 +154,7 @@ export class AuthMiddleware {
         });
       }
 
-      const hasPermission = permissions.some(permission => 
+      const hasPermission = permissions.some(permission =>
         req.user!.permissions.includes(permission)
       );
 
@@ -167,7 +167,7 @@ export class AuthMiddleware {
         });
       }
 
-      next();
+      return next();
     };
   }
 
@@ -248,7 +248,7 @@ export class AuthMiddleware {
         });
       }
 
-      next();
+      return next();
     };
   }
 

@@ -170,7 +170,7 @@ export class IncidentModel {
         description: data.description,
         status: data.status || 'investigating', // Default initial status
         severity: data.severity,
-        priority: data.priority, // Priority must be explicitly set
+        priority: data.priority || 'P3', // Default priority (P3 = Medium)
         affected_services: data.affected_services,
         reporter: data.reporter || data.reporter_id,
         detection_criteria: data.detection_criteria || null,
