@@ -18,7 +18,10 @@ declare global {
        */
       user?: {
         userId: string;
+        id?: string;          // Alias for userId (compatibility)
         email: string;
+        username?: string;    // Username field (optional)
+        name?: string;        // Display name (optional)
         role: 'viewer' | 'reporter' | 'admin';
         permissions: string[];
       };
@@ -32,6 +35,12 @@ declare global {
        * Unique request identifier for tracing (set by logging middleware)
        */
       requestId?: string;
+
+      /**
+       * Request body (already exists in Express, but typed as any by default)
+       * Explicitly declaring for better TypeScript support
+       */
+      body: any;
     }
   }
 }
