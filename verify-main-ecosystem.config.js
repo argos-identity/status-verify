@@ -3,7 +3,8 @@ module.exports = {
     {
       name: 'verify-main',
       script: './.next/standalone/status-verify/verify-main/server.js',
-      cwd: '/Users/pegasus/Documents/argos/_project/status-verify/verify-main',
+      //cwd: '/Users/pegasus/Documents/argos/_project/status-verify/verify-main',
+      cwd: '/home/ubuntu/status-verify/verify-main/',
       instances: 1,
       exec_mode: 'cluster',
       watch: false,
