@@ -114,54 +114,54 @@ module.exports = {
     // ============================================
     // Frontend - verify-main (System Status Dashboard)
     // ============================================
-    {
-      name: 'verify-main',
-      cwd: './verify-main',
+    //{
+    //  name: 'verify-main',
+    //  cwd: './verify-main',
       //script: './.next/standalone/status-verify/verify-main/server.js',
-      script: './verify-main-ecosystem.config.js',
+    //  script: './verify-main-ecosystem.config.js',
 
       // 클러스터 모드 (Next.js standalone)
-      instances: 1,
-      exec_mode: 'cluster',
+    //  instances: 1,
+    //  exec_mode: 'cluster',
 
       // 환경변수
-      env: {
-        NODE_ENV: 'production',
-        PORT: 80,
-        HOSTNAME: '0.0.0.0',
-      },
+    //  env: {
+    //    NODE_ENV: 'production',
+    //    PORT: 80,
+    //    HOSTNAME: '0.0.0.0',
+    //  },
 
-      env_file: './verify-main/.env.local',
+    //  env_file: './verify-main/.env.local',
 
       // 로그 설정
-      error_file: './verify-main/logs/pm2-error.log',
-      out_file: './verify-main/logs/pm2-out.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      merge_logs: true,
+    //  error_file: './verify-main/logs/pm2-error.log',
+    //  out_file: './verify-main/logs/pm2-out.log',
+    //  log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+    //  merge_logs: true,
 
       // 재시작 정책
-      autorestart: true,
-      max_restarts: 10,
-      min_uptime: '10s',
-      restart_delay: 4000,
+    //  autorestart: true,
+    //  max_restarts: 10,
+    //  min_uptime: '10s',
+    //  restart_delay: 4000,
 
       // 메모리 제한
-      max_memory_restart: '400M',
+    //  max_memory_restart: '400M',
 
       // 프로세스 관리
-      kill_timeout: 5000,
-      listen_timeout: 3000,
+    //  kill_timeout: 5000,
+    //  listen_timeout: 3000,
 
       // 모니터링
-      watch: false,
-      time: true,
-      instance_var: 'INSTANCE_ID',
+    //  watch: false,
+    //  time: true,
+    //  instance_var: 'INSTANCE_ID',
 
       // Note: Port 80 requires elevated privileges
       // Option 1: Run with sudo (not recommended)
       // Option 2: Use setcap: sudo setcap 'cap_net_bind_service=+ep' $(which node)
       // Option 3: Use port 3000 and proxy with nginx/HAProxy
-    },
+    //},
 
     // ============================================
     // Frontend - verify-incidents (Incident Management)
