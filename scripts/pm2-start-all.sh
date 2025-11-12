@@ -37,15 +37,15 @@ if [ ! -f "$PROJECT_ROOT/ecosystem.config.js" ]; then
 fi
 
 # Check if services are already running
-if pm2 list | grep -q "online"; then
+if sudo pm2 list | grep -q "online"; then
     echo -e "${YELLOW}Some services are already running${NC}"
-    pm2 list
+    sudo pm2 list
     echo ""
     read -p "Do you want to restart them? (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "Restarting services..."
-        pm2 restart ecosystem.config.js
+        sudo pm2 restart ecosystem.config.js
     else
         echo "Skipping start"
         exit 0
@@ -54,7 +54,7 @@ else
     # Start all services
     echo "Starting all services..."
     cd "$PROJECT_ROOT"
-    pm2 start ecosystem.config.js
+    sudo pm2 start ecosystem.config.js
 fi
 
 echo ""
