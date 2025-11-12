@@ -286,7 +286,7 @@ const SystemStatus = () => {
           {error ? (
             <div className="px-6 py-8 text-center text-muted-foreground">
               <p className="text-lg font-medium text-red-500 mb-2">Backend API Connection Failed</p>
-              <p className="text-sm">Unable to connect to monitoring API. Please check if the backend server is running on port 3003.</p>
+              <p className="text-sm">Unable to connect to monitoring API. Please check if the backend server is running.</p>
             </div>
           ) : displayServices.length === 0 ? (
             <div className="px-6 py-8 text-center text-muted-foreground">

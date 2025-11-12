@@ -14,9 +14,10 @@ export async function GET(request: NextRequest) {
       ...Object.fromEntries(searchParams.entries())
     });
 
-    // Call the backend API (verify-monitor-api on port 3003)
-    // Use 127.0.0.1 instead of localhost to avoid IPv6 issues
-    const backendUrl = `http://127.0.0.1:3003/api/incidents/detail?${params.toString()}`;
+    // Call the backend API (verify-monitor-api)
+    // Use environment variable for flexible configuration
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const backendUrl = `${apiBaseUrl}/incidents/detail?${params.toString()}`;
 
     const response = await fetch(backendUrl, {
       method: 'GET',
