@@ -24,7 +24,7 @@ module.exports = {
       script: './dist/server.js',
 
       // 클러스터 모드로 실행 (무상태 서비스)
-      instances: 2,
+      instances: 1,
       exec_mode: 'cluster',
 
       // 환경변수
@@ -117,10 +117,11 @@ module.exports = {
     {
       name: 'verify-main',
       cwd: './verify-main',
-      script: './.next/standalone/status-verify/verify-main/server.js',
+      //script: './.next/standalone/status-verify/verify-main/server.js',
+      script: './verify-main-ecosystem.config.js',
 
       // 클러스터 모드 (Next.js standalone)
-      instances: 2,
+      instances: 1,
       exec_mode: 'cluster',
 
       // 환경변수
@@ -171,7 +172,7 @@ module.exports = {
       script: './.next/standalone/status-verify/verify-incidents/server.js',
 
       // 클러스터 모드
-      instances: 2,
+      instances: 1,
       exec_mode: 'cluster',
 
       // 환경변수
