@@ -139,13 +139,13 @@ print_section "Deploying verify-main (Frontend Dashboard)"
 cd "$PROJECT_ROOT/verify-main"
 
 echo "Installing dependencies..."
-npm ci --only=production
+#npm ci --only=production
 
 echo "npm node_modules Installing dependencies..."
 npm install --legacy-peer-deps
 
 echo "verify-main Building Next.js application..."
-npm run build
+npm run build:standalone
 
 mkdir -p logs
 echo -e "${GREEN}✓ verify-main deployed${NC}"
