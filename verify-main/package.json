@@ -5,7 +5,20 @@
     "scripts": {
         "dev": "next dev --turbopack --port 80",
         "build": "next build",
+        "build:standalone": "npm run build && npm run copy-assets",
+        "copy-assets": "cp -r .next/static .next/standalone/status-verify/verify-main/.next/static && cp -r public .next/standalone/status-verify/verify-main/public",
         "start": "next start",
+        "start:standalone": "PORT=80 node .next/standalone/status-verify/verify-main/server.js",
+        "pm2:build": "npm run build:standalone && echo 'Build complete! Ready for PM2'",
+        "pm2:start": "npm run build:standalone && pm2 start ecosystem.config.js --env production",
+        "pm2:start:dev": "npm run build:standalone && pm2 start ecosystem.config.js --env development",
+        "pm2:restart": "pm2 restart verify-main",
+        "pm2:reload": "pm2 reload verify-main",
+        "pm2:stop": "pm2 stop verify-main",
+        "pm2:delete": "pm2 delete verify-main",
+        "pm2:logs": "pm2 logs verify-main",
+        "pm2:status": "pm2 status verify-main",
+        "pm2:monit": "pm2 monit verify-main",
         "lint": "next lint"
     },
     "dependencies": {

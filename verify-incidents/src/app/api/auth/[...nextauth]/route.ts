@@ -2,7 +2,7 @@ import NextAuth from 'next-auth'
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
-const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:3003/api'
+const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:3001/api'
 
 const authOptions: NextAuthOptions = {
   providers: [
@@ -75,11 +75,21 @@ const authOptions: NextAuthOptions = {
         token.accessToken = user.accessToken
         token.refreshToken = user.refreshToken
         token.expiresAt = Date.now() + user.expiresIn * 1000
+        return token
       }
 
       // Return previous token if the access token has not expired yet
-      if (Date.now() < token.expiresAt) {
+      if (token.expiresAt && Date.now() < token.expiresAt) {
         return token
+      }
+
+      // If token doesn't have expiration info, it's invalid
+      if (!token.expiresAt || !token.refreshToken) {
+        console.error('Token missing expiration or refresh token')
+        return {
+          ...token,
+          error: 'InvalidToken',
+        }
       }
 
       // Access token has expired, try to refresh it

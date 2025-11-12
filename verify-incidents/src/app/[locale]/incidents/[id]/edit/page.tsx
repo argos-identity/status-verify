@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import {
   ArrowLeft,
@@ -31,13 +30,14 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useIncident } from '@/hooks/use-incidents';
 import apiClient from '@/lib/api-client';
+import { useApiAuth } from '@/lib/api-client-wrapper';
 import type { Incident, IncidentStatus, IncidentPriority, IncidentSeverity } from '@/lib/types';
 import { formatServiceName } from '@/lib/utils';
 
 export default function IncidentEditPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { session, status } = useApiAuth(); // Automatically manages API token
   const t = useTranslations('incident.edit');
   const tf = useTranslations('incident.create.form');
   const ti = useTranslations('incidents');
@@ -139,11 +139,6 @@ export default function IncidentEditPage() {
     setError(null);
 
     try {
-      // 인증 토큰 설정
-      if (session?.accessToken) {
-        apiClient.setAuthToken(session.accessToken as string);
-      }
-
       // 백엔드가 요구하는 형식으로 데이터 변환
       const updateData = {
         title: formData.title,
@@ -190,11 +185,6 @@ export default function IncidentEditPage() {
     if (!confirmDelete) return;
 
     try {
-      // 인증 토큰 설정
-      if (session?.accessToken) {
-        apiClient.setAuthToken(session.accessToken as string);
-      }
-
       // 삭제 API 호출
       await apiClient.deleteIncident(incidentId);
 
@@ -223,11 +213,6 @@ export default function IncidentEditPage() {
 
   const handleAddUpdate = async (updateData: { status: IncidentStatus; description: string }) => {
     try {
-      // 인증 토큰 설정
-      if (session?.accessToken) {
-        apiClient.setAuthToken(session.accessToken as string);
-      }
-
       // API 호출로 업데이트 추가
       await apiClient.addIncidentUpdate(incidentId, {
         status: updateData.status,

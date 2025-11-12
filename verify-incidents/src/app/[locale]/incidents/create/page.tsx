@@ -2,20 +2,20 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { useTranslations } from 'next-intl';
 import Header from '@/components/sections/header';
 import Footer from '@/components/sections/footer';
 import IncidentForm from '@/components/sections/incident-form';
 import { storage } from '@/lib/utils';
 import apiClient from '@/lib/api-client';
+import { useApiAuth } from '@/lib/api-client-wrapper';
 import type { IncidentFormData } from '@/lib/types';
 
 export default function CreateIncidentPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { data: session } = useSession();
+  const { session } = useApiAuth(); // Automatically manages API token
   const t = useTranslations('incident.create');
 
   const handleSubmit = async (data: IncidentFormData) => {
@@ -23,11 +23,6 @@ export default function CreateIncidentPage() {
     setError(null);
 
     try {
-      // 인증 토큰 설정
-      if (session?.accessToken) {
-        apiClient.setAuthToken(session.accessToken as string);
-      }
-
       // 백엔드가 요구하는 형식으로 데이터 변환
       const incidentData = {
         title: data.title,

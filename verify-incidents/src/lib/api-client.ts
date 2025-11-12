@@ -1,7 +1,7 @@
 import type { Incident, IncidentUpdate, IncidentFilters } from './types';
 
 // API Configuration
-const API_BASE_URL = 'http://localhost:3003/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api';
 
 // API Response wrapper type
 interface ApiResponse<T> {
@@ -120,7 +120,7 @@ class ApiClient {
         throw {
           status: 0,
           message: 'Network error: Unable to connect to the server',
-          details: 'Please check if the Backend API server is running on http://localhost:3003',
+          details: `Please check if the Backend API server is running on ${API_BASE_URL}`,
         } as ApiError;
       }
       throw error;
