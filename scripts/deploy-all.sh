@@ -69,21 +69,21 @@ fi
 echo -e "${GREEN}✓ All prerequisites met${NC}"
 
 # Check if PostgreSQL is running
-print_section "Checking Database"
+#print_section "Checking Database"
 
-if ! docker compose -f "$PROJECT_ROOT/docker-compose.yml" ps | grep -q "sla-monitor-db.*Up"; then
-    echo -e "${YELLOW}PostgreSQL is not running${NC}"
-    read -p "Do you want to start PostgreSQL? (Y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-        bash "$SCRIPT_DIR/setup-database.sh"
-    else
-        echo -e "${RED}Error: Database must be running${NC}"
-        exit 1
-    fi
-else
-    echo -e "${GREEN}✓ PostgreSQL is running${NC}"
-fi
+#if ! docker compose -f "$PROJECT_ROOT/docker-compose.yml" ps | grep -q "sla-monitor-db.*Up"; then
+#    echo -e "${YELLOW}PostgreSQL is not running${NC}"
+#    read -p "Do you want to start PostgreSQL? (Y/n): " -n 1 -r
+#    echo
+#    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+#        bash "$SCRIPT_DIR/setup-database.sh"
+#    else
+#        echo -e "${RED}Error: Database must be running${NC}"
+#        exit 1
+#    fi
+#else
+#    echo -e "${GREEN}✓ PostgreSQL is running${NC}"
+#fi
 
 # Deploy verify-monitor-api
 print_section "Deploying verify-monitor-api (Backend API)"
@@ -91,7 +91,7 @@ print_section "Deploying verify-monitor-api (Backend API)"
 cd "$PROJECT_ROOT/verify-monitor-api"
 
 echo "Installing dependencies..."
-npm ci --only=production
+#npm ci --only=production
 
 echo "npm node_modules Installing dependencies..."
 npm install
@@ -119,7 +119,7 @@ print_section "Deploying watch-server (Health Monitor)"
 cd "$PROJECT_ROOT/watch-server"
 
 echo "Installing dependencies..."
-npm ci --only=production
+#npm ci --only=production
 
 echo "npm node_modules Installing dependencies..."
 npm install
@@ -142,7 +142,8 @@ echo "Installing dependencies..."
 #npm ci --only=production
 
 echo "npm node_modules Installing dependencies..."
-npm install --legacy-peer-deps
+#npm install --legacy-peer-deps
+npm install
 
 echo "verify-main Building Next.js application..."
 npm run build:standalone
@@ -156,9 +157,10 @@ print_section "Deploying verify-incidents (Incident Management)"
 cd "$PROJECT_ROOT/verify-incidents"
 
 echo "Installing dependencies..."
-npm ci --only=production
+#npm ci --only=production
 
 echo "npm node_modules Installing dependencies..."
+#npm install --legacy-peer-deps
 npm install 
 
 

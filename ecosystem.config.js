@@ -118,7 +118,7 @@ module.exports = {
       name: 'verify-main',
       cwd: './verify-main',
       //script: './.next/standalone/status-verify/verify-main/server.js',
-      script: '../verify-main-ecosystem.config.js',
+      script: './verify-main-ecosystem.config.js',
 
       // 클러스터 모드 (Next.js standalone)
       instances: 1,
