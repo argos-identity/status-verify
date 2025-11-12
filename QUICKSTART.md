@@ -172,21 +172,25 @@ cd verify-main
 cp .env.local.example .env.local
 nano .env.local  # API URL 설정
 
-# 의존성 설치 및 빌드
-npm ci --only=production
-npm run build
-
 # 로그 디렉토리
 mkdir -p logs
+
+
+# 의존성 설치 및 빌드
+npm run build:standalone
+
 
 # Port 80 권한 부여 (한 번만)
 sudo setcap 'cap_net_bind_service=+ep' $(which node)
 
 # PM2로 시작
-pm2 start .next/standalone/server.js --name verify-main \
-  --instances 2 --exec-mode cluster
-
 cd ..
+
+pm2 start verify-main-ecosystem.config.js --name verify-main \ --instances 2 --exec-mode cluster
+
+또는 
+
+npm run start:standalone
 ```
 
 ### 5. verify-incidents (인시던트 관리)
