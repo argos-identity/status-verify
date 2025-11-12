@@ -5,6 +5,7 @@
     "scripts": {
         "dev": "next dev --turbopack --port 3006",
         "build": "next build",
+        "postbuild": "node scripts/copy-standalone-assets.js",
         "start": "next start",
         "lint": "next lint"
     },
