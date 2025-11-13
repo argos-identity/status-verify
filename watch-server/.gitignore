@@ -21,11 +21,6 @@ node_modules/
 *.tsbuildinfo
 
 # Environment variables
-.env
-.env.test
-.env.local
-.env.production
-
 # Build output
 dist/
 build/
