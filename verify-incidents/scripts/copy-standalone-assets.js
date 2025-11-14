@@ -118,6 +118,38 @@ function main() {
     log('   ⚠️  .env.local file not found, skipping', 'yellow');
   }
 
+  // 4. Fix server.js default port to 3006
+  log('\n4️⃣  Fixing server.js default port...', 'yellow');
+  const serverJsPath = path.join(standaloneDir, 'server.js');
+
+  if (fs.existsSync(serverJsPath)) {
+    try {
+      let serverContent = fs.readFileSync(serverJsPath, 'utf8');
+
+      // Replace default port 3000 with 3006
+      const originalContent = serverContent;
+      serverContent = serverContent.replace(
+        /const currentPort = parseInt\(process\.env\.PORT, 10\) \|\| 3000/g,
+        'const currentPort = parseInt(process.env.PORT, 10) || 3006'
+      );
+
+      if (serverContent !== originalContent) {
+        fs.writeFileSync(serverJsPath, serverContent, 'utf8');
+        log('   ✅ server.js default port updated to 3006', 'green');
+        successCount++;
+      } else {
+        log('   ℹ️  server.js already has correct port (3006)', 'blue');
+        successCount++;
+      }
+    } catch (error) {
+      log(`   ❌ Failed to update server.js: ${error.message}`, 'red');
+      failCount++;
+    }
+  } else {
+    log('   ❌ server.js not found', 'red');
+    failCount++;
+  }
+
   // Summary
   log('\n' + '='.repeat(50), 'blue');
   log(`📊 Summary: ${successCount} succeeded, ${failCount} failed`, 'blue');
