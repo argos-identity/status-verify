@@ -1,7 +1,7 @@
 // API Configuration for verify-incidents application
 
 // Backend API Base URL
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:3001/api';
 
 // API Endpoints
 export const API_ENDPOINTS = {
