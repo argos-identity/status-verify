@@ -160,8 +160,8 @@ echo "Installing dependencies..."
 #npm ci --only=production
 
 echo "npm node_modules Installing dependencies..."
-#npm install --legacy-peer-deps
-npm install 
+npm install --legacy-peer-deps
+#npm install 
 
 
 echo "verify-incidents Building Next.js application..."
