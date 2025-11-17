@@ -140,13 +140,18 @@ export class App {
   private initializeApiRoutes(apiPrefix: string): void {
     const apiRouter = express.Router();
 
-    // Apply conditional authentication middleware
+    // Mount auto-detection routes BEFORE global auth middleware
+    // These routes use their own conditionalApiKeyAuth middleware
+    console.log('🔓 Mounting auto-detection routes with API key auth');
+    apiRouter.use('/auto-detection', autoDetectionRoutes);
+
+    // Apply conditional authentication middleware to other routes
     // GET requests to public routes are allowed without JWT
     // All other requests require JWT authentication
     console.log('🔐 Applying conditional authentication middleware');
     apiRouter.use(AuthMiddleware.conditionalAuth());
 
-    // All API routes (now using conditional authentication)
+    // All other API routes (using conditional JWT authentication)
     this.initializeAllRoutes(apiRouter);
 
     // Mount API router
@@ -183,8 +188,8 @@ export class App {
     // SLA routes
     router.use('/sla', slaController.createRouter());
 
-    // Auto-detection routes (public for internal service calls)
-    router.use('/auto-detection', autoDetectionRoutes);
+    // Auto-detection routes are mounted separately before global auth middleware
+    // See initializeApiRoutes() method
 
     // Admin routes (always require admin role)
     const adminRouter = express.Router();
