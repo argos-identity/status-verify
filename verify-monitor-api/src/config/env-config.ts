@@ -27,7 +27,7 @@ const envSchema = z.object({
   JWT_ALGORITHM: z.enum(['HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512']).default('HS256'),
   
   // CORS Configuration
-  ALLOWED_ORIGINS: z.string().default('http://localhost:3000,http://localhost:3002,http://localhost:3005,http://localhost:3006,http://localhost:3001'),
+  ALLOWED_ORIGINS: z.string().default('http://localhost,http://localhost:3006,http://localhost:3008,http://verify-status.argosidentity.io:3006,http://verify-status.argosidentity.io:3001'),
   CORS_CREDENTIALS: z.string().transform(val => val === 'true').default(true),
   
   // Socket.IO Configuration
