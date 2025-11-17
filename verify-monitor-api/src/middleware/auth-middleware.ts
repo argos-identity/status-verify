@@ -267,14 +267,12 @@ export class AuthMiddleware {
       ];
 
       // Public POST endpoints that don't require authentication
+      // NOTE: /auto-detection/* routes handle their own authentication via conditionalApiKeyAuth
       const publicPostRoutes = [
         '/auth/login',
         '/auth/refresh',
         '/auth/password-reset/request',
-        '/auth/password-reset/confirm',
-        '/auto-detection/analyze',
-        '/auto-detection/batch-analyze',
-        '/auto-detection/manual-analysis'
+        '/auth/password-reset/confirm'
       ];
 
       // Check if this is a GET request to a public route
