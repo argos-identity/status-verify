@@ -205,7 +205,7 @@ export const getCorsConfig = () => {
     origin: config.ALLOWED_ORIGINS.split(',').map(o => o.trim()),
     credentials: config.CORS_CREDENTIALS,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key'],
   };
 };
 
