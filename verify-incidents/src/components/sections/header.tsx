@@ -41,7 +41,7 @@ const Header = () => {
           </a>
           <div className="flex items-center gap-6">
             <a
-              href="http://localhost"
+              href="http://verify-status.argosidentity.io"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               {t('dashboard')}

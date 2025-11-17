@@ -2,7 +2,7 @@ import NextAuth from 'next-auth'
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
-const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://127.0.0.1:3001/api'
+const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://verify-status.argosidentity.io:3001/api'
 
 const authOptions: NextAuthOptions = {
   providers: [
