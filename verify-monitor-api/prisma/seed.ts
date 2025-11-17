@@ -101,6 +101,33 @@ async function main() {
     }
   }
 
+  // Create system auto-detection user for automated incidents
+  console.log('🤖 Creating system auto-detection user...');
+
+  const systemUserId = 'system-auto-detection';
+  const existingSystemUser = await prisma.user.findUnique({
+    where: { id: systemUserId },
+  });
+
+  if (!existingSystemUser) {
+    // Create a system user with a non-login password
+    const systemPasswordHash = await bcrypt.hash('system-user-no-login-' + Date.now(), 12);
+
+    await prisma.user.create({
+      data: {
+        id: systemUserId,
+        username: 'Auto Detection System',
+        email: 'auto-detection@system.internal',
+        password_hash: systemPasswordHash,
+        role: 'admin' as UserRole,
+        is_active: true,
+      },
+    });
+    console.log('✅ System auto-detection user created');
+  } else {
+    console.log('⚪ System auto-detection user already exists');
+  }
+
   // Create a sample system status entry
   console.log('📊 Creating initial system status...');
 
