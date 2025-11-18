@@ -338,11 +338,11 @@ class APIClient {
 
   // Incidents API
   async getIncidents(): Promise<APIResponse<any[]>> {
-    return this.request<any[]>('/incidents');
+    return this.request<any[]>('/incidents/detail');
   }
 
   async getActiveIncidents(): Promise<APIResponse<any[]>> {
-    return this.request<any[]>('/incidents?status=active');
+    return this.request<any[]>('/incidents/active');
   }
 
   async getPastIncidents(): Promise<APIResponse<any[]>> {
