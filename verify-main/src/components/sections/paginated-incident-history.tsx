@@ -371,7 +371,7 @@ const PaginatedIncidentHistory: React.FC<PaginatedIncidentHistoryProps> = ({
           />
           {!showAllIncidents && (
             <button
-              onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_INCIDENTS_URL}/incidents`}
+              onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_INCIDENTS_URL}/incidents/${currentIncident.id}`}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm font-medium"
             >
               {t('viewDetails')}
