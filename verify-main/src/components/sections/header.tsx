@@ -16,6 +16,7 @@ const Header = () => {
               alt="Argosidentity logo"
               width={180}
               height={26}
+              unoptimized
             />
           </a>
           <div className="flex items-center gap-4">
