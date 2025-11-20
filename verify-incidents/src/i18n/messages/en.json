@@ -1,0 +1,306 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All",
+    "none": "None",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "incidents": "Incident Management",
+    "history": "History",
+    "settings": "Settings",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "incidents": {
+    "title": "Incident Management",
+    "subtitle": "Manage and track system failure events",
+    "newIncident": "New Incident",
+    "viewDetails": "View Details",
+    "editIncident": "Edit",
+    "deleteIncident": "Delete",
+    "noIncidentsFound": "No incidents found matching your criteria",
+    "tryDifferentFilters": "Try using different search terms or filters",
+    "createNewIncident": "Create New Failure Event",
+    "loginToSeeMore": "Go to login",
+    "refreshIncidents": "Refresh incident list",
+    "refresh": "Refresh",
+    "incidentCount": "{filtered} incidents ({total} total)",
+    "searchPlaceholder": "Search by title, description, reporter...",
+    "activeFilters": "Active Filters",
+    "clearFilters": "Clear Filters",
+    "filters": {
+      "status": "Status",
+      "priority": "Priority",
+      "severity": "Severity",
+      "affectedService": "Affected Service"
+    },
+    "status": {
+      "all": "All Status",
+      "investigating": "Investigating",
+      "identified": "Identified",
+      "monitoring": "Monitoring",
+      "resolved": "Resolved"
+    },
+    "priority": {
+      "all": "All Priorities",
+      "p1": "P1 - Critical",
+      "p2": "P2 - High",
+      "p3": "P3 - Medium",
+      "p4": "P4 - Low"
+    },
+    "severity": {
+      "all": "All Severities",
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "services": {
+      "all": "All Services",
+      "idRecognition": "ID Recognition",
+      "faceLiveness": "Face Liveness",
+      "idLiveness": "ID Liveness",
+      "faceCompare": "Face Compare",
+      "curpVerifier": "Curp Verifier"
+    },
+    "dashboard": {
+      "totalIncidents": "Total Incidents",
+      "activeIncidents": "Active Incidents",
+      "avgResolutionTime": "Avg Resolution Time",
+      "resolvedPercentage": "Resolution Rate",
+      "statusDistribution": "Status Distribution",
+      "this24Hours": "Last 24 Hours",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "noData": "No Data"
+    }
+  },
+  "incident": {
+    "create": {
+      "title": "Create New Incident",
+      "pageTitle": "Create New Failure Event",
+      "basicInfo": "Basic Information",
+      "statusAndPriority": "Status and Priority",
+      "affectedServices": "Affected Services",
+      "form": {
+        "titleLabel": "Title *",
+        "titlePlaceholder": "Enter incident title",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter detailed description of the incident",
+        "detectionCriteriaLabel": "Detection Criteria / Method",
+        "detectionCriteriaPlaceholder": "Enter incident detection criteria or method",
+        "reporterLabel": "Reporter",
+        "reporterPlaceholder": "Enter reporter name",
+        "statusLabel": "Status",
+        "statusPlaceholder": "Select status",
+        "priorityLabel": "Priority",
+        "priorityPlaceholder": "Select priority",
+        "severityLabel": "Severity",
+        "severityPlaceholder": "Select severity",
+        "affectedServicesLabel": "Affected Services",
+        "affectedServicesDescription": "Select affected services (multiple selection allowed)",
+        "selectedServices": "Selected services:",
+        "header": {
+          "createTitle": "Create New Failure Event",
+          "editTitle": "Edit Failure Event",
+          "createDescription": "Designed for quick input in emergency situations",
+          "editDescription": "Edit {id}"
+        },
+        "progress": {
+          "completion": "Completion:",
+          "submittable": "Ready to submit"
+        },
+        "autoSave": {
+          "saving": "Auto-saving...",
+          "lastSaved": "Last saved:"
+        },
+        "cards": {
+          "basicInfo": "Basic Information",
+          "impactScope": "Impact Scope",
+          "required": "Required"
+        },
+        "detailedForm": {
+          "detailedDescriptionLabel": "Detailed Description *",
+          "severityAutoSuggest": "(Auto-suggested based on severity)",
+          "titleExample": "e.g.: ID Recognition service response delay",
+          "descriptionExample": "Please describe the problem situation in detail. Include when it occurred, under what circumstances, and the current scope of impact.",
+          "reporterExample": "e.g.: Operations Team - Kim Min-su, Monitoring System",
+          "detectionExample": "e.g.: Detected 3 consecutive response times exceeding 7 seconds, timeout occurring more than 5 times per hour",
+          "characterCountHelper": "Please enter at least 20 characters. Current: {count} characters",
+          "statusLabelWithNote": "Status * (Priority and severity auto-set)",
+          "selectStatusPlaceholder": "Select Status",
+          "additionalInformation": "Additional Information"
+        },
+        "buttons": {
+          "cancel": "Cancel",
+          "saving": "Saving...",
+          "create": "Create",
+          "edit": "Update"
+        },
+        "mobile": {
+          "title": "📱 Mobile Optimized",
+          "quickCreation": "• Quick creation possible with just required fields",
+          "autoSave": "• Auto-saved every 30 seconds to protect your data",
+          "touchFriendly": "• Large touch areas for convenient input"
+        }
+      },
+      "buttons": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete"
+      },
+      "validation": {
+        "titleRequired": "Please enter a title",
+        "titleMinLength": "Title must be at least 5 characters",
+        "titleMaxLength": "Title cannot exceed 255 characters",
+        "descriptionMinLength": "Description must be at least 20 characters",
+        "descriptionMaxLength": "Description cannot exceed 2000 characters",
+        "statusRequired": "Please select a status",
+        "severityRequired": "Please select a severity",
+        "priorityRequired": "Please select a priority",
+        "servicesRequired": "Please select at least 1 affected service",
+        "servicesMaxLimit": "You can select up to 5 affected services",
+        "reporterRequired": "Please enter a reporter",
+        "reporterMaxLength": "Reporter name cannot exceed 100 characters",
+        "detectionCriteriaMinLength": "Detection criteria must be at least 10 characters",
+        "detectionCriteriaMaxLength": "Detection criteria cannot exceed 500 characters"
+      },
+      "errors": {
+        "authenticationRequired": "Authentication required. Please login and try again.",
+        "permissionDenied": "You do not have permission to create incidents.",
+        "serverConnectionFailed": "Cannot connect to server. Please check if the backend API server is running.",
+        "createFailed": "Failed to create incident. Please try again.",
+        "errorOccurred": "An error occurred"
+      },
+      "confirmations": {
+        "unsavedChanges": "You have unsaved changes. Are you sure you want to cancel?"
+      }
+    },
+    "edit": {
+      "title": "Edit Incident",
+      "editMode": "Edit Mode",
+      "buttons": {
+        "back": "Back",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "retry": "Retry"
+      },
+      "errors": {
+        "notFound": "Cannot find the incident. (ID: {id})",
+        "titleRequired": "Please enter a title.",
+        "authenticationRequired": "Authentication required. Please login and try again.",
+        "permissionDenied": "You do not have permission to edit incidents.",
+        "incidentNotFound": "Cannot find the incident.",
+        "serverConnectionFailed": "Cannot connect to server. Please check if the backend API server is running.",
+        "saveFailed": "Failed to save incident. Please try again.",
+        "deleteFailed": "Failed to delete incident. Please try again.",
+        "updateAddFailed": "Failed to add update."
+      },
+      "confirmations": {
+        "deleteConfirm": "Are you sure you want to delete this incident? This action cannot be undone."
+      },
+      "loading": "Loading...",
+      "returnToList": "Return to List",
+      "basicInfo": "Basic Information",
+      "statusAndPriority": "Status and Priority",
+      "affectedServices": "Affected Services"
+    },
+    "detail": {
+      "backToList": "Back to List",
+      "list": "List",
+      "edit": "Edit",
+      "detailInfo": "Details",
+      "timeInfo": "Time Information",
+      "creationTime": "Created At",
+      "resolutionTime": "Resolved At",
+      "totalResolutionTime": "Total Resolution Time: {resolutionTime}",
+      "assigneeInfo": "Assignee Information",
+      "detectionCriteria": "Detection Criteria / Method",
+      "noServiceInfo": "No service information available.",
+      "loadingIncident": "Loading incident information...",
+      "incidentNotFound": "Cannot find the incident. (ID: {id})",
+      "goToLogin": "Go to Login",
+      "retry": "Retry",
+      "newIncidentCreated": "New incident has been successfully created. You can check it in verify-main.",
+      "description": "Description",
+      "affectedServices": "Affected Services",
+      "currentStatus": "Current Status",
+      "priority": "Priority",
+      "severity": "Severity",
+      "reporter": "Reporter",
+      "createdAt": "Created",
+      "resolvedAt": "Resolved",
+      "duration": "Duration",
+      "delete": "Delete",
+      "share": "Share",
+      "refresh": "Refresh",
+      "loading": "Loading...",
+      "noDescription": "No description provided",
+      "noAffectedServices": "No affected services",
+      "notResolved": "Not resolved yet"
+    }
+  },
+  "auth": {
+    "login": "Login",
+    "loginRequired": "Login required",
+    "loginToAccess": "Please login to access this feature",
+    "username": "Username",
+    "password": "Password",
+    "loginButton": "Sign In",
+    "loginFailed": "Login failed",
+    "invalidCredentials": "Invalid username or password"
+  },
+  "language": {
+    "switchLanguage": "Switch Language",
+    "korean": "한국어",
+    "english": "English"
+  },
+  "errors": {
+    "permissionDenied": "Permission denied",
+    "notFound": "Page not found",
+    "serverError": "Server error occurred",
+    "networkError": "Please check your network connection",
+    "unexpectedError": "An unexpected error occurred"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{minutes} minutes ago",
+    "hoursAgo": "{hours} hours ago",
+    "daysAgo": "{days} days ago",
+    "weeksAgo": "{weeks} weeks ago",
+    "monthsAgo": "{months} months ago"
+  },
+  "timeline": {
+    "updateHistory": "Update History",
+    "noUpdatesYet": "No updates yet",
+    "addFirstUpdate": "Add your first status update",
+    "addStatusUpdate": "Add Status Update",
+    "newStatus": "New Status",
+    "updateContent": "Update Content",
+    "cancel": "Cancel",
+    "adding": "Adding...",
+    "addUpdate": "Add Update",
+    "updateCount": "{count} updates",
+    "enterUpdateContent": "Please enter update content.",
+    "updateAddFailed": "Failed to add update.",
+    "placeholder": "Enter detailed description of the status change. Include root cause analysis, resolution process, next steps, etc.",
+    "characterCount": "Current: {count} characters (minimum 10 characters recommended)"
+  }
+}

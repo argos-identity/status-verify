@@ -1,0 +1,306 @@
+{
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "cancel": "취소",
+    "save": "저장",
+    "edit": "편집",
+    "delete": "삭제",
+    "confirm": "확인",
+    "close": "닫기",
+    "back": "뒤로",
+    "next": "다음",
+    "previous": "이전",
+    "search": "검색",
+    "filter": "필터",
+    "all": "전체",
+    "none": "없음",
+    "yes": "예",
+    "no": "아니오"
+  },
+  "navigation": {
+    "dashboard": "대시보드",
+    "incidents": "장애 관리",
+    "history": "이력",
+    "settings": "설정",
+    "login": "로그인",
+    "logout": "로그아웃"
+  },
+  "incidents": {
+    "title": "장애 관리",
+    "subtitle": "시스템 장애 이벤트를 관리하고 추적합니다",
+    "newIncident": "새 장애 이벤트",
+    "viewDetails": "상세보기",
+    "editIncident": "수정",
+    "deleteIncident": "삭제",
+    "noIncidentsFound": "검색 조건에 맞는 장애 이벤트가 없습니다",
+    "tryDifferentFilters": "다른 검색어나 필터를 사용해보세요",
+    "createNewIncident": "새 장애 이벤트 생성",
+    "loginToSeeMore": "로그인하러 가기",
+    "refreshIncidents": "장애 목록 새로고침",
+    "refresh": "새로고침",
+    "incidentCount": "{filtered}개의 장애 이벤트 ({total}개 중)",
+    "searchPlaceholder": "제목, 설명, 보고자로 검색...",
+    "activeFilters": "활성 필터",
+    "clearFilters": "필터 초기화",
+    "filters": {
+      "status": "상태",
+      "priority": "우선순위",
+      "severity": "심각도",
+      "affectedService": "영향 서비스"
+    },
+    "status": {
+      "all": "모든 상태",
+      "investigating": "조사 중",
+      "identified": "원인 식별",
+      "monitoring": "모니터링",
+      "resolved": "해결됨"
+    },
+    "priority": {
+      "all": "모든 우선순위",
+      "p1": "P1 - 중대",
+      "p2": "P2 - 높음",
+      "p3": "P3 - 중간",
+      "p4": "P4 - 낮음"
+    },
+    "severity": {
+      "all": "모든 심각도",
+      "critical": "치명적",
+      "high": "높음",
+      "medium": "중간",
+      "low": "낮음"
+    },
+    "services": {
+      "all": "모든 서비스",
+      "idRecognition": "ID Recognition",
+      "faceLiveness": "Face Liveness",
+      "idLiveness": "ID Liveness",
+      "faceCompare": "Face Compare",
+      "curpVerifier": "Curp Verifier"
+    },
+    "dashboard": {
+      "totalIncidents": "총 장애 이벤트",
+      "activeIncidents": "활성 장애 이벤트",
+      "avgResolutionTime": "평균 해결 시간",
+      "resolvedPercentage": "해결률",
+      "statusDistribution": "상태 분포",
+      "this24Hours": "지난 24시간",
+      "thisWeek": "이번 주",
+      "thisMonth": "이번 달",
+      "noData": "데이터 없음"
+    }
+  },
+  "incident": {
+    "create": {
+      "title": "새 장애 이벤트 생성",
+      "pageTitle": "새 장애 이벤트 생성",
+      "basicInfo": "기본 정보",
+      "statusAndPriority": "상태 및 우선순위",
+      "affectedServices": "영향받는 서비스",
+      "form": {
+        "titleLabel": "제목 *",
+        "titlePlaceholder": "장애 이벤트 제목을 입력하세요",
+        "descriptionLabel": "설명",
+        "descriptionPlaceholder": "장애 상황에 대한 상세한 설명을 입력하세요",
+        "detectionCriteriaLabel": "발생 기준 / 감지 방법",
+        "detectionCriteriaPlaceholder": "장애 감지 기준이나 방법을 입력하세요",
+        "reporterLabel": "보고자",
+        "reporterPlaceholder": "보고자 이름을 입력하세요",
+        "statusLabel": "상태",
+        "statusPlaceholder": "상태 선택",
+        "priorityLabel": "우선순위",
+        "priorityPlaceholder": "우선순위 선택",
+        "severityLabel": "심각도",
+        "severityPlaceholder": "심각도 선택",
+        "affectedServicesLabel": "영향받는 서비스",
+        "affectedServicesDescription": "영향을 받는 서비스를 선택하세요 (복수 선택 가능)",
+        "selectedServices": "선택된 서비스:",
+        "header": {
+          "createTitle": "새 장애 이벤트 생성",
+          "editTitle": "장애 이벤트 수정",
+          "createDescription": "긴급 상황에서 빠른 입력이 가능하도록 설계되었습니다",
+          "editDescription": "{id} 수정"
+        },
+        "progress": {
+          "completion": "완성도:",
+          "submittable": "제출 가능"
+        },
+        "autoSave": {
+          "saving": "자동 저장 중...",
+          "lastSaved": "마지막 저장:"
+        },
+        "cards": {
+          "basicInfo": "기본 정보",
+          "impactScope": "영향 범위",
+          "required": "필수"
+        },
+        "detailedForm": {
+          "detailedDescriptionLabel": "상세 설명 *",
+          "severityAutoSuggest": "(심각도 기반 자동 제안)",
+          "titleExample": "예: ID Recognition 서비스 응답 지연",
+          "descriptionExample": "문제 상황을 구체적으로 설명해주세요. 언제, 어떤 상황에서 발생했는지, 현재 영향 범위는 어느 정도인지 등을 포함해주세요.",
+          "reporterExample": "예: 운영팀 - 김민수, 모니터링 시스템",
+          "detectionExample": "예: 연속 3회 7초 초과 응답시간 감지, 시간당 5회 이상 타임아웃 발생",
+          "characterCountHelper": "최소 20자 이상 입력해주세요. 현재: {count}자",
+          "statusLabelWithNote": "상태 * (우선순위와 심각도 자동 설정)",
+          "selectStatusPlaceholder": "상태 선택",
+          "additionalInformation": "추가 정보"
+        },
+        "buttons": {
+          "cancel": "취소",
+          "saving": "저장 중...",
+          "create": "생성",
+          "edit": "수정"
+        },
+        "mobile": {
+          "title": "📱 모바일 최적화",
+          "quickCreation": "• 필수 항목만 입력하면 빠른 생성이 가능합니다",
+          "autoSave": "• 30초마다 자동 저장되어 데이터가 보호됩니다",
+          "touchFriendly": "• 큰 터치 영역으로 편리한 입력이 가능합니다"
+        }
+      },
+      "buttons": {
+        "save": "저장",
+        "cancel": "취소",
+        "delete": "삭제"
+      },
+      "validation": {
+        "titleRequired": "제목을 입력해주세요",
+        "titleMinLength": "제목은 5자 이상이어야 합니다",
+        "titleMaxLength": "제목은 255자를 초과할 수 없습니다",
+        "descriptionMinLength": "상세 설명은 20자 이상이어야 합니다",
+        "descriptionMaxLength": "설명은 2000자를 초과할 수 없습니다",
+        "statusRequired": "상태를 선택하세요",
+        "severityRequired": "심각도를 선택하세요",
+        "priorityRequired": "우선순위를 선택하세요",
+        "servicesRequired": "영향받는 서비스를 최소 1개 이상 선택하세요",
+        "servicesMaxLimit": "영향받는 서비스는 최대 5개까지 선택 가능합니다",
+        "reporterRequired": "보고자를 입력하세요",
+        "reporterMaxLength": "보고자명은 100자를 초과할 수 없습니다",
+        "detectionCriteriaMinLength": "발생 기준은 10자 이상이어야 합니다",
+        "detectionCriteriaMaxLength": "발생 기준은 500자를 초과할 수 없습니다"
+      },
+      "errors": {
+        "authenticationRequired": "인증이 필요합니다. 로그인 후 다시 시도해주세요.",
+        "permissionDenied": "인시던트 생성 권한이 없습니다.",
+        "serverConnectionFailed": "서버에 연결할 수 없습니다. 백엔드 API 서버가 실행 중인지 확인해주세요.",
+        "createFailed": "장애 이벤트 생성에 실패했습니다. 다시 시도해주세요.",
+        "errorOccurred": "오류가 발생했습니다"
+      },
+      "confirmations": {
+        "unsavedChanges": "저장되지 않은 변경사항이 있습니다. 정말 취소하시겠습니까?"
+      }
+    },
+    "edit": {
+      "title": "장애 이벤트 수정",
+      "editMode": "편집 모드",
+      "buttons": {
+        "back": "뒤로",
+        "save": "저장",
+        "cancel": "취소",
+        "delete": "삭제",
+        "retry": "다시 시도"
+      },
+      "errors": {
+        "notFound": "해당 장애 이벤트를 찾을 수 없습니다. (ID: {id})",
+        "titleRequired": "제목을 입력해주세요.",
+        "authenticationRequired": "인증이 필요합니다. 로그인 후 다시 시도해주세요.",
+        "permissionDenied": "인시던트 수정 권한이 없습니다.",
+        "incidentNotFound": "해당 인시던트를 찾을 수 없습니다.",
+        "serverConnectionFailed": "서버에 연결할 수 없습니다. 백엔드 API 서버가 실행 중인지 확인해주세요.",
+        "saveFailed": "장애 이벤트 저장에 실패했습니다. 다시 시도해주세요.",
+        "deleteFailed": "장애 이벤트 삭제에 실패했습니다. 다시 시도해주세요.",
+        "updateAddFailed": "업데이트 추가에 실패했습니다."
+      },
+      "confirmations": {
+        "deleteConfirm": "정말로 이 장애 이벤트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+      },
+      "loading": "로딩 중...",
+      "returnToList": "목록으로 돌아가기",
+      "basicInfo": "기본 정보",
+      "statusAndPriority": "상태 및 우선순위",
+      "affectedServices": "영향받는 서비스"
+    },
+    "detail": {
+      "backToList": "목록으로 돌아가기",
+      "list": "목록",
+      "edit": "수정",
+      "detailInfo": "상세 정보",
+      "timeInfo": "시간 정보",
+      "creationTime": "생성 시간",
+      "resolutionTime": "해결 시간",
+      "totalResolutionTime": "총 해결 시간: {resolutionTime}",
+      "assigneeInfo": "담당자 정보",
+      "detectionCriteria": "발생 기준 / 감지 방법",
+      "noServiceInfo": "서비스 정보가 없습니다.",
+      "loadingIncident": "장애 이벤트 정보를 불러오는 중...",
+      "incidentNotFound": "해당 장애 이벤트를 찾을 수 없습니다. (ID: {id})",
+      "goToLogin": "로그인하러 가기",
+      "retry": "다시 시도",
+      "newIncidentCreated": "새 장애 이벤트가 성공적으로 생성되었습니다. verify-main에서 확인할 수 있습니다.",
+      "description": "설명",
+      "affectedServices": "영향받는 서비스",
+      "currentStatus": "현재 상태",
+      "priority": "우선순위",
+      "severity": "심각도",
+      "reporter": "보고자",
+      "createdAt": "생성일",
+      "resolvedAt": "해결일",
+      "duration": "기간",
+      "delete": "삭제",
+      "share": "공유",
+      "refresh": "새로고침",
+      "loading": "로딩 중...",
+      "noDescription": "설명이 제공되지 않았습니다",
+      "noAffectedServices": "영향받는 서비스가 없습니다",
+      "notResolved": "아직 해결되지 않음"
+    }
+  },
+  "auth": {
+    "login": "로그인",
+    "loginRequired": "로그인이 필요합니다",
+    "loginToAccess": "이 기능에 접근하려면 로그인하세요",
+    "username": "사용자명",
+    "password": "비밀번호",
+    "loginButton": "로그인하기",
+    "loginFailed": "로그인에 실패했습니다",
+    "invalidCredentials": "잘못된 사용자명 또는 비밀번호입니다"
+  },
+  "language": {
+    "switchLanguage": "언어 변경",
+    "korean": "한국어",
+    "english": "English"
+  },
+  "errors": {
+    "permissionDenied": "권한이 없습니다",
+    "notFound": "페이지를 찾을 수 없습니다",
+    "serverError": "서버 오류가 발생했습니다",
+    "networkError": "네트워크 연결을 확인해주세요",
+    "unexpectedError": "예상치 못한 오류가 발생했습니다"
+  },
+  "time": {
+    "justNow": "방금 전",
+    "minutesAgo": "{minutes}분 전",
+    "hoursAgo": "{hours}시간 전",
+    "daysAgo": "{days}일 전",
+    "weeksAgo": "{weeks}주 전",
+    "monthsAgo": "{months}개월 전"
+  },
+  "timeline": {
+    "updateHistory": "업데이트 히스토리",
+    "noUpdatesYet": "아직 업데이트가 없습니다",
+    "addFirstUpdate": "첫 번째 상태 업데이트를 추가해보세요",
+    "addStatusUpdate": "상태 업데이트 추가",
+    "newStatus": "새 상태",
+    "updateContent": "업데이트 내용",
+    "cancel": "취소",
+    "adding": "추가 중...",
+    "addUpdate": "업데이트 추가",
+    "updateCount": "{count}개 업데이트",
+    "enterUpdateContent": "업데이트 내용을 입력하세요.",
+    "updateAddFailed": "업데이트 추가에 실패했습니다.",
+    "placeholder": "상태 변경에 대한 상세한 설명을 입력하세요. 원인 분석, 해결 과정, 다음 단계 등을 포함해주세요.",
+    "characterCount": "현재: {count}자 (최소 10자 권장)"
+  }
+}

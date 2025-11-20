@@ -1,0 +1,307 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-background: #FFFFFF;
+  --color-foreground: #1a1a1a;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1a1a;
+
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a1a1a;
+
+  --color-primary: #FF6B35; /* Incident Orange - 긴급성 표현 */
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #FFF5F5; /* Light background for incidents */
+  --color-secondary-foreground: #1a1a1a;
+
+  --color-muted: #f8f8f8; /* Background */
+  --color-muted-foreground: #999999; /* Muted Text */
+
+  --color-accent: #FF6B35; /* Accent color */
+  --color-accent-foreground: #ffffff;
+
+  --color-destructive: #F44336; /* Error Red */
+  --color-destructive-foreground: #ffffff;
+
+  --color-border: #e6e6e6;
+  --color-input: #e6e6e6;
+  --color-ring: #FF6B35;
+
+  /* Incident Status Colors */
+  --color-chart-1: #4CAF50; /* Resolved - Green */
+  --color-chart-2: #FF9800; /* Monitoring - Orange */
+  --color-chart-3: #FF6B35; /* Investigating - Primary Orange */
+  --color-chart-4: #F44336; /* Critical - Red */
+  --color-chart-5: #e6e6e6; /* No Data - Gray */
+
+  /* Incident Priority Colors */
+  --color-priority-p1: #F44336; /* P1 Critical - Red */
+  --color-priority-p2: #FF9800; /* P2 High - Orange */  
+  --color-priority-p3: #FFC107; /* P3 Medium - Yellow */
+
+  /* Status Colors */
+  --color-status-investigating: #FF6B35;
+  --color-status-identified: #FF9800;
+  --color-status-monitoring: #2196F3;
+  --color-status-resolved: #4CAF50;
+
+  /* Severity Colors */
+  --color-severity-critical: #F44336;
+  --color-severity-high: #FF5722;
+  --color-severity-medium: #FF9800;
+  --color-severity-low: #FFC107;
+
+  --radius-lg: 8px;
+  --radius-md: 6px;
+  --radius-sm: 4px;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  /* Custom Incident Management Colors */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-text-muted: #999999;
+
+  /* Font Families */
+  --font-sans: "Inter", sans-serif;
+  --font-logo: "Inter", sans-serif;
+  --font-page-title: "Inter", sans-serif;
+  --font-section-header: "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-button: "Inter", sans-serif;
+  --font-form: "Inter", sans-serif;
+  --font-footer: "Inter", sans-serif;
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border);
+  }
+}
+
+@layer utilities {
+  body {
+    font-family: var(--font-body);
+  }
+}
+
+@layer base {
+  :root {
+    --background: var(--color-background);
+    --foreground: var(--color-foreground);
+    --card: var(--color-card);
+    --card-foreground: var(--color-card-foreground);
+    --popover: var(--color-popover);
+    --popover-foreground: var(--color-popover-foreground);
+    --primary: var(--color-primary);
+    --primary-foreground: var(--color-primary-foreground);
+    --secondary: var(--color-secondary);
+    --secondary-foreground: var(--color-secondary-foreground);
+    --muted: var(--color-muted);
+    --muted-foreground: var(--color-muted-foreground);
+    --accent: var(--color-accent);
+    --accent-foreground: var(--color-accent-foreground);
+    --destructive: var(--color-destructive);
+    --destructive-foreground: var(--color-destructive-foreground);
+    --border: var(--color-border);
+    --input: var(--color-input);
+    --ring: var(--color-ring);
+    --chart-1: var(--color-chart-1);
+    --chart-2: var(--color-chart-2);
+    --chart-3: var(--color-chart-3);
+    --chart-4: var(--color-chart-4);
+    --chart-5: var(--color-chart-5);
+    --radius: var(--radius-lg);
+  }
+
+  /* Typography */
+  h1 {
+    font-family: var(--font-page-title);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--color-text-primary);
+  }
+
+  h2 {
+    font-family: var(--font-section-header);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-text-primary);
+  }
+
+  h3 {
+    font-family: var(--font-section-header);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-text-primary);
+  }
+
+  p {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  a:hover {
+    opacity: 0.8;
+  }
+
+  /* HTML Tag Styles */
+  html {
+    box-sizing: border-box;
+  }
+
+  *, *::before, *::after {
+    box-sizing: inherit;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+  }
+
+  /* Incident specific styles */
+  .incident-status-investigating {
+    color: var(--color-status-investigating);
+    background-color: rgba(255, 107, 53, 0.1);
+  }
+
+  .incident-status-identified {
+    color: var(--color-status-identified);
+    background-color: rgba(255, 152, 0, 0.1);
+  }
+
+  .incident-status-monitoring {
+    color: var(--color-status-monitoring);
+    background-color: rgba(33, 150, 243, 0.1);
+  }
+
+  .incident-status-resolved {
+    color: var(--color-status-resolved);
+    background-color: rgba(76, 175, 80, 0.1);
+  }
+
+  .incident-priority-p1 {
+    color: var(--color-priority-p1);
+    background-color: rgba(244, 67, 54, 0.1);
+  }
+
+  .incident-priority-p2 {
+    color: var(--color-priority-p2);
+    background-color: rgba(255, 152, 0, 0.1);
+  }
+
+  .incident-priority-p3 {
+    color: var(--color-priority-p3);
+    background-color: rgba(255, 193, 7, 0.1);
+  }
+
+  /* Form styles for incident management */
+  .form-urgent {
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  }
+
+  .form-urgent:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+  }
+
+  /* Container class definition */
+  .container {
+    max-width: 1200px;
+    padding-left: 40px;
+    padding-right: 40px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Mobile responsive for emergency situations */
+  @media (max-width: 768px) {
+    .container {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+
+    /* Large touch targets for mobile */
+    button, .btn {
+      min-height: 48px;
+      min-width: 48px;
+    }
+
+    /* Prevent iOS zoom on input focus */
+    input, textarea, select {
+      font-size: 16px;
+    }
+
+    /* Emergency form optimizations */
+    .incident-form-mobile {
+      padding: 16px;
+    }
+
+    .incident-form-mobile .optional-fields {
+      display: none;
+    }
+
+    .incident-form-mobile button {
+      width: 100%;
+      margin-bottom: 12px;
+    }
+  }
+}
+
+/* Hide Next.js error overlay portal */
+nextjs-portal {
+  display: none !important;
+}

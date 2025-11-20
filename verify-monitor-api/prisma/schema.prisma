@@ -1,0 +1,216 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. Service - Represents a monitored system component
+model Service {
+  id           String   @id // Unique service identifier (kebab-case)
+  name         String   @db.VarChar(100) // Human-readable service name
+  description  String?  @db.Text // Service description
+  endpoint_url String?  @db.Text // Health check endpoint
+  created_at   DateTime @default(now()) @map("created_at")
+  updated_at   DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  uptime_records      UptimeRecord[]
+  api_response_times  APIResponseTime[]
+  api_call_logs       APICallLog[]
+  watch_server_logs   WatchServerLog[]
+
+  @@map("services")
+}
+
+// 2. UptimeRecord - Daily status entry for each service
+model UptimeRecord {
+  id            Int      @id @default(autoincrement())
+  service_id    String   @map("service_id")
+  date          DateTime @db.Date
+  status        UptimeStatus
+  response_time Int?     // Average response time in ms
+  error_message String?  @db.Text
+  created_at    DateTime @default(now()) @map("created_at")
+
+  // Relationships
+  service Service @relation(fields: [service_id], references: [id], onDelete: Cascade)
+
+  @@unique([service_id, date])
+  @@map("uptime_records")
+}
+
+// 3. Incident - Problem report with workflow tracking
+model Incident {
+  id                  String            @id // Format: "inc-YYYY-NNN"
+  title               String            @db.VarChar(255)
+  description         String?           @db.Text
+  status              IncidentStatus
+  severity            IncidentSeverity
+  priority            IncidentPriority
+  reporter            String?           @db.VarChar(100)
+  detection_criteria  String?           @db.Text
+  affected_services   String[]          // Array of service IDs
+  created_at          DateTime          @default(now()) @map("created_at")
+  resolved_at         DateTime?         @map("resolved_at")
+
+  // Relationships
+  updates IncidentUpdate[]
+
+  @@map("incident")
+}
+
+// 4. IncidentUpdate - Status changes and comments on incidents
+model IncidentUpdate {
+  id          Int              @id @default(autoincrement())
+  incident_id String           @map("incident_id")
+  status      IncidentStatus?  // New status if status change
+  description String           @db.Text // Update description or comment
+  user_id     String?          @map("user_id")
+  created_at  DateTime         @default(now()) @map("created_at")
+
+  // Relationships
+  incident Incident @relation(fields: [incident_id], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@map("incident_update")
+}
+
+// 5. User - System user with role-based access
+model User {
+  id            String    @id @default(cuid())
+  username      String    @unique @db.VarChar(50)
+  email         String    @unique @db.VarChar(255)
+  password_hash String    @map("password_hash") @db.VarChar(255)
+  role          UserRole
+  is_active     Boolean   @default(true) @map("is_active")
+  created_at    DateTime  @default(now()) @map("created_at")
+  last_login_at DateTime? @map("last_login_at")
+
+  // Relationships
+  incident_updates IncidentUpdate[]
+
+  @@map("users")
+}
+
+// 6. APIResponseTime - Individual API call measurements for SLA analysis
+model APIResponseTime {
+  id            Int      @id @default(autoincrement())
+  service_id    String   @map("service_id")
+  response_time Int      // Response time in milliseconds
+  status_code   Int      @map("status_code") // HTTP status code
+  endpoint      String?  @db.VarChar(255) // Specific endpoint called
+  method        String   @default("GET") @db.VarChar(10) // HTTP method
+  timestamp     DateTime @default(now())
+
+  // Relationships
+  service Service @relation(fields: [service_id], references: [id], onDelete: Cascade)
+
+  @@index([service_id, timestamp])
+  @@index([timestamp]) // For time-based partitioning
+  @@map("api_response_times")
+}
+
+// 7. APICallLog - Daily aggregated statistics per service
+model APICallLog {
+  id                Int      @id @default(autoincrement())
+  service_id        String   @map("service_id")
+  date              DateTime @db.Date
+  total_calls       Int      @default(0) @map("total_calls")
+  success_calls     Int      @default(0) @map("success_calls")
+  error_calls       Int      @default(0) @map("error_calls")
+  avg_response_time Int?     @map("avg_response_time") // Average response time in ms
+  max_response_time Int?     @map("max_response_time") // Maximum response time
+  min_response_time Int?     @map("min_response_time") // Minimum response time
+  created_at        DateTime @default(now()) @map("created_at")
+  updated_at        DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  service Service @relation(fields: [service_id], references: [id], onDelete: Cascade)
+
+  @@unique([service_id, date])
+  @@map("api_call_logs")
+}
+
+// 8. WatchServerLog - Individual monitoring check results
+model WatchServerLog {
+  id            Int              @id @default(autoincrement())
+  service_id    String           @map("service_id")
+  check_time    DateTime         @default(now()) @map("check_time")
+  status_code   Int?             @map("status_code") // HTTP response status
+  response_time Int?             @map("response_time") // Response time in milliseconds
+  is_success    Boolean          @map("is_success")
+  error_message String?          @db.Text @map("error_message")
+  error_type    WatchErrorType?  @map("error_type")
+
+  // Relationships
+  service Service @relation(fields: [service_id], references: [id], onDelete: Cascade)
+
+  @@index([service_id, check_time])
+  @@index([check_time]) // For time-based queries
+  @@map("watch_server_logs")
+}
+
+// 9. SystemStatus - Overall system health indicator
+model SystemStatus {
+  id             Int           @id @default(autoincrement())
+  overall_status SystemHealthStatus @map("overall_status")
+  message        String?       @db.Text
+  created_at     DateTime      @default(now()) @map("created_at")
+
+  @@map("system_status")
+}
+
+// Enums
+enum UptimeStatus {
+  o  // Operational (green)
+  po // Partial Outage (orange/warning)
+  mo // Major Outage (red/error)
+  nd // No Data (blue)
+  e  // Empty (transparent)
+}
+
+enum IncidentStatus {
+  investigating // Initial state, problem being analyzed
+  identified    // Root cause identified
+  monitoring    // Fix implemented, monitoring results
+  resolved      // Issue completely resolved
+}
+
+enum IncidentSeverity {
+  low      // Minor impact, non-critical
+  medium   // Moderate impact, affects some users
+  high     // Major impact, significant user disruption
+  critical // Severe impact, service unavailable
+}
+
+enum IncidentPriority {
+  P1 // Critical - Complete service outage, data loss risk
+  P2 // High - Core functionality failure, >15s response time
+  P3 // Medium - Partial functionality issues, 7-15s response time
+  P4 // Low - Minor issues, minimal user impact
+}
+
+enum UserRole {
+  viewer   // Read-only access to all monitoring data
+  reporter // Can create and update incidents, includes viewer permissions
+  admin    // Full system access including user management
+}
+
+enum WatchErrorType {
+  timeout          // Request exceeded time limit
+  connection_error // Network connectivity issue
+  http_error       // HTTP error response
+  dns_error        // DNS resolution failure
+}
+
+enum SystemHealthStatus {
+  operational // All systems functioning normally
+  degraded    // Some services experiencing issues
+  outage      // Major system outage affecting multiple services
+}
