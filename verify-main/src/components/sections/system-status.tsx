@@ -24,42 +24,40 @@ const UptimeBar: React.FC<UptimeBarProps> = ({ status, date, serviceName, index 
   const { incidents, hasIncidents, isLoading } = useIncidentByDate(date, serviceName, status);
 
   // Determine color based on priority levels of incidents
+  // NOTE: Only P1, P2 affect bar color - P3, P4 keep green (no uptime impact)
   const getPriorityBasedColor = () => {
     if (!hasIncidents || incidents.length === 0) {
       return 'bg-chart-1'; // Green for operational
     }
 
-    // Check highest priority level in incidents
+    // Only check P1, P2 - P3, P4 should not affect bar color
     const hasP1 = incidents.some(incident => incident.priority === 'P1');
     const hasP2 = incidents.some(incident => incident.priority === 'P2');
-    const hasP3 = incidents.some(incident => incident.priority === 'P3');
 
     if (hasP1) return 'bg-chart-3';      // Red for P1 Critical
     if (hasP2) return 'bg-chart-2';      // Orange for P2 High
-    if (hasP3) return 'bg-chart-4';      // Yellow for P3 Medium
-    return 'bg-chart-5';                 // Blue for P4 Monitoring
+    return 'bg-chart-1';                 // Green - P3, P4 don't affect uptime bar color
   };
 
   // Removed hardcoded statusColors - now using priority-based colors only
 
   const getStatusText = (status: UptimeStatus) => {
     // Determine status text based on priority level of incidents
+    // NOTE: Only P1, P2 change status text - P3, P4 use default status
     if (hasIncidents && incidents.length > 0) {
       const hasP1 = incidents.some(incident => incident.priority === 'P1');
       const hasP2 = incidents.some(incident => incident.priority === 'P2');
-      const hasP3 = incidents.some(incident => incident.priority === 'P3');
 
       if (hasP1) return t('p1Critical');
       if (hasP2) return t('p2High');
-      if (hasP3) return t('p3Medium');
-      return t('p4Low');
+      // P3, P4 fall through to use default status text
     }
 
     switch (status) {
       case 'operational': return t('operational');
       case 'degraded': return t('degraded');
       case 'outage': return t('majorOutage');
-      case 'partial': return t('partialOutage');
+      case 'partial': return t('operational'); // P3, P4 show as operational
       default: return t('unknownStatus');
     }
   };
@@ -132,15 +130,16 @@ interface ServiceStatusProps {
 
 
 // Calculate uptime percentage with consistent values for operational services
+// NOTE: P3, P4 incidents should NOT affect uptime calculation - only P1 (outage) and P2 (degraded)
 const calculateUptimePercentage = (uptimeData: UptimeStatus[], serviceName?: string): string => {
   if (uptimeData.length === 0) return '99.99'; // Even with no data, show consistent 99.99%
 
   const totalScore = uptimeData.reduce((score, status) => {
     switch (status) {
       case 'operational': return score + 1.0;   // 100% uptime
-      case 'degraded': return score + 0.75;     // 75% uptime (performance issues but service available)
-      case 'partial': return score + 0.5;       // 50% uptime (some functionality affected)
-      case 'outage': return score + 0.0;        // 0% uptime (service completely down)
+      case 'degraded': return score + 0.75;     // 75% uptime (P2 - performance issues)
+      case 'partial': return score + 1.0;       // 100% uptime (P3, P4 - no uptime impact)
+      case 'outage': return score + 0.0;        // 0% uptime (P1 - service completely down)
       default: return score + 1.0;              // Default to operational
     }
   }, 0);
@@ -177,13 +176,13 @@ const ServiceStatusCard: React.FC<ServiceStatusProps> = ({ name, uptimePercentag
   const { incidents: todayIncidents } = useIncidentByDate(today, name, todayStatus);
 
   // Determine current status based on priority levels of today's incidents
+  // NOTE: Only P1, P2 affect status display - P3, P4 keep "Operational" status
   let currentStatus = 'Operational';
   let statusColor = 'text-primary'; // Green for operational
 
   if (todayIncidents && todayIncidents.length > 0) {
     const hasP1 = todayIncidents.some(incident => incident.priority === 'P1');
     const hasP2 = todayIncidents.some(incident => incident.priority === 'P2');
-    const hasP3 = todayIncidents.some(incident => incident.priority === 'P3');
 
     if (hasP1) {
       currentStatus = t('p1Critical');
@@ -191,13 +190,8 @@ const ServiceStatusCard: React.FC<ServiceStatusProps> = ({ name, uptimePercentag
     } else if (hasP2) {
       currentStatus = t('p2High');
       statusColor = 'text-chart-2'; // Orange
-    } else if (hasP3) {
-      currentStatus = t('p3Medium');
-      statusColor = 'text-yellow-500'; // Yellow
-    } else {
-      currentStatus = t('p4Low');
-      statusColor = 'text-chart-5'; // Blue for monitoring
     }
+    // P3, P4 don't change status - remain "Operational" (green)
   }
 
   return (
