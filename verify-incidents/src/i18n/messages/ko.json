@@ -77,7 +77,9 @@
       "faceLiveness": "Face Liveness",
       "idLiveness": "ID Liveness",
       "faceCompare": "Face Compare",
-      "curpVerifier": "Curp Verifier"
+      "curpVerifier": "Curp Verifier",
+      "idcheckStep1": "idcheck(step1)",
+      "idcheckStep2": "idcheck(step2)"
     },
     "dashboard": {
       "totalIncidents": "총 장애 이벤트",

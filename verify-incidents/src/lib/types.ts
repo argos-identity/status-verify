@@ -51,13 +51,15 @@ export interface CreateIncidentUpdateRequest {
   description: string;
 }
 
-// 서비스 목록 (기존 프로젝트와 동일)
+// 서비스 목록 (Argos Infra - 총 7개 서비스)
 export const AVAILABLE_SERVICES = [
   { id: 'id-recognition', name: 'ID Recognition' },
   { id: 'face-liveness', name: 'Face Liveness' },
   { id: 'id-liveness', name: 'ID Liveness' },
   { id: 'face-compare', name: 'Face Compare' },
   { id: 'curp-verifier', name: 'Curp Verifier' },
+  { id: 'idcheck-step1', name: 'idcheck(step1)' },
+  { id: 'idcheck-step2', name: 'idcheck(step2)' },
 ] as const;
 
 // Status display information

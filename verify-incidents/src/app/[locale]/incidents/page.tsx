@@ -158,40 +158,38 @@ export default function IncidentsPage() {
             </Alert>
           )}
 
-          {/* 통계 대시보드 */}
-          <IncidentDashboard stats={stats} loading={statsLoading} />
+          {/* 통계 대시보드 - 임시 비활성화 */}
+          {/* <IncidentDashboard stats={stats} loading={statsLoading} /> */}
         </div>
 
-        {/* 검색 및 필터 섹션 */}
+        {/* 검색 및 필터 섹션 - 임시 비활성화
         <div className="bg-card border border-border rounded-lg p-6 mb-6">
           <div className="flex flex-col gap-4">
-            {/* 검색바 */}
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-placeholder={t('searchPlaceholder')}
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
 
-            {/* 필터들 */}
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-muted-foreground" />
-<span className="text-sm font-medium text-muted-foreground">{tCommon('filter')}:</span>
+                <span className="text-sm font-medium text-muted-foreground">{tCommon('filter')}:</span>
               </div>
 
-              <Select 
-                value={filters.status} 
+              <Select
+                value={filters.status}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, status: value as any }))}
               >
                 <SelectTrigger className="w-[150px]">
-<SelectValue placeholder={t('filters.status')} />
+                  <SelectValue placeholder={t('filters.status')} />
                 </SelectTrigger>
                 <SelectContent>
-<SelectItem value="all">{t('status.all')}</SelectItem>
+                  <SelectItem value="all">{t('status.all')}</SelectItem>
                   <SelectItem value="investigating">{t('status.investigating')}</SelectItem>
                   <SelectItem value="identified">{t('status.identified')}</SelectItem>
                   <SelectItem value="monitoring">{t('status.monitoring')}</SelectItem>
@@ -204,10 +202,10 @@ placeholder={t('searchPlaceholder')}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, priority: value as any }))}
               >
                 <SelectTrigger className="w-[150px]">
-<SelectValue placeholder={t('filters.priority')} />
+                  <SelectValue placeholder={t('filters.priority')} />
                 </SelectTrigger>
                 <SelectContent>
-<SelectItem value="all">{t('priority.all')}</SelectItem>
+                  <SelectItem value="all">{t('priority.all')}</SelectItem>
                   <SelectItem value="P1">{t('priority.p1')}</SelectItem>
                   <SelectItem value="P2">{t('priority.p2')}</SelectItem>
                   <SelectItem value="P3">{t('priority.p3')}</SelectItem>
@@ -215,15 +213,15 @@ placeholder={t('searchPlaceholder')}
                 </SelectContent>
               </Select>
 
-              <Select 
-                value={filters.severity} 
+              <Select
+                value={filters.severity}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, severity: value as any }))}
               >
                 <SelectTrigger className="w-[150px]">
-<SelectValue placeholder={t('filters.severity')} />
+                  <SelectValue placeholder={t('filters.severity')} />
                 </SelectTrigger>
                 <SelectContent>
-<SelectItem value="all">{t('severity.all')}</SelectItem>
+                  <SelectItem value="all">{t('severity.all')}</SelectItem>
                   <SelectItem value="critical">{t('severity.critical')}</SelectItem>
                   <SelectItem value="high">{t('severity.high')}</SelectItem>
                   <SelectItem value="medium">{t('severity.medium')}</SelectItem>
@@ -231,36 +229,37 @@ placeholder={t('searchPlaceholder')}
                 </SelectContent>
               </Select>
 
-              <Select 
-                value={filters.affected_service} 
+              <Select
+                value={filters.affected_service}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, affected_service: value as any }))}
               >
                 <SelectTrigger className="w-[180px]">
-<SelectValue placeholder={t('filters.affectedService')} />
+                  <SelectValue placeholder={t('filters.affectedService')} />
                 </SelectTrigger>
                 <SelectContent>
-<SelectItem value="all">{t('services.all')}</SelectItem>
+                  <SelectItem value="all">{t('services.all')}</SelectItem>
                   <SelectItem value="id-recognition">{t('services.idRecognition')}</SelectItem>
                   <SelectItem value="face-liveness">{t('services.faceLiveness')}</SelectItem>
                   <SelectItem value="id-liveness">{t('services.idLiveness')}</SelectItem>
                   <SelectItem value="face-compare">{t('services.faceCompare')}</SelectItem>
                   <SelectItem value="curp-verifier">{t('services.curpVerifier')}</SelectItem>
+                  <SelectItem value="idcheck-step1">{t('services.idcheckStep1')}</SelectItem>
+                  <SelectItem value="idcheck-step2">{t('services.idcheckStep2')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* 활성 필터 표시 */}
-            {(searchTerm || 
-              filters.status !== 'all' || 
-              filters.priority !== 'all' || 
-              filters.severity !== 'all' || 
+            {(searchTerm ||
+              filters.status !== 'all' ||
+              filters.priority !== 'all' ||
+              filters.severity !== 'all' ||
               filters.affected_service !== 'all') && (
               <div className="flex items-center gap-2 pt-2 border-t">
-<span className="text-sm text-muted-foreground">{t('activeFilters')}:</span>
+                <span className="text-sm text-muted-foreground">{t('activeFilters')}:</span>
                 {searchTerm && (
                   <Badge variant="secondary" className="flex items-center gap-1">
-{tCommon('search')}: "{searchTerm}"
-                    <button 
+                    {tCommon('search')}: "{searchTerm}"
+                    <button
                       onClick={() => setSearchTerm('')}
                       className="ml-1 hover:bg-muted-foreground/20 rounded-full p-0.5"
                     >
@@ -271,7 +270,7 @@ placeholder={t('searchPlaceholder')}
                 {filters.status !== 'all' && (
                   <Badge variant="secondary" className="flex items-center gap-1">
                     상태: {filters.status}
-                    <button 
+                    <button
                       onClick={() => setFilters(prev => ({ ...prev, status: 'all' }))}
                       className="ml-1 hover:bg-muted-foreground/20 rounded-full p-0.5"
                     >
@@ -283,6 +282,7 @@ placeholder={t('searchPlaceholder')}
             )}
           </div>
         </div>
+        */}
 
         {/* 검색 결과 정보 */}
         <div className="flex items-center justify-between mb-4">
