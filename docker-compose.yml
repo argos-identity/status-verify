@@ -94,15 +94,11 @@ services:
     build:
       context: ./verify-incidents
       dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_BASE_URL: ${API_URL:-http://verify-monitor-api:3003}/api
-        NEXT_PUBLIC_WS_URL: ${WS_URL:-ws://verify-monitor-api:3003}
     container_name: sla-monitor-incidents
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_BASE_URL: ${API_URL:-http://verify-monitor-api:3003}/api
-      NEXT_PUBLIC_API_URL: ${API_URL:-http://verify-monitor-api:3003}
+      BACKEND_API_URL: ${API_URL:-http://verify-monitor-api:3003}/api
       NEXT_PUBLIC_WS_URL: ${WS_URL:-ws://verify-monitor-api:3003}
       PORT: 3006
     # Keep incidents port for direct access if needed (optional)
