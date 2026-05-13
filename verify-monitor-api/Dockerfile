@@ -22,6 +22,8 @@ RUN npx prisma generate
 # Build TypeScript application
 RUN npm run build
 
+RUN npx tsc prisma/seeds/index.ts --outDir dist/seeds --module commonjs --target ES2022 --esModuleInterop --skipLibCheck --resolveJsonModule 2>/dev/null || true
+
 # Production image
 FROM base AS runner
 WORKDIR /app
@@ -38,6 +40,7 @@ RUN npm ci --only=production && npm cache clean --force
 
 COPY --from=builder --chown=apiuser:nodejs /app/dist ./dist
 COPY --from=builder --chown=apiuser:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=apiuser:nodejs /app/dist/seeds ./dist/seeds
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY --from=builder /app/node_modules/@prisma/engines ./node_modules/@prisma/engines

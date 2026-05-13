@@ -23,7 +23,7 @@ npx prisma migrate deploy
 # Seed database if SEED_DATABASE environment variable is set
 if [ "$SEED_DATABASE" = "true" ]; then
   echo "🌱 Seeding database..."
-  npm run db:seed
+  node dist/seeds/index.js
 fi
 
 echo "🎯 Starting server..."
