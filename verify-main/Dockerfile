@@ -9,10 +9,8 @@ WORKDIR /app
 
 # Copy package manager files
 COPY package*.json ./
-COPY bun.lock* ./
 
-# Install dependencies
-RUN npm ci --only=production
+RUN npm ci
 
 # Rebuild the source code only when needed
 FROM base AS builder
