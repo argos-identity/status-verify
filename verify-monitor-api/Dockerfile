@@ -1,6 +1,6 @@
 # verify-monitor-api Dockerfile - Express.js Backend API with TypeScript
 FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat netcat-openbsd
+RUN apk add --no-cache libc6-compat netcat-openbsd openssl
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -40,8 +40,11 @@ COPY --from=builder --chown=apiuser:nodejs /app/dist ./dist
 COPY --from=builder --chown=apiuser:nodejs /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
+COPY --from=builder /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
 
-# Copy startup script
+RUN chown -R apiuser:nodejs /app/node_modules/.prisma \
+    && chown -R apiuser:nodejs /app/node_modules/@prisma
+
 COPY --chown=apiuser:nodejs scripts/docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
 

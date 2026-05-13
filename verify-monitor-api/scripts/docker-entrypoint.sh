@@ -20,10 +20,6 @@ echo "✅ Database connected"
 echo "🔄 Running database migrations..."
 npx prisma migrate deploy
 
-# Generate Prisma client if needed
-echo "🔧 Generating Prisma client..."
-npx prisma generate
-
 # Seed database if SEED_DATABASE environment variable is set
 if [ "$SEED_DATABASE" = "true" ]; then
   echo "🌱 Seeding database..."
