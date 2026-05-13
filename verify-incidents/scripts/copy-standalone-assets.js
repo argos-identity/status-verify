@@ -49,23 +49,34 @@ function copyFile(src, dest) {
   }
 }
 
+function findStandaloneDir(baseDir) {
+  const serverJs = path.join(baseDir, 'server.js');
+  if (fs.existsSync(serverJs)) return baseDir;
+  try {
+    for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        const found = findStandaloneDir(path.join(baseDir, entry.name));
+        if (found) return found;
+      }
+    }
+  } catch (_) {}
+  return null;
+}
+
 function main() {
   log('\n📦 Copying standalone build assets...', 'blue');
 
   const projectRoot = process.cwd();
-  const standaloneDir = path.join(
-    projectRoot,
-    '.next',
-    'standalone',
-    'status-verify',
-    'verify-incidents'
-  );
+  const standaloneBase = path.join(projectRoot, '.next', 'standalone');
 
-  // Check if standalone directory exists
-  if (!fs.existsSync(standaloneDir)) {
+  const standaloneDir = findStandaloneDir(standaloneBase);
+
+  if (!standaloneDir) {
     log('❌ Standalone directory not found. Make sure you have output: "standalone" in next.config.ts', 'red');
     process.exit(1);
   }
+
+  log(`   📂 Standalone dir: ${standaloneDir}`, 'blue');
 
   let successCount = 0;
   let failCount = 0;
