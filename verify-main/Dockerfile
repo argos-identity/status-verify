@@ -18,10 +18,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Disable telemetry
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Build application
+ARG NEXT_PUBLIC_API_URL=http://localhost:3003/api
+ARG NEXT_PUBLIC_WS_URL=ws://localhost:3003
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
+
 RUN npm run build
 
 # Production image, copy all the files and run next
