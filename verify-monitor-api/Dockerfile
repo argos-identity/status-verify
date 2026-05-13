@@ -1,9 +1,9 @@
 # verify-monitor-api Dockerfile - Express.js Backend API with TypeScript
 FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat netcat-openbsd
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Copy package files
@@ -32,15 +32,14 @@ ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 apiuser
 
-# Install runtime dependencies including Prisma
+# Install runtime dependencies
 COPY --from=builder /app/package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
-# Copy built application
 COPY --from=builder --chown=apiuser:nodejs /app/dist ./dist
 COPY --from=builder --chown=apiuser:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=apiuser:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=apiuser:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
 # Copy startup script
 COPY --chown=apiuser:nodejs scripts/docker-entrypoint.sh ./

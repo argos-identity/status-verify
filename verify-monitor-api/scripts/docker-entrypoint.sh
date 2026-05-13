@@ -8,22 +8,13 @@ echo "🚀 Starting verify-monitor-api..."
 
 # Wait for database to be ready
 echo "⏳ Waiting for database connection..."
-until node -e "
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-prisma.\$connect()
-  .then(() => {
-    console.log('✅ Database connected');
-    process.exit(0);
-  })
-  .catch(() => {
-    console.log('❌ Database not ready');
-    process.exit(1);
-  });
-" > /dev/null 2>&1; do
+DB_HOST=$(echo "$DATABASE_URL" | sed -E 's|.*@([^:/]+):([0-9]+).*|\1|')
+DB_PORT=$(echo "$DATABASE_URL" | sed -E 's|.*@([^:/]+):([0-9]+).*|\2|')
+until nc -z "$DB_HOST" "$DB_PORT" 2>/dev/null; do
   echo "⏳ Database not ready, retrying in 2 seconds..."
   sleep 2
 done
+echo "✅ Database connected"
 
 # Run database migrations
 echo "🔄 Running database migrations..."
