@@ -42,6 +42,7 @@ services:
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:3006}
       PORT: 3003
+      HOST: 0.0.0.0
       SEED_DATABASE: ${SEED_DATABASE:-true}
     # Keep API port for direct access if needed (optional)
     ports:
