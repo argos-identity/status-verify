@@ -25,16 +25,22 @@ prisma.\$connect()
   sleep 5
 done
 
-# Wait for API server to be ready (optional but recommended)
+# Wait for API server to be ready (optional; capped so a persistent failure
+# cannot exhaust the API rate limiter, then boot regardless).
 echo "⏳ Waiting for API server connection..."
-until curl -f http://${API_HOST:-verify-monitor-api}:${API_PORT:-3001}/api/health > /dev/null 2>&1; do
-  echo "⏳ API server not ready, retrying in 5 seconds..."
-  sleep 5
+API_URL="http://${API_HOST:-verify-monitor-api}:${API_PORT:-3003}/health"
+API_WAIT_MAX_ATTEMPTS=${API_WAIT_MAX_ATTEMPTS:-30}
+API_WAIT_INTERVAL=${API_WAIT_INTERVAL:-10}
+attempt=1
+while ! curl -fsS -o /dev/null "$API_URL" 2>/dev/null; do
+  if [ "$attempt" -ge "$API_WAIT_MAX_ATTEMPTS" ]; then
+    echo "⚠️ API server not ready after ${API_WAIT_MAX_ATTEMPTS} attempts — starting anyway."
+    break
+  fi
+  echo "⏳ API server not ready (attempt ${attempt}/${API_WAIT_MAX_ATTEMPTS}), retrying in ${API_WAIT_INTERVAL}s..."
+  attempt=$((attempt + 1))
+  sleep "$API_WAIT_INTERVAL"
 done
-
-# Generate Prisma client if needed
-echo "🔧 Generating Prisma client..."
-npx prisma generate
 
 # Initialize services in database (if needed)
 echo "🔄 Initializing services..."

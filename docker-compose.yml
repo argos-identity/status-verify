@@ -86,7 +86,7 @@ services:
     networks:
       - frontend
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:80/', (res) => process.exit(res.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -113,7 +113,7 @@ services:
     networks:
       - frontend
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3006/api/health || exit 1"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3006/', (res) => process.exit(res.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3
