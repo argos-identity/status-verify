@@ -5,6 +5,12 @@ import apiLogger from '../utils/api-logger';
 import { getServiceConfigs } from '../test-data/health-check-data';
 import metricsService from '../services/metrics-service-simple';
 import autoDetectionClient from '../services/auto-detection-client';
+import serviceInitializer from '../services/service-initializer';
+
+const SAMPLE_PAYLOAD_REJECTED = [400, 422];
+
+const isServiceUp = (httpStatus: number): boolean =>
+  (httpStatus >= 200 && httpStatus < 300) || SAMPLE_PAYLOAD_REJECTED.includes(httpStatus);
 
 class HealthMonitor {
   private static instance: HealthMonitor;
@@ -109,7 +115,7 @@ class HealthMonitor {
           serviceId: service.id,
           serviceName: service.name,
           url: service.url,
-          status: response.status >= 200 && response.status < 500 ? 'operational' : 'down',
+          status: isServiceUp(response.status) ? 'operational' : 'down',
           httpStatus: response.status,
           responseTime,
           timestamp: new Date()
@@ -148,23 +154,21 @@ class HealthMonitor {
           requestId: requestId!
         });
 
-        // 400번대 응답은 서비스가 살아있다는 의미 (파라미터 오류)
-        const status = httpStatus >= 400 && httpStatus < 500 ? 'operational' : 'down';
+        const serviceUp = isServiceUp(httpStatus);
 
         results.push({
           serviceId: service.id,
           serviceName: service.name,
           url: service.url,
-          status,
+          status: serviceUp ? 'operational' : 'down',
           httpStatus,
           responseTime,
           timestamp: new Date(),
-          error: httpStatus >= 400 && httpStatus < 500 ? 'Service operational (parameter validation error)' : error.message
+          error: serviceUp ? 'Service operational (sample payload rejected)' : error.message
         });
 
-        // Detailed error logging
-        if (httpStatus >= 400 && httpStatus < 500) {
-          this.logger.info(`✅ ${service.name}: ${httpStatus} (${responseTime}ms) - Service operational, parameter validation error`);
+        if (serviceUp) {
+          this.logger.info(`✅ ${service.name}: ${httpStatus} (${responseTime}ms) - Service operational, sample payload rejected`);
         } else {
           this.logger.error(`❌ ${service.name} failed:`, {
             url: service.url,
@@ -220,7 +224,7 @@ class HealthMonitor {
   }> {
     return {
       isMonitoring: this.isMonitoring,
-      serviceStatus: []
+      serviceStatus: await serviceInitializer.getServiceHealth()
     };
   }
 }

@@ -28,10 +28,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "tests",
-    "src/monitors/health-monitor.ts",
-    "src/services/metrics-service.ts",
-    "src/config/services.ts",
-    "src/utils/endpoint-parser.ts"
+    "tests"
   ]
 }
