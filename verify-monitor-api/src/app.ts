@@ -222,12 +222,14 @@ export class App {
         authentication: {
           policy: 'Conditional - GET requests to public endpoints allowed without JWT',
           publicGetEndpoints: [
+            '/health',
             '/api/system-status',
             '/api/services',
-            '/api/uptime',
-            '/api/incidents',
-            '/api/sla/availability',
-            '/api/health'
+            '/api/uptime/{serviceId}',
+            '/api/incidents/past',
+            '/api/incidents/detail',
+            '/api/incidents/by-date',
+            '/api/sla/availability/{serviceId}'
           ],
           protectedMethods: ['POST', 'PUT', 'DELETE'],
           protectedGetEndpoints: ['/api/system-metrics', '/api/system-alerts', '/api/admin/*']
@@ -237,8 +239,8 @@ export class App {
           auth: `${this.config.API_PREFIX}/auth`,
           system: `${this.config.API_PREFIX}/system-status`,
           services: `${this.config.API_PREFIX}/services`,
-          uptime: `${this.config.API_PREFIX}/uptime`,
-          incidents: `${this.config.API_PREFIX}/incidents`,
+          uptime: `${this.config.API_PREFIX}/uptime/{serviceId}`,
+          incidents: `${this.config.API_PREFIX}/incidents/past`,
           sla: `${this.config.API_PREFIX}/sla`,
           documentation: this.config.SWAGGER_ENABLED ? `${this.config.API_PREFIX}/docs` : null,
         },

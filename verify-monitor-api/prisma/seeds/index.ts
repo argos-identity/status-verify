@@ -54,19 +54,19 @@ async function main(): Promise<void> {
     {
       username: 'admin',
       email: 'admin@argosidentity.com',
-      password: 'admin123',
+      password: process.env.DEFAULT_ADMIN_PASSWORD || 'Admin@123',
       role: UserRole.admin,
     },
     {
       username: 'reporter',
       email: 'reporter@argosidentity.com', 
-      password: 'reporter123',
+      password: process.env.DEFAULT_REPORTER_PASSWORD || 'Reporter@123',
       role: UserRole.reporter,
     },
     {
       username: 'viewer',
       email: 'viewer@argosidentity.com',
-      password: 'viewer123',
+      password: process.env.DEFAULT_VIEWER_PASSWORD || 'Viewer@123',
       role: UserRole.viewer,
     },
   ];
