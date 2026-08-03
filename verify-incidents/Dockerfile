@@ -21,6 +21,9 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
+ARG NEXTAUTH_URL=http://localhost:3006
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
+
 RUN npm run build
 
 # Production image, copy all the files and run next

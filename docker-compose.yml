@@ -96,6 +96,8 @@ services:
     build:
       context: ./verify-incidents
       dockerfile: Dockerfile
+      args:
+        NEXTAUTH_URL: ${NEXTAUTH_URL:-http://verify-status.argosidentity.io:3006}
     container_name: sla-monitor-incidents
     restart: unless-stopped
     environment:
