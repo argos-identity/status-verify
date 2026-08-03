@@ -25,7 +25,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
   useEffect(() => {
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3003';
 
     // Create socket connection
     const newSocket = io(socketUrl, {

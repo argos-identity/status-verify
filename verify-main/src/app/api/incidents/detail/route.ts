@@ -14,9 +14,7 @@ export async function GET(request: NextRequest) {
       ...Object.fromEntries(searchParams.entries())
     });
 
-    // Call the backend API (verify-monitor-api)
-    // Use environment variable for flexible configuration
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const apiBaseUrl = process.env.BACKEND_API_URL || 'http://verify-monitor-api:3003/api';
     const backendUrl = `${apiBaseUrl}/incidents/detail?${params.toString()}`;
 
     const response = await fetch(backendUrl, {

@@ -1,5 +1,5 @@
 // API client for Backend API communication
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003/api';
 
 // API logging utility for frontend
 class FrontendAPILogger {
