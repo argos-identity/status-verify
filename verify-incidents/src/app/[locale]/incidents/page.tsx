@@ -30,8 +30,7 @@ export default function IncidentsPage() {
   const [filters, setFilters] = useState<IncidentFilters>({
     status: 'all',
     priority: 'all',
-    severity: 'all',
-    affected_service: 'all'
+    severity: 'all'
   });
 
   const router = useRouter();
@@ -64,10 +63,8 @@ export default function IncidentsPage() {
     const matchesStatus = filters.status === 'all' || incident.status === filters.status;
     const matchesPriority = filters.priority === 'all' || incident.priority === filters.priority;
     const matchesSeverity = filters.severity === 'all' || incident.severity === filters.severity;
-    const matchesService = filters.affected_service === 'all' ||
-      incident.affected_services.includes(filters.affected_service as string);
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesSeverity && matchesService;
+    return matchesSearch && matchesStatus && matchesPriority && matchesSeverity;
   });
 
   // Handle refresh
@@ -228,30 +225,12 @@ export default function IncidentsPage() {
                   <SelectItem value="low">{t('severity.low')}</SelectItem>
                 </SelectContent>
               </Select>
-
-              <Select
-                value={filters.affected_service}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, affected_service: value as any }))}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder={t('filters.affectedService')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('services.all')}</SelectItem>
-                  <SelectItem value="id-recognition">{t('services.idRecognition')}</SelectItem>
-                  <SelectItem value="face-liveness">{t('services.faceLiveness')}</SelectItem>
-                  <SelectItem value="id-liveness">{t('services.idLiveness')}</SelectItem>
-                  <SelectItem value="face-compare">{t('services.faceCompare')}</SelectItem>
-                  <SelectItem value="curp-verifier">{t('services.curpVerifier')}</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             {(searchTerm ||
               filters.status !== 'all' ||
               filters.priority !== 'all' ||
-              filters.severity !== 'all' ||
-              filters.affected_service !== 'all') && (
+              filters.severity !== 'all') && (
               <div className="flex items-center gap-2 pt-2 border-t">
                 <span className="text-sm text-muted-foreground">{t('activeFilters')}:</span>
                 {searchTerm && (

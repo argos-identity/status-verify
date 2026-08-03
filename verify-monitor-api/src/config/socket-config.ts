@@ -313,21 +313,6 @@ export class SocketConfig {
     });
   }
 
-  public broadcastSystemStatusUpdate(status: any): void {
-    this.io.emit('system_status_updated', {
-      status,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  public broadcastServiceStatusUpdate(serviceId: string, status: any): void {
-    this.io.emit('service_status_updated', {
-      serviceId,
-      status,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
   public broadcastNewIncident(incident: any): void {
     this.io.emit('new_incident', {
       incident,

@@ -31,9 +31,15 @@ function resolveTestDatabaseUrl(): string {
   return url;
 }
 
+const testDatabaseUrl = resolveTestDatabaseUrl();
+
+// src/models/* 는 각자 new PrismaClient() 를 만들고 DATABASE_URL 만 참조하므로,
+// 앱이 개발/운영 DB 에 붙는 것을 막으려면 DATABASE_URL 자체가 테스트 DB 여야 한다.
+process.env.DATABASE_URL = testDatabaseUrl;
+
 if (!global.__PRISMA__) {
   global.__PRISMA__ = new PrismaClient({
-    datasources: { db: { url: resolveTestDatabaseUrl() } },
+    datasources: { db: { url: testDatabaseUrl } },
   });
 }
 

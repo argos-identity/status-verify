@@ -8,7 +8,7 @@ describe('Integration Test: Role-based Access Control Scenario (T026)', () => {
   beforeAll(() => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      app = require('../../src/app').default;
+      app = new (require('../../src/app').default)().getApp();
     } catch (error) {
       console.log('App not implemented yet - tests will fail as expected (TDD)');
     }

@@ -1,6 +1,4 @@
 import IncidentService from '../services/incident-service';
-import SystemService from '../services/system-service';
-import UptimeService from '../services/uptime-service';
 import AuthService from '../services/auth-service';
 import LoggingMiddleware from '../middleware/logging-middleware';
 import SocketConfig, { AuthenticatedSocket } from '../config/socket-config';
@@ -242,17 +240,6 @@ export class WebSocketController {
         await socket.join(`service:${serviceId}`);
       }
 
-      // Send current system status
-      const systemStatus = await SystemService.getSystemStatus();
-      socket.emit('system_status_snapshot', {
-        status: systemStatus,
-        subscriptions: {
-          types: subscriptionTypes,
-          serviceIds,
-        },
-        timestamp: new Date().toISOString(),
-      });
-
       this.logger.logEvent(socket.id, 'subscribe_system_updates', socket.userId, {
         types: subscriptionTypes,
         serviceIds,
@@ -398,13 +385,6 @@ export class WebSocketController {
   }
 
   // System update broadcasters (called from external services)
-  broadcastSystemStatusUpdate(statusUpdate: any): void {
-    this.socketConfig.getSocketIOServer().to('system:status').emit('system_status_update', {
-      ...statusUpdate,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
   broadcastServiceUpdate(serviceId: string, serviceUpdate: any): void {
     // Broadcast to service-specific room
     this.socketConfig.getSocketIOServer().to(`service:${serviceId}`).emit('service_update', {
@@ -458,7 +438,6 @@ export class WebSocketController {
         title: incident.title,
         severity: incident.severity,
         status: incident.status,
-        affectedServices: incident.affected_services,
         createdAt: incident.created_at,
       },
     });

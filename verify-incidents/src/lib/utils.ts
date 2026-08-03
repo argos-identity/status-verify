@@ -171,18 +171,6 @@ export function generateIncidentId(): string {
   return `inc-${timestamp}-${random}`
 }
 
-// 서비스 이름 포맷팅
-export function formatServiceName(serviceId: string): string {
-  const serviceNames: Record<string, string> = {
-    'id-recognition': 'ID Recognition',
-    'face-liveness': 'Face Liveness',
-    'id-liveness': 'ID Liveness',
-    'face-compare': 'Face Compare',
-    'curp-verifier': 'Curp Verifier'
-  }
-  return serviceNames[serviceId] || serviceId
-}
-
 // URL 파라미터 생성
 export function createQueryString(params: Record<string, string | undefined>): string {
   const searchParams = new URLSearchParams()

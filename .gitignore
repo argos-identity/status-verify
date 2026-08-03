@@ -54,3 +54,4 @@ docker-compose.override.yml
 postgres-data/
 *.db
 *.sqlite
+.gstack/

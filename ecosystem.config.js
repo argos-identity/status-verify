@@ -67,51 +67,6 @@ module.exports = {
     },
 
     // ============================================
-    // Watch Server (Health Check Monitor)
-    // ============================================
-    {
-      name: 'watch-server',
-      cwd: './watch-server',
-      script: './dist/index.js',
-
-      // Fork 모드 (단일 인스턴스 - cron 작업)
-      instances: 1,
-      exec_mode: 'fork',
-
-      // 환경변수
-      env: {
-        NODE_ENV: 'production',
-        PORT: 3008,
-        WATCH_MODE: 'continuous',
-        MONITORING_INTERVAL: 60000,  // 1분
-      },
-
-      env_file: './watch-server/.env',
-
-      // 로그 설정
-      error_file: './watch-server/logs/pm2-error.log',
-      out_file: './watch-server/logs/pm2-out.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-
-      // 재시작 정책
-      autorestart: true,
-      max_restarts: 10,
-      min_uptime: '10s',
-      restart_delay: 5000,
-
-      // 메모리 제한
-      max_memory_restart: '300M',
-
-      // 프로세스 관리
-      kill_timeout: 5000,
-      listen_timeout: 3000,
-
-      // 모니터링
-      watch: false,
-      time: true,
-    },
-
-    // ============================================
     // Frontend - verify-main (System Status Dashboard)
     // ============================================
     //{
@@ -247,7 +202,7 @@ module.exports = {
  *
  * 2. 특정 서비스만 시작:
  *    pm2 start ecosystem.config.js --only verify-monitor-api
- *    pm2 start ecosystem.config.js --only watch-server
+ *    pm2 start ecosystem.config.js --only verify-incidents
  *
  * 3. 서비스 상태 확인:
  *    pm2 status

@@ -30,7 +30,6 @@ export default function CreateIncidentPage() {
         status: data.status || 'investigating', // 사용자 선택값 우선, 기본값 fallback
         severity: data.severity || 'medium', // 기본값: medium
         priority: data.priority || 'P2',    // 기본값: P2 (백엔드와 동일)
-        affected_services: data.affected_services || [],
         reporter_id: session?.user?.id || 'system',
         detection_criteria: data.detection_criteria,
         reporter: data.reporter || session?.user?.name || 'Unknown'

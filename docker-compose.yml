@@ -61,35 +61,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # System Status Dashboard (Main App)
-  verify-main:
-    build:
-      context: ./verify-main
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-http://verify-status.argosidentity.io:3003}/api
-        NEXT_PUBLIC_SOCKET_URL: ${PUBLIC_API_URL:-http://verify-status.argosidentity.io:3003}
-        NEXT_PUBLIC_INCIDENTS_URL: ${INCIDENTS_URL:-http://verify-status.argosidentity.io:3006}
-    container_name: sla-monitor-main
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      BACKEND_API_URL: ${API_URL:-http://verify-monitor-api:3003}/api
-      PORT: 80
-    # Direct port mapping (HAProxy 제거로 인한 복원)
-    ports:
-      - "${MAIN_PORT:-80}:80"
-    depends_on:
-      verify-monitor-api:
-        condition: service_healthy
-    networks:
-      - frontend
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:80/', (res) => process.exit(res.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+  # ponytail: verify-main + watch-server decommissioned (incident-only pivot). Source kept on disk.
 
   # Incident Management App
   verify-incidents:
@@ -121,48 +93,6 @@ services:
       retries: 3
       start_period: 30s
 
-  # Watch Server - Health Monitoring Service
-  watch-server:
-    build:
-      context: ./watch-server
-      dockerfile: Dockerfile
-    container_name: sla-monitor-watch
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
-      WATCH_MODE: ${WATCH_MODE:-continuous}
-      MONITORING_INTERVAL: ${MONITORING_INTERVAL:-60000}
-      PORT: 3008
-      API_HOST: verify-monitor-api
-      API_PORT: 3003
-      # Monitored service authentication
-      SERVICE_API_KEY: ${SERVICE_API_KEY:?SERVICE_API_KEY is required - health checks return 403 without it}
-      SERVICE_AUTH_HEADER: ${SERVICE_AUTH_HEADER:-x-api-key}
-      # Monitoring configuration
-      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-10000}
-      MAX_RETRIES: ${MAX_RETRIES:-3}
-      # Logging
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-      LOG_FILE: ${LOG_FILE:-logs/watch-server.log}
-    ports:
-      - "${WATCH_PORT:-3008}:3008"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      verify-monitor-api:
-        condition: service_healthy
-    networks:
-      - backend
-    volumes:
-      - watch_logs:/app/logs
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3008/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
 networks:
   frontend:
     driver: bridge
@@ -175,6 +105,3 @@ volumes:
   postgres_data:
     driver: local
     name: sla-monitor-db-data
-  watch_logs:
-    driver: local
-    name: sla-monitor-watch-logs

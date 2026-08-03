@@ -222,29 +222,6 @@ export class ValidationMiddleware {
     };
   }
 
-  // Uptime record validation rules
-  static validateUptimeRecord() {
-    return [
-      body('date')
-        .isISO8601()
-        .toDate()
-        .withMessage('Date must be a valid ISO8601 date'),
-      body('status')
-        .isIn(['o', 'po', 'mo', 'nd', 'e'])
-        .withMessage('Status must be one of: o (operational), po (partial outage), mo (major outage), nd (no data), e (empty)'),
-      body('response_time')
-        .optional()
-        .isFloat({ min: 0 })
-        .withMessage('Response time must be a positive number'),
-      body('error_message')
-        .optional()
-        .isString()
-        .trim()
-        .isLength({ max: 500 })
-        .withMessage('Error message must be 500 characters or less'),
-    ];
-  }
-
   // SLA target validation rules
   static validateSLATargets() {
     return [
@@ -403,20 +380,6 @@ export class ValidationMiddleware {
       errors.push('Severity must be one of: low, medium, high, critical');
     }
 
-    // Affected services validation
-    if (!data.affected_services || !Array.isArray(data.affected_services)) {
-      errors.push('Affected services is required and must be an array');
-    } else if (data.affected_services.length === 0) {
-      errors.push('At least one affected service must be specified');
-    } else {
-      const invalidServices = data.affected_services.filter((id: any) =>
-        typeof id !== 'string' || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)
-      );
-      if (invalidServices.length > 0) {
-        errors.push(`Invalid service IDs: ${invalidServices.join(', ')}`);
-      }
-    }
-
     return {
       isValid: errors.length === 0,
       errors,
@@ -465,22 +428,6 @@ export class ValidationMiddleware {
         errors.push('Status must be a string');
       } else if (!['investigating', 'identified', 'monitoring', 'resolved'].includes(data.status)) {
         errors.push('Status must be one of: investigating, identified, monitoring, resolved');
-      }
-    }
-
-    // Affected services validation (optional)
-    if (data.affected_services !== undefined) {
-      if (!Array.isArray(data.affected_services)) {
-        errors.push('Affected services must be an array');
-      } else if (data.affected_services.length === 0) {
-        errors.push('At least one affected service must be specified');
-      } else {
-        const invalidServices = data.affected_services.filter((id: any) =>
-          typeof id !== 'string' || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)
-        );
-        if (invalidServices.length > 0) {
-          errors.push(`Invalid service IDs: ${invalidServices.join(', ')}`);
-        }
       }
     }
 

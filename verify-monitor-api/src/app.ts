@@ -30,18 +30,12 @@ import loggingMiddleware from './middleware/logging-middleware';
 import SocketConfig from './config/socket-config';
 
 // Controllers
-import systemController from './controllers/system-controller';
 import servicesController from './controllers/services-controller';
-import uptimeController from './controllers/uptime-controller';
 import incidentsController from './controllers/incidents-controller';
-import slaController from './controllers/sla-controller';
 import authController from './controllers/auth-controller';
 
 // Admin routes
 import adminRoutes from './routes/admin-routes';
-
-// Auto-detection routes
-import autoDetectionRoutes from './routes/auto-detection-routes';
 
 export class App {
   public app: Application;
@@ -140,11 +134,6 @@ export class App {
   private initializeApiRoutes(apiPrefix: string): void {
     const apiRouter = express.Router();
 
-    // Mount auto-detection routes BEFORE global auth middleware
-    // These routes use their own conditionalApiKeyAuth middleware
-    console.log('🔓 Mounting auto-detection routes with API key auth');
-    apiRouter.use('/auto-detection', autoDetectionRoutes);
-
     // Apply conditional authentication middleware to other routes
     // GET requests to public routes are allowed without JWT
     // All other requests require JWT authentication
@@ -162,17 +151,6 @@ export class App {
     // Authentication routes (always public)
     router.use('/auth', authController.createRouter());
 
-    // System status routes
-    router.get('/system-status', systemController.getSystemStatus.bind(systemController));
-    router.get('/system-metrics', systemController.getSystemMetrics.bind(systemController));
-    router.get('/system-health', systemController.getSystemHealth.bind(systemController));
-    router.get('/system-alerts', systemController.getSystemAlerts.bind(systemController));
-    router.post('/system-alerts/:alertId/acknowledge',
-      rbacMiddleware.requirePermission('manage_services'),
-      systemController.acknowledgeAlert.bind(systemController)
-    );
-    router.get('/system-configuration', systemController.getSystemConfiguration.bind(systemController));
-
     // Incidents routes (GET public, POST/PUT/DELETE protected)
     router.get('/incidents/past', incidentsController.getPastIncidents.bind(incidentsController));
     router.get('/incidents/detail', incidentsController.getAllIncidents.bind(incidentsController));
@@ -182,19 +160,9 @@ export class App {
     // Services routes
     router.use('/services', servicesController.createRouter());
 
-    // Uptime routes
-    router.use('/uptime', uptimeController.createRouter());
-
-    // SLA routes
-    router.use('/sla', slaController.createRouter());
-
-    // Auto-detection routes are mounted separately before global auth middleware
-    // See initializeApiRoutes() method
-
     // Admin routes (always require admin role)
     const adminRouter = express.Router();
     adminRouter.use(rbacMiddleware.requireRole('admin'));
-    adminRouter.post('/system-settings', systemController.updateSystemSettings.bind(systemController));
 
     // Database admin routes
     adminRouter.use('/', adminRoutes);
@@ -223,25 +191,19 @@ export class App {
           policy: 'Conditional - GET requests to public endpoints allowed without JWT',
           publicGetEndpoints: [
             '/health',
-            '/api/system-status',
             '/api/services',
-            '/api/uptime/{serviceId}',
             '/api/incidents/past',
             '/api/incidents/detail',
-            '/api/incidents/by-date',
-            '/api/sla/availability/{serviceId}'
+            '/api/incidents/by-date'
           ],
           protectedMethods: ['POST', 'PUT', 'DELETE'],
-          protectedGetEndpoints: ['/api/system-metrics', '/api/system-alerts', '/api/admin/*']
+          protectedGetEndpoints: ['/api/admin/*']
         },
         endpoints: {
           health: this.config.HEALTH_CHECK_PATH,
           auth: `${this.config.API_PREFIX}/auth`,
-          system: `${this.config.API_PREFIX}/system-status`,
           services: `${this.config.API_PREFIX}/services`,
-          uptime: `${this.config.API_PREFIX}/uptime/{serviceId}`,
           incidents: `${this.config.API_PREFIX}/incidents/past`,
-          sla: `${this.config.API_PREFIX}/sla`,
           documentation: this.config.SWAGGER_ENABLED ? `${this.config.API_PREFIX}/docs` : null,
         },
       });
@@ -291,12 +253,9 @@ export class App {
         documentation: this.config.SWAGGER_ENABLED ? `${this.config.API_PREFIX}/docs` : null,
       },
       links: {
-        systemStatus: `${this.config.API_PREFIX}/system-status`,
         auth: `${this.config.API_PREFIX}/auth`,
         services: `${this.config.API_PREFIX}/services`,
-        uptime: `${this.config.API_PREFIX}/uptime`,
         incidents: `${this.config.API_PREFIX}/incidents`,
-        sla: `${this.config.API_PREFIX}/sla`,
       },
     });
 

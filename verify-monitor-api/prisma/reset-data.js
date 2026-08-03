@@ -70,16 +70,6 @@ async function resetDatabaseData(options = {}) {
             console.log(`✅ Deleted ${incidentUpdatesCount.count} incident updates`);
             const incidentsCount = await tx.incident.deleteMany({});
             console.log(`✅ Deleted ${incidentsCount.count} incidents`);
-            const uptimeRecordsCount = await tx.uptimeRecord.deleteMany({});
-            console.log(`✅ Deleted ${uptimeRecordsCount.count} uptime records`);
-            const apiResponseTimesCount = await tx.aPIResponseTime.deleteMany({});
-            console.log(`✅ Deleted ${apiResponseTimesCount.count} API response time records`);
-            const apiCallLogsCount = await tx.aPICallLog.deleteMany({});
-            console.log(`✅ Deleted ${apiCallLogsCount.count} API call logs`);
-            const watchServerLogsCount = await tx.watchServerLog.deleteMany({});
-            console.log(`✅ Deleted ${watchServerLogsCount.count} watch server logs`);
-            const systemStatusCount = await tx.systemStatus.deleteMany({});
-            console.log(`✅ Deleted ${systemStatusCount.count} system status records`);
             const servicesCount = await tx.service.deleteMany({});
             console.log(`✅ Deleted ${servicesCount.count} services`);
             if (!preserveUsers) {
@@ -141,13 +131,6 @@ async function reseedEssentialData() {
             data: service,
         });
     }
-    console.log('🌟 Creating initial system status...');
-    await prisma.systemStatus.create({
-        data: {
-            overall_status: 'operational',
-            message: '시스템이 초기화되었습니다. 모니터링이 준비되었습니다.',
-        },
-    });
     console.log('✅ Essential data re-seeded successfully');
 }
 async function main() {

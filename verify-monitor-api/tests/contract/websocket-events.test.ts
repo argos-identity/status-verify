@@ -13,7 +13,7 @@ describe('Contract Test: WebSocket Events', () => {
   beforeAll(async () => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      app = require('../../src/app').default;
+      app = new (require('../../src/app').default)().getApp();
 
       // Create HTTP server for Socket.IO
       server = createServer(app);

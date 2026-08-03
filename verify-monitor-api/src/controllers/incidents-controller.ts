@@ -414,12 +414,6 @@ export class IncidentsController {
         incidents = incidents.filter(incident => incident.severity === severity);
       }
 
-      if (serviceId) {
-        incidents = incidents.filter(incident =>
-          incident.affected_services.includes(serviceId as string)
-        );
-      }
-
       // Sort results
       if (sortBy === 'created_at') {
         incidents.sort((a, b) => {

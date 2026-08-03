@@ -8,7 +8,7 @@ describe('Contract Test: POST /api/incidents/{incidentId}/updates', () => {
   beforeAll(() => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      app = require('../../src/app').default;
+      app = new (require('../../src/app').default)().getApp();
     } catch (error) {
       console.log('App not implemented yet - tests will fail as expected (TDD)');
     }
@@ -71,7 +71,6 @@ describe('Contract Test: POST /api/incidents/{incidentId}/updates', () => {
         status: 'investigating',
         severity: 'high',
         priority: 'P2',
-        affected_services: ['id-recognition'],
         detection_criteria: '연속 3회 7초 초과',
         start_time: new Date('2025-09-11T10:00:00Z'),
         created_by: 'user-reporter',

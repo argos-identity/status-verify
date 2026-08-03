@@ -11,7 +11,7 @@ describe('Integration Test: Real-time Collaboration Scenario (T025)', () => {
   beforeAll(async () => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      app = require('../../src/app').default;
+      app = new (require('../../src/app').default)().getApp();
       server = createServer(app);
 
       await new Promise<void>((resolve) => {

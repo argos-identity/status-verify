@@ -13,11 +13,6 @@ interface ResetDataResult {
   deletedCounts: {
     incidentUpdates: number;
     incidents: number;
-    uptimeRecords: number;
-    apiResponseTimes: number;
-    apiCallLogs: number;
-    watchServerLogs: number;
-    systemStatus: number;
     services: number;
     users?: number;
   };
@@ -63,51 +58,18 @@ class AdminService {
       const deletedCounts = {
         incidentUpdates: 0,
         incidents: 0,
-        uptimeRecords: 0,
-        apiResponseTimes: 0,
-        apiCallLogs: 0,
-        watchServerLogs: 0,
-        systemStatus: 0,
         services: 0,
         users: 0,
       };
 
       // Use transaction for data consistency
       await this.prisma.$transaction(async (tx) => {
-        // Count before deletion for logging
-        const counts = await Promise.all([
-          tx.incidentUpdate.count(),
-          tx.incident.count(),
-          tx.uptimeRecord.count(),
-          tx.aPIResponseTime.count(),
-          tx.aPICallLog.count(),
-          tx.watchServerLog.count(),
-          tx.systemStatus.count(),
-          tx.service.count(),
-          preserveUsers ? Promise.resolve(0) : tx.user.count(),
-        ]);
-
         // Delete in order to respect foreign key constraints
         const incidentUpdatesResult = await tx.incidentUpdate.deleteMany({});
         deletedCounts.incidentUpdates = incidentUpdatesResult.count;
 
         const incidentsResult = await tx.incident.deleteMany({});
         deletedCounts.incidents = incidentsResult.count;
-
-        const uptimeRecordsResult = await tx.uptimeRecord.deleteMany({});
-        deletedCounts.uptimeRecords = uptimeRecordsResult.count;
-
-        const apiResponseTimesResult = await tx.aPIResponseTime.deleteMany({});
-        deletedCounts.apiResponseTimes = apiResponseTimesResult.count;
-
-        const apiCallLogsResult = await tx.aPICallLog.deleteMany({});
-        deletedCounts.apiCallLogs = apiCallLogsResult.count;
-
-        const watchServerLogsResult = await tx.watchServerLog.deleteMany({});
-        deletedCounts.watchServerLogs = watchServerLogsResult.count;
-
-        const systemStatusResult = await tx.systemStatus.deleteMany({});
-        deletedCounts.systemStatus = systemStatusResult.count;
 
         const servicesResult = await tx.service.deleteMany({});
         deletedCounts.services = servicesResult.count;
@@ -152,21 +114,11 @@ class AdminService {
       const [
         incidentUpdatesCount,
         incidentsCount,
-        uptimeRecordsCount,
-        apiResponseTimesCount,
-        apiCallLogsCount,
-        watchServerLogsCount,
-        systemStatusCount,
         servicesCount,
         usersCount,
       ] = await Promise.all([
         this.prisma.incidentUpdate.count(),
         this.prisma.incident.count(),
-        this.prisma.uptimeRecord.count(),
-        this.prisma.aPIResponseTime.count(),
-        this.prisma.aPICallLog.count(),
-        this.prisma.watchServerLog.count(),
-        this.prisma.systemStatus.count(),
         this.prisma.service.count(),
         this.prisma.user.count(),
       ]);
@@ -174,11 +126,6 @@ class AdminService {
       const tables = {
         incident_updates: incidentUpdatesCount,
         incidents: incidentsCount,
-        uptime_records: uptimeRecordsCount,
-        api_response_times: apiResponseTimesCount,
-        api_call_logs: apiCallLogsCount,
-        watch_server_logs: watchServerLogsCount,
-        system_status: systemStatusCount,
         services: servicesCount,
         users: usersCount,
       };

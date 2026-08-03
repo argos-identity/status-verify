@@ -30,6 +30,9 @@ module.exports = {
   },
   verbose: true,
   testTimeout: 10000,
+  // db 스위트는 테스트 DB 하나를 공유하고 매 테스트마다 TRUNCATE 하므로,
+  // 병렬 실행하면 다른 파일의 픽스처를 지워 서로를 깨뜨린다.
+  maxWorkers: 1,
   projects: [
     {
       ...common,

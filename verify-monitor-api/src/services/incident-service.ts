@@ -1,7 +1,5 @@
 import IncidentModel from '../models/incident';
 import IncidentUpdateModel from '../models/incident-update';
-import SystemStatusModel from '../models/system-status';
-import ServiceModel from '../models/service';
 import UserModel from '../models/user';
 import { Incident, IncidentUpdate, IncidentStatus, IncidentSeverity, IncidentPriority, User } from '@prisma/client';
 
@@ -11,7 +9,6 @@ export interface CreateIncidentData {
   status?: IncidentStatus;
   severity: IncidentSeverity;
   priority?: IncidentPriority;
-  affected_services: string[];
   reporter_id?: string;
   reporter?: string;
   detection_criteria?: string;
@@ -26,7 +23,6 @@ export interface UpdateIncidentData {
   description?: string;
   severity?: IncidentSeverity;
   priority?: IncidentPriority;
-  affected_services?: string[];
   status?: IncidentStatus;
 }
 
@@ -43,7 +39,6 @@ export interface IncidentWithDetails {
   status: IncidentStatus;
   severity: IncidentSeverity;
   priority: IncidentPriority;
-  affected_services: string[];
   reporter: string | null;
   detection_criteria: string | null;
   created_at: Date;
@@ -54,7 +49,6 @@ export interface IncidentWithDetails {
     name: string;
     email: string;
   };
-  affected_service_names?: string[];
 }
 
 export class IncidentService {
@@ -85,20 +79,11 @@ export class IncidentService {
         throw httpError('User does not have permission to create incidents', 403);
       }
 
-      // Validate all affected services exist
-      const knownServices = await ServiceModel.findByIds(data.affected_services);
-      const knownIds = knownServices.map((s) => s.id);
-      const unknownIds = data.affected_services.filter((id) => !knownIds.includes(id));
-      if (unknownIds.length > 0) {
-        throw httpError(`Unknown affected services: ${unknownIds.join(', ')}`, 400);
-      }
-
       const incident = await IncidentModel.create({
         title: data.title,
         description: data.description,
         severity: data.severity,
         priority: data.priority,
-        affected_services: data.affected_services,
         reporter_id: effectiveReporterId,
         reporter: data.reporter,
         status: data.status || 'investigating',
@@ -112,9 +97,6 @@ export class IncidentService {
         user_id: effectiveReporterId,
         status: data.status || 'investigating',
       });
-
-      // Update system status if needed
-      await this.updateSystemStatusIfNeeded();
 
       return incident;
     } catch (error: any) {
@@ -148,14 +130,6 @@ export class IncidentService {
         }
       }
 
-      // Validate affected services if being updated
-      if (updateData.affected_services) {
-        const servicesExist = await ServiceModel.existsAll(updateData.affected_services);
-        if (!servicesExist) {
-          throw httpError('One or more affected services do not exist', 400);
-        }
-      }
-
       const incident = await IncidentModel.update(incidentId, updateData);
 
       // Create update log if status changed
@@ -175,9 +149,6 @@ export class IncidentService {
         });
       }
 
-      // Update system status if needed
-      await this.updateSystemStatusIfNeeded();
-
       return incident;
     } catch (error: any) {
       console.error(`Error updating incident ${incidentId}:`, error);
@@ -193,18 +164,7 @@ export class IncidentService {
         return null;
       }
 
-      // Get service names for affected services
-      const services = await ServiceModel.findByIds(incident.affected_services);
-      const serviceNameMap = new Map(services.map(s => [s.id, s.name]));
-      
-      const affected_service_names = incident.affected_services.map(
-        id => serviceNameMap.get(id) || id
-      );
-
-      return {
-        ...incident,
-        affected_service_names,
-      };
+      return incident;
     } catch (error) {
       console.error(`Error getting incident ${incidentId}:`, error);
       throw new Error('Failed to retrieve incident');
@@ -223,26 +183,8 @@ export class IncidentService {
     try {
       const { incidents, total } = await IncidentModel.findManyWithDetails(limit, offset, status);
 
-      // Get all unique service IDs
-      const allServiceIds = new Set<string>();
-      incidents.forEach(incident => {
-        incident.affected_services.forEach(id => allServiceIds.add(id));
-      });
-
-      // Fetch all services once
-      const services = await ServiceModel.findByIds(Array.from(allServiceIds));
-      const serviceNameMap = new Map(services.map(s => [s.id, s.name]));
-
-      // Add service names to each incident
-      const incidentsWithServiceNames: IncidentWithDetails[] = incidents.map(incident => ({
-        ...incident,
-        affected_service_names: incident.affected_services.map(
-          id => serviceNameMap.get(id) || id
-        ),
-      }));
-
       return {
-        incidents: incidentsWithServiceNames,
+        incidents: incidents as IncidentWithDetails[],
         total,
         hasMore: offset + limit < total,
       };
@@ -290,9 +232,6 @@ export class IncidentService {
       // Update incident status if provided
       if (updateData.status && updateData.status !== incident.status) {
         await IncidentModel.update(incidentId, { status: updateData.status });
-        
-        // Update system status if needed
-        await this.updateSystemStatusIfNeeded();
       }
 
       return update;
@@ -342,9 +281,6 @@ export class IncidentService {
 
       const deletedIncident = await IncidentModel.delete(incidentId);
 
-      // Update system status if needed
-      await this.updateSystemStatusIfNeeded();
-
       return deletedIncident;
     } catch (error: any) {
       console.error(`Error deleting incident ${incidentId}:`, error);
@@ -366,52 +302,6 @@ export class IncidentService {
     } catch (error) {
       console.error('Error getting active incidents:', error);
       throw new Error('Failed to retrieve active incidents');
-    }
-  }
-
-  async getIncidentsByService(
-    serviceId: string,
-    limit: number = 20,
-    offset: number = 0
-  ): Promise<{
-    incidents: IncidentWithDetails[];
-    total: number;
-    hasMore: boolean;
-  }> {
-    try {
-      // Validate service exists
-      const serviceExists = await ServiceModel.exists(serviceId);
-      if (!serviceExists) {
-        throw httpError('Service not found', 404);
-      }
-
-      const { incidents, total } = await IncidentModel.findByService(serviceId, limit, offset);
-
-      // Get all unique service IDs for service name lookup
-      const allServiceIds = new Set<string>();
-      incidents.forEach(incident => {
-        incident.affected_services.forEach(id => allServiceIds.add(id));
-      });
-
-      const services = await ServiceModel.findByIds(Array.from(allServiceIds));
-      const serviceNameMap = new Map(services.map(s => [s.id, s.name]));
-
-      const incidentsWithServiceNames: IncidentWithDetails[] = incidents.map(incident => ({
-        ...incident,
-        affected_service_names: incident.affected_services.map(
-          id => serviceNameMap.get(id) || id
-        ),
-      }));
-
-      return {
-        incidents: incidentsWithServiceNames,
-        total,
-        hasMore: offset + limit < total,
-      };
-    } catch (error: any) {
-      console.error(`Error getting incidents for service ${serviceId}:`, error);
-      if (error.statusCode) throw error;
-      throw new Error(error.message || 'Failed to retrieve service incidents');
     }
   }
 
@@ -466,24 +356,11 @@ export class IncidentService {
         status: 'resolved',
       });
 
-      // Update system status
-      await this.updateSystemStatusIfNeeded();
-
       return resolvedIncident;
     } catch (error: any) {
       console.error(`Error resolving incident ${incidentId}:`, error);
       if (error.statusCode) throw error;
       throw new Error(error.message || 'Failed to resolve incident');
-    }
-  }
-
-  private async updateSystemStatusIfNeeded(): Promise<void> {
-    try {
-      // This will trigger system status calculation based on active incidents
-      await SystemStatusModel.getCurrentSystemStatus();
-    } catch (error) {
-      console.error('Error updating system status after incident change:', error);
-      // Don't throw - this is a side effect and shouldn't fail the main operation
     }
   }
 
@@ -501,7 +378,6 @@ export class IncidentService {
         offset = 0,
         severity,
         status,
-        serviceId,
         timeRange = '90d'
       } = options;
 
@@ -517,13 +393,6 @@ export class IncidentService {
       if (severity) {
         filteredIncidents = filteredIncidents.filter(
           incident => incident.severity === severity
-        );
-      }
-
-      // Filter by service if provided
-      if (serviceId) {
-        filteredIncidents = filteredIncidents.filter(
-          incident => incident.affected_services.includes(serviceId)
         );
       }
 
@@ -554,7 +423,6 @@ export class IncidentService {
       title: string;
       severity: IncidentSeverity;
       status: IncidentStatus;
-      affected_services: string[];
       started_at: Date;
       resolved_at: Date | null;
       major_outage_duration?: number; // in minutes
@@ -565,7 +433,6 @@ export class IncidentService {
       total_incidents: number;
       major_outage_minutes: number;
       partial_outage_minutes: number;
-      affected_services: string[];
     };
   }> {
     try {
@@ -590,15 +457,8 @@ export class IncidentService {
         return incidentStart <= endOfDay && incidentEnd >= startOfDay;
       });
 
-      // Further filter by service if specified
-      const filteredIncidents = serviceId
-        ? relevantIncidents.filter(incident =>
-            incident.affected_services.includes(serviceId)
-          )
-        : relevantIncidents;
-
       // Calculate durations and format response
-      const formattedIncidents = filteredIncidents.map(incident => {
+      const formattedIncidents = relevantIncidents.map(incident => {
         // Use created_at as the start time
         const incidentStart = new Date(incident.created_at);
         const incidentEnd = incident.resolved_at ? new Date(incident.resolved_at) : new Date();
@@ -622,7 +482,6 @@ export class IncidentService {
           title: incident.title,
           severity: incident.severity,
           status: incident.status,
-          affected_services: incident.affected_services,
           started_at: incident.created_at,
           resolved_at: incident.resolved_at,
           major_outage_duration: majorOutageDuration,
@@ -634,7 +493,6 @@ export class IncidentService {
       // Calculate summary
       const totalMajorOutage = formattedIncidents.reduce((sum, inc) => sum + (inc.major_outage_duration || 0), 0);
       const totalPartialOutage = formattedIncidents.reduce((sum, inc) => sum + (inc.partial_outage_duration || 0), 0);
-      const affectedServices = [...new Set(formattedIncidents.flatMap(inc => inc.affected_services))];
 
       return {
         date,
@@ -643,7 +501,6 @@ export class IncidentService {
           total_incidents: formattedIncidents.length,
           major_outage_minutes: totalMajorOutage,
           partial_outage_minutes: totalPartialOutage,
-          affected_services: affectedServices,
         },
       };
     } catch (error: any) {
@@ -679,20 +536,6 @@ export class IncidentService {
       const validSeverities: IncidentSeverity[] = ['low', 'medium', 'high', 'critical'];
       if (!validSeverities.includes(data.severity)) {
         errors.push('Invalid severity level');
-      }
-    }
-
-    if (data.affected_services !== undefined) {
-      if (!Array.isArray(data.affected_services) || data.affected_services.length === 0) {
-        errors.push('At least one affected service is required');
-      } else {
-        // Validate service IDs format (kebab-case)
-        const invalidServiceIds = data.affected_services.filter(
-          id => !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)
-        );
-        if (invalidServiceIds.length > 0) {
-          errors.push(`Invalid service ID format: ${invalidServiceIds.join(', ')}`);
-        }
       }
     }
 
@@ -786,9 +629,6 @@ export class IncidentService {
         user_id: userId,
         status: incident.status,
       });
-
-      // Update system status
-      await this.updateSystemStatusIfNeeded();
 
       return updatedIncident;
     } catch (error: any) {

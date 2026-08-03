@@ -4,58 +4,51 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an SLA monitoring system consisting of one Next.js frontend application and a planned backend API. The system monitors service uptime and displays system status information for services like ID Recognition, Face Liveness, ID Liveness, Face Compare, and Curp Verifier.
+장애 이력 등록과 장애 목록 관리 전용 시스템. 운영 중인 것은 `verify-incidents`(관리 UI)와 `verify-monitor-api`(REST + Socket.IO), PostgreSQL 뿐이다.
 
-**Current Status**: Implementation plan complete. Ready for backend API development with Node.js + Express + TypeScript, PostgreSQL + Prisma, Socket.IO for real-time features. **Authentication Policy**: Conditional authentication - GET requests to public endpoints allowed without JWT, all POST/PUT/DELETE require JWT tokens.
+**폐기됨 (2026-08-03)**: `verify-main`(공개 상태 페이지)과 `watch-server`(1분 헬스체크)는 컨테이너에서 내렸다. 소스는 리포에 남아 있지만 빌드/배포하지 않으며, 이들이 쓰던 DB 테이블 5개(`uptime_records`, `api_response_times`, `api_call_logs`, `watch_server_logs`, `system_status`)와 `incident.affected_services` 컬럼도 DROP했다. **자동 장애 감지는 watch-server와 함께 사라졌다 — 장애는 100% 수동 등록이다.**
+
+**Authentication Policy**: Conditional authentication - GET requests to public endpoints allowed without JWT, all POST/PUT/DELETE require JWT tokens.
 
 ## Development Commands
 
-### Frontend Application (verify-main)
+### Incident Management UI (verify-incidents, port 3006)
 ```bash
-# Start verify-main on port 80
-cd verify-main && npm run dev
-
-# Build application
+cd verify-incidents
+npm run dev
 npm run build
-
-# Lint code
 npm run lint
 ```
 
-### Backend API (ready for implementation)
+### Backend API (verify-monitor-api, port 3003)
 ```bash
-# Backend API server (port 3001)
 cd verify-monitor-api
 npm run dev                 # Start development server
 npm run build              # Build for production
 npm run test               # Run test suite
 npm run test:contract      # Run contract tests
-npx prisma migrate dev     # Apply database migrations
+npx prisma migrate deploy  # Apply database migrations
 npx prisma db seed         # Seed initial data
 npx prisma studio         # Open Prisma Studio
-
-# Watch server (port 3008) 
-cd watch-server
-npm run dev               # Start monitoring service
-npm run test              # Run health check tests
 ```
 
 ## Architecture Overview
 
 ### Current Structure
 ```
-/sla-monitor/
-├── verify-main/          # System status page (Next.js, port 80)
-├── arch.jpeg            # Architecture diagram
-└── PRD.md              # Product Requirements Document
+/status-verify/
+├── verify-incidents/     # 장애 관리 UI (Next.js, port 3006)
+├── verify-monitor-api/   # REST + Socket.IO (Express, port 3003)
+├── verify-main/          # 폐기 — 빌드하지 않음
+├── watch-server/         # 폐기 — 빌드하지 않음
+└── PRD.md
 ```
 
 ### Implementation Architecture
-- **Web Pages**: One Next.js app (verify-main)
+- **Web Pages**: One Next.js app (verify-incidents)
 - **Backend API**: Node.js + Express + TypeScript + PostgreSQL + Prisma ORM
-- **Watch Server**: Automated monitoring service with 1-minute health checks
-- **Real-time**: Socket.IO for WebSocket-based collaboration and status updates
-- **Database**: PostgreSQL with 9 core tables (services, incidents, users, uptime_records, etc.)
+- **Real-time**: Socket.IO — 장애 협업 이벤트만 (상태 브로드캐스트는 제거됨)
+- **Database**: PostgreSQL, 4 tables (`services`, `incident`, `incident_update`, `users`)
 
 ### Key Components
 
@@ -136,11 +129,11 @@ The frontend component is structured to easily accept API data:
 
 | 서비스 | 호스트 포트 | 컨테이너 내부 |
 |---|---|---|
-| verify-main | 3000 | 80 |
 | verify-incidents | 3006 | 3006 |
 | Backend API | 3003 | 3003 |
-| Watch Server | 3008 | 3008 |
 | PostgreSQL | 5432 | 5432 |
+
+폐기: verify-main(3000), Watch Server(3008) — 컨테이너 없음.
 
 컨테이너 간 통신은 Docker 내부 DNS `http://verify-monitor-api:3003/api` 를 사용한다.
 HAProxy 는 현재 미사용(각 컨테이너가 호스트 포트에 직접 바인딩).

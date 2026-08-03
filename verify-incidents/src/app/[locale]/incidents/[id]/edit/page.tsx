@@ -32,7 +32,6 @@ import { useIncident } from '@/hooks/use-incidents';
 import apiClient from '@/lib/api-client';
 import { useApiAuth } from '@/lib/api-client-wrapper';
 import type { Incident, IncidentStatus, IncidentPriority, IncidentSeverity } from '@/lib/types';
-import { formatServiceName } from '@/lib/utils';
 
 export default function IncidentEditPage() {
   const params = useParams();
@@ -67,7 +66,6 @@ export default function IncidentEditPage() {
         status: originalIncident.status,
         priority: originalIncident.priority,
         severity: originalIncident.severity,
-        affected_services: originalIncident.affected_services,
         detection_criteria: originalIncident.detection_criteria,
         reporter: originalIncident.reporter
       });
@@ -146,7 +144,6 @@ export default function IncidentEditPage() {
         status: formData.status,
         severity: formData.severity,
         priority: formData.priority,
-        affected_services: formData.affected_services || [],
         detection_criteria: formData.detection_criteria,
         reporter: formData.reporter
       };
@@ -235,23 +232,6 @@ export default function IncidentEditPage() {
       [field]: value
     }));
   };
-
-  const handleServiceToggle = (service: string) => {
-    const currentServices = formData.affected_services || [];
-    const newServices = currentServices.includes(service)
-      ? currentServices.filter(s => s !== service)
-      : [...currentServices, service];
-
-    handleFieldChange('affected_services', newServices);
-  };
-
-  const availableServices = [
-    'id-recognition',
-    'face-liveness',
-    'id-liveness',
-    'face-compare',
-    'curp-verifier'
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -426,46 +406,6 @@ export default function IncidentEditPage() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Affected Services */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('affectedServices')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  {tf('affectedServicesDescription')}
-                </p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {availableServices.map((service) => (
-                    <label
-                      key={service}
-                      className="flex items-center space-x-2 cursor-pointer p-2 rounded border hover:bg-accent"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.affected_services?.includes(service) || false}
-                        onChange={() => handleServiceToggle(service)}
-                        className="rounded border-border"
-                      />
-                      <span className="text-sm">{formatServiceName(service)}</span>
-                    </label>
-                  ))}
-                </div>
-                {formData.affected_services && formData.affected_services.length > 0 && (
-                  <div className="flex flex-wrap gap-1 pt-2 border-t">
-                    <span className="text-sm text-muted-foreground">{tf('selectedServices')}</span>
-                    {formData.affected_services.map((service) => (
-                      <Badge key={service} variant="outline">
-                        {formatServiceName(service)}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>

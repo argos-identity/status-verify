@@ -11,7 +11,6 @@ import {
   AlertTriangle, 
   Clock, 
   User, 
-  Server, 
   CheckCircle2,
   Loader2
 } from 'lucide-react';
@@ -26,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -39,7 +37,6 @@ import type {
   IncidentStatus
 } from '@/lib/types';
 import {
-  AVAILABLE_SERVICES,
   SEVERITY_INFO,
   PRIORITY_INFO,
   STATUS_INFO
@@ -59,7 +56,6 @@ type FormData = {
   status: 'investigating' | 'identified' | 'monitoring' | 'resolved';
   severity: 'low' | 'medium' | 'high' | 'critical';
   priority: 'P1' | 'P2' | 'P3' | 'P4';
-  affected_services: string[];
   reporter: string;
   detection_criteria: string;
 };
@@ -105,9 +101,6 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
     priority: z.enum(['P1', 'P2', 'P3', 'P4'], {
       required_error: tv('priorityRequired')
     }),
-    affected_services: z.array(z.string())
-      .min(1, tv('servicesRequired'))
-      .max(5, tv('servicesMaxLimit')),
     reporter: z.string()
       .min(1, tv('reporterRequired'))
       .max(100, tv('reporterMaxLength')),
@@ -136,7 +129,6 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
       status: initialData?.status,
       severity: initialData?.severity || 'low',
       priority: initialData?.priority || 'P4',
-      affected_services: initialData?.affected_services || [],
       reporter: initialData?.reporter || storage.get('last-reporter', ''),
       detection_criteria: initialData?.detection_criteria || ''
     },
@@ -149,14 +141,13 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
   // 완성도 계산
   const calculateProgress = useCallback((data: Partial<FormData>) => {
     let completed = 0;
-    const total = 8;
+    const total = 7;
 
     if ((data?.title?.length ?? 0) >= 5) completed++;
     if ((data?.description?.length ?? 0) >= 20) completed++;
     if (data?.status) completed++;
     if (data?.severity) completed++;
     if (data?.priority) completed++;
-    if ((data?.affected_services || []).length > 0) completed++;
     if ((data?.reporter?.length ?? 0) > 0) completed++;
     if ((data?.detection_criteria?.length ?? 0) >= 10) completed++;
 
@@ -456,51 +447,6 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
                   <p className="text-xs text-destructive">{errors.priority.message}</p>
                 )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* 영향 범위 카드 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Server className="w-5 h-5 text-primary" />
-              {tf('cards.impactScope')}
-              <Badge variant="destructive" className="text-xs">{tf('cards.required')}</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">{tf('affectedServicesLabel')}</Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {AVAILABLE_SERVICES.map((service) => (
-                  <div key={service.id} className="flex items-center space-x-2">
-                    <Controller
-                      name="affected_services"
-                      control={control}
-                      render={({ field }) => (
-                        <Checkbox
-                          id={service.id}
-                          checked={(field.value || []).includes(service.id)}
-                          onCheckedChange={(checked) => {
-                            const currentValue = field.value || [];
-                            const newValue = checked
-                              ? [...currentValue, service.id]
-                              : currentValue.filter(id => id !== service.id);
-                            field.onChange(newValue);
-                          }}
-                        />
-                      )}
-                    />
-                    <Label htmlFor={service.id} className="text-sm cursor-pointer">
-                      {service.name}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-              {errors.affected_services && (
-                <p className="text-xs text-destructive">{errors.affected_services.message}</p>
-              )}
             </div>
           </CardContent>
         </Card>

@@ -20,7 +20,6 @@
     "no": "No"
   },
   "navigation": {
-    "dashboard": "Dashboard",
     "incidents": "Incident Management",
     "history": "History",
     "settings": "Settings",
@@ -47,8 +46,7 @@
     "filters": {
       "status": "Status",
       "priority": "Priority",
-      "severity": "Severity",
-      "affectedService": "Affected Service"
+      "severity": "Severity"
     },
     "status": {
       "all": "All Status",
@@ -71,14 +69,6 @@
       "medium": "Medium",
       "low": "Low"
     },
-    "services": {
-      "all": "All Services",
-      "idRecognition": "ID Recognition",
-      "faceLiveness": "Face Liveness",
-      "idLiveness": "ID Liveness",
-      "faceCompare": "Face Compare",
-      "curpVerifier": "Curp Verifier"
-    },
     "dashboard": {
       "totalIncidents": "Total Incidents",
       "activeIncidents": "Active Incidents",
@@ -97,7 +87,6 @@
       "pageTitle": "Create New Failure Event",
       "basicInfo": "Basic Information",
       "statusAndPriority": "Status and Priority",
-      "affectedServices": "Affected Services",
       "form": {
         "titleLabel": "Title *",
         "titlePlaceholder": "Enter incident title",
@@ -113,9 +102,6 @@
         "priorityPlaceholder": "Select priority",
         "severityLabel": "Severity",
         "severityPlaceholder": "Select severity",
-        "affectedServicesLabel": "Affected Services",
-        "affectedServicesDescription": "Select affected services (multiple selection allowed)",
-        "selectedServices": "Selected services:",
         "header": {
           "createTitle": "Create New Failure Event",
           "editTitle": "Edit Failure Event",
@@ -132,7 +118,6 @@
         },
         "cards": {
           "basicInfo": "Basic Information",
-          "impactScope": "Impact Scope",
           "required": "Required"
         },
         "detailedForm": {
@@ -174,8 +159,6 @@
         "statusRequired": "Please select a status",
         "severityRequired": "Please select a severity",
         "priorityRequired": "Please select a priority",
-        "servicesRequired": "Please select at least 1 affected service",
-        "servicesMaxLimit": "You can select up to 5 affected services",
         "reporterRequired": "Please enter a reporter",
         "reporterMaxLength": "Reporter name cannot exceed 100 characters",
         "detectionCriteriaMinLength": "Detection criteria must be at least 10 characters",
@@ -219,8 +202,7 @@
       "loading": "Loading...",
       "returnToList": "Return to List",
       "basicInfo": "Basic Information",
-      "statusAndPriority": "Status and Priority",
-      "affectedServices": "Affected Services"
+      "statusAndPriority": "Status and Priority"
     },
     "detail": {
       "backToList": "Back to List",
@@ -233,14 +215,12 @@
       "totalResolutionTime": "Total Resolution Time: {resolutionTime}",
       "assigneeInfo": "Assignee Information",
       "detectionCriteria": "Detection Criteria / Method",
-      "noServiceInfo": "No service information available.",
       "loadingIncident": "Loading incident information...",
       "incidentNotFound": "Cannot find the incident. (ID: {id})",
       "goToLogin": "Go to Login",
       "retry": "Retry",
       "newIncidentCreated": "New incident has been successfully created. You can check it in verify-main.",
       "description": "Description",
-      "affectedServices": "Affected Services",
       "currentStatus": "Current Status",
       "priority": "Priority",
       "severity": "Severity",
@@ -253,7 +233,6 @@
       "refresh": "Refresh",
       "loading": "Loading...",
       "noDescription": "No description provided",
-      "noAffectedServices": "No affected services",
       "notResolved": "Not resolved yet"
     }
   },

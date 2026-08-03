@@ -30,8 +30,7 @@ import apiClient from '@/lib/api-client';
 import {
   formatDate,
   formatRelativeTime,
-  calculateResolutionTime,
-  formatServiceName
+  calculateResolutionTime
 } from '@/lib/utils';
 import { STATUS_INFO, PRIORITY_INFO, SEVERITY_INFO } from '@/lib/types';
 import type { IncidentStatus } from '@/lib/types';
@@ -228,21 +227,6 @@ export default function IncidentDetailPage() {
                     </p>
                   </div>
                 )}
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-2">{t('affectedServices')}</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {incident.affected_services && incident.affected_services.length > 0 ? (
-                      incident.affected_services.map((service) => (
-                        <Badge key={service} variant="outline">
-                          {formatServiceName(service)}
-                        </Badge>
-                      ))
-                    ) : (
-                      <span className="text-sm text-muted-foreground">{t('noServiceInfo')}</span>
-                    )}
-                  </div>
-                </div>
               </CardContent>
             </Card>
 

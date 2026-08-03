@@ -11,7 +11,6 @@ export interface IncidentCreateData {
   description?: string;
   severity: IncidentSeverity;
   priority?: IncidentPriority;
-  affected_services: string[];
   reporter?: string;
   reporter_id?: string;
   detection_criteria?: string;
@@ -171,7 +170,6 @@ export class IncidentModel {
         status: data.status || 'investigating', // Default initial status
         severity: data.severity,
         priority: data.priority || 'P3', // Default priority (P3 = Medium)
-        affected_services: data.affected_services,
         reporter: data.reporter || data.reporter_id,
         detection_criteria: data.detection_criteria || null,
       },
@@ -298,59 +296,6 @@ export class IncidentModel {
     return incident.resolved_at.getTime() - incident.created_at.getTime();
   }
 
-  static async getAffectedServices(incidentId: string): Promise<string[]> {
-    const incident = await prisma.incident.findUnique({
-      where: { id: incidentId },
-      select: {
-        affected_services: true,
-      },
-    });
-
-    return incident?.affected_services || [];
-  }
-
-  static async findByService(
-    serviceId: string,
-    limit: number = 20,
-    offset: number = 0
-  ): Promise<{ incidents: IncidentWithUpdates[]; total: number }> {
-    const where = {
-      affected_services: {
-        has: serviceId,
-      },
-    };
-
-    const [incidents, total] = await Promise.all([
-      prisma.incident.findMany({
-        where,
-        orderBy: {
-          created_at: 'desc',
-        },
-        skip: offset,
-        take: limit,
-        include: {
-          updates: {
-            orderBy: {
-              created_at: 'asc',
-            },
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  username: true,
-                  email: true,
-                },
-              },
-            },
-          },
-        },
-      }),
-      prisma.incident.count({ where }),
-    ]);
-
-    return { incidents, total };
-  }
-
   static async getMetrics(days: number = 30): Promise<{
     totalIncidents: number;
     incidentsBySeverity: Record<IncidentSeverity, number>;
@@ -417,56 +362,6 @@ export class IncidentModel {
       avgResolutionTime,
       mttr,
     };
-  }
-
-  static async findIncidentsByServiceAndDateRange(
-    serviceId: string,
-    startDate: Date,
-    endDate: Date
-  ): Promise<Incident[]> {
-    const incidents = await prisma.incident.findMany({
-      where: {
-        affected_services: {
-          has: serviceId,
-        },
-        OR: [
-          {
-            // Incident created during the range
-            created_at: {
-              gte: startDate,
-              lte: endDate,
-            },
-          },
-          {
-            // Incident created before the range but still active during it
-            AND: [
-              {
-                created_at: {
-                  lt: endDate,
-                },
-              },
-              {
-                OR: [
-                  {
-                    resolved_at: null, // Not yet resolved
-                  },
-                  {
-                    resolved_at: {
-                      gte: startDate, // Resolved during or after the range
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      orderBy: {
-        created_at: 'asc',
-      },
-    });
-
-    return incidents;
   }
 }
 

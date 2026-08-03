@@ -11,7 +11,6 @@ export const mockIncidents: Incident[] = [
     priority: 'P2',
     reporter: '모니터링 시스템',
     detection_criteria: '연속 3회 7초 초과 응답시간 감지',
-    affected_services: ['id-recognition', 'face-liveness'],
     created_at: '2025-09-01T09:30:00Z',
     resolved_at: undefined
   },
@@ -24,7 +23,6 @@ export const mockIncidents: Incident[] = [
     priority: 'P2',
     reporter: '운영팀 - 김민수',
     detection_criteria: '시간당 5회 이상 타임아웃 발생',
-    affected_services: ['face-compare'],
     created_at: '2025-09-01T10:15:00Z',
     resolved_at: undefined
   },
@@ -37,7 +35,6 @@ export const mockIncidents: Incident[] = [
     priority: 'P1',
     reporter: '모니터링 시스템',
     detection_criteria: '연속 10회 연결 실패',
-    affected_services: ['curp-verifier'],
     created_at: '2025-09-01T11:45:00Z',
     resolved_at: undefined
   },
@@ -50,7 +47,6 @@ export const mockIncidents: Incident[] = [
     priority: 'P3',
     reporter: '운영팀 - 이영희',
     detection_criteria: '평균 응답시간 30% 증가',
-    affected_services: ['id-liveness'],
     created_at: '2025-08-31T14:20:00Z',
     resolved_at: '2025-08-31T16:45:00Z'
   },
@@ -63,7 +59,6 @@ export const mockIncidents: Incident[] = [
     priority: 'P1',
     reporter: '모니터링 시스템',
     detection_criteria: '전체 서비스 동시 부하 200% 증가',
-    affected_services: ['id-recognition', 'face-liveness', 'id-liveness', 'face-compare', 'curp-verifier'],
     created_at: '2025-09-01T12:00:00Z',
     resolved_at: undefined
   },
@@ -76,7 +71,6 @@ export const mockIncidents: Incident[] = [
     priority: 'P3',
     reporter: '고객지원팀',
     detection_criteria: '특정 이미지 포맷에서 5% 오류율',
-    affected_services: ['face-liveness'],
     created_at: '2025-08-30T09:30:00Z',
     resolved_at: '2025-08-30T11:15:00Z'
   }

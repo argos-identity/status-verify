@@ -88,10 +88,8 @@ export const useIncidents = (filters?: IncidentFilters) => {
     const matchesStatus = !filters.status || filters.status === 'all' || incident.status === filters.status;
     const matchesPriority = !filters.priority || filters.priority === 'all' || incident.priority === filters.priority;
     const matchesSeverity = !filters.severity || filters.severity === 'all' || incident.severity === filters.severity;
-    const matchesService = !filters.affected_service || filters.affected_service === 'all' ||
-      incident.affected_services.includes(filters.affected_service);
 
-    return matchesStatus && matchesPriority && matchesSeverity && matchesService;
+    return matchesStatus && matchesPriority && matchesSeverity;
   });
 
   // 인시던트 새로고침

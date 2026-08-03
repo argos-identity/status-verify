@@ -5,7 +5,6 @@ import {
   Clock,
   AlertTriangle,
   User,
-  Server,
   ExternalLink,
   CheckCircle,
   Eye,
@@ -23,8 +22,7 @@ import {
   getStatusColor,
   getPriorityColor,
   getSeverityColor,
-  calculateResolutionTime,
-  formatServiceName
+  calculateResolutionTime
 } from '@/lib/utils';
 import type { Incident } from '@/lib/types';
 import { STATUS_INFO, PRIORITY_INFO, SEVERITY_INFO } from '@/lib/types';
@@ -150,25 +148,6 @@ const IncidentCard: React.FC<{ incident: Incident }> = ({ incident }) => {
               <span className="font-medium">{incident.reporter}</span>
             </div>
           )}
-          
-          {/* 영향받는 서비스 */}
-          <div className="flex items-start gap-2">
-            <Server className="w-3 h-3 text-muted-foreground mt-0.5" />
-            <div>
-              <span className="text-muted-foreground">영향 서비스:</span>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {incident.affected_services.map((service) => (
-                  <Badge 
-                    key={service} 
-                    variant="outline" 
-                    className="text-xs px-2 py-0"
-                  >
-                    {formatServiceName(service)}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
           
           {/* 감지 기준 */}
           {incident.detection_criteria && (
