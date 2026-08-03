@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, IncidentStatus, IncidentSeverity, IncidentPriority, UptimeStatus } from '@prisma/client';
+import { PrismaClient, UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -89,56 +89,6 @@ async function main(): Promise<void> {
       },
     });
   }
-
-  // Create sample uptime records for the last 30 days
-  console.log('📊 Creating sample uptime records...');
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-  const statusOptions: UptimeStatus[] = ['o', 'o', 'o', 'o', 'po', 'o']; // Mostly operational
-
-  for (const service of services) {
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(thirtyDaysAgo);
-      date.setDate(date.getDate() + i);
-
-      const randomStatus = statusOptions[Math.floor(Math.random() * statusOptions.length)] ?? 'o';
-      const responseTime = randomStatus === 'o' ? 
-        Math.floor(Math.random() * 500) + 100 : // 100-600ms for operational
-        Math.floor(Math.random() * 3000) + 1000; // 1-4s for issues
-
-      await prisma.uptimeRecord.upsert({
-        where: {
-          service_id_date: {
-            service_id: service.id,
-            date,
-          },
-        },
-        update: {
-          status: randomStatus,
-          response_time: responseTime,
-        },
-        create: {
-          service_id: service.id,
-          date,
-          status: randomStatus,
-          response_time: responseTime,
-        },
-      });
-    }
-  }
-
-  // Create initial system status for production
-  console.log('🌟 Creating initial system status...');
-  await prisma.systemStatus.create({
-    data: {
-      overall_status: 'operational',
-      message: '시스템이 정상 운영 중입니다. 실시간 모니터링이 활성화되었습니다.',
-    },
-  });
-
-  // NOTE: No sample incidents are created in production mode
-  // Real incidents will be created automatically when monitoring detects issues
 
   console.log('✅ Database seed completed successfully!');
 }
