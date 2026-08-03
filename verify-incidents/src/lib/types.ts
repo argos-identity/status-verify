@@ -51,15 +51,15 @@ export interface CreateIncidentUpdateRequest {
   description: string;
 }
 
-// 서비스 목록 (Argos Infra - 총 7개 서비스)
+// 서비스 목록 (Argos Infra - 총 5개 서비스)
+// 반드시 백엔드 services 테이블(verify-monitor-api/prisma/seeds/index.ts)과 일치할 것.
+// 서버가 affected_services 를 services 테이블 존재 여부로 검증하므로, 여기에만 추가하면 장애 등록이 실패한다.
 export const AVAILABLE_SERVICES = [
   { id: 'id-recognition', name: 'ID Recognition' },
   { id: 'face-liveness', name: 'Face Liveness' },
   { id: 'id-liveness', name: 'ID Liveness' },
   { id: 'face-compare', name: 'Face Compare' },
   { id: 'curp-verifier', name: 'Curp Verifier' },
-  { id: 'idcheck-step1', name: 'idcheck(step1)' },
-  { id: 'idcheck-step2', name: 'idcheck(step2)' },
 ] as const;
 
 // Status display information

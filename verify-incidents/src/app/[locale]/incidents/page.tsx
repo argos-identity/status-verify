@@ -243,8 +243,6 @@ export default function IncidentsPage() {
                   <SelectItem value="id-liveness">{t('services.idLiveness')}</SelectItem>
                   <SelectItem value="face-compare">{t('services.faceCompare')}</SelectItem>
                   <SelectItem value="curp-verifier">{t('services.curpVerifier')}</SelectItem>
-                  <SelectItem value="idcheck-step1">{t('services.idcheckStep1')}</SelectItem>
-                  <SelectItem value="idcheck-step2">{t('services.idcheckStep2')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

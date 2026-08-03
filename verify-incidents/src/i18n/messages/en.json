@@ -77,9 +77,7 @@
       "faceLiveness": "Face Liveness",
       "idLiveness": "ID Liveness",
       "faceCompare": "Face Compare",
-      "curpVerifier": "Curp Verifier",
-      "idcheckStep1": "idcheck(step1)",
-      "idcheckStep2": "idcheck(step2)"
+      "curpVerifier": "Curp Verifier"
     },
     "dashboard": {
       "totalIncidents": "Total Incidents",
