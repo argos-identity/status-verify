@@ -14,7 +14,12 @@ export interface CreateIncidentData {
   affected_services: string[];
   reporter_id?: string;
   reporter?: string;
+  detection_criteria?: string;
 }
+
+// statusCode 가 없는 Error 는 error-middleware 가 500 + 'An unexpected error occurred' 로 마스킹한다.
+const httpError = (message: string, statusCode: number): Error =>
+  Object.assign(new Error(message), { statusCode });
 
 export interface UpdateIncidentData {
   title?: string;
@@ -66,24 +71,26 @@ export class IncidentService {
       });
 
       if (!effectiveReporterId) {
-        throw new Error('Reporter ID is required but not provided');
+        throw httpError('Reporter ID is required but not provided', 400);
       }
 
       // Validate reporter exists
       const reporter = await UserModel.findById(effectiveReporterId);
       if (!reporter) {
-        throw new Error('Reporter not found');
+        throw httpError('Reporter not found', 404);
       }
 
       // Check reporter permissions
       if (!await UserModel.hasPermission(effectiveReporterId, 'report_incidents')) {
-        throw new Error('User does not have permission to create incidents');
+        throw httpError('User does not have permission to create incidents', 403);
       }
 
       // Validate all affected services exist
-      const servicesExist = await ServiceModel.existsAll(data.affected_services);
-      if (!servicesExist) {
-        throw new Error('One or more affected services do not exist');
+      const knownServices = await ServiceModel.findByIds(data.affected_services);
+      const knownIds = knownServices.map((s) => s.id);
+      const unknownIds = data.affected_services.filter((id) => !knownIds.includes(id));
+      if (unknownIds.length > 0) {
+        throw httpError(`Unknown affected services: ${unknownIds.join(', ')}`, 400);
       }
 
       const incident = await IncidentModel.create({
@@ -95,6 +102,7 @@ export class IncidentService {
         reporter_id: effectiveReporterId,
         reporter: data.reporter,
         status: data.status || 'investigating',
+        detection_criteria: data.detection_criteria,
       });
 
       // Create initial incident update
@@ -111,6 +119,7 @@ export class IncidentService {
       return incident;
     } catch (error: any) {
       console.error('Error creating incident:', error);
+      if (error.statusCode) throw error;
       throw new Error(error.message || 'Failed to create incident');
     }
   }
@@ -124,18 +133,18 @@ export class IncidentService {
       // Check if incident exists
       const existingIncident = await IncidentModel.findById(incidentId);
       if (!existingIncident) {
-        throw new Error('Incident not found');
+        throw httpError('Incident not found', 404);
       }
 
       // Check user permissions
       if (!await UserModel.hasPermission(userId, 'manage_incidents')) {
-        throw new Error('User does not have permission to manage incidents');
+        throw httpError('User does not have permission to manage incidents', 403);
       }
 
       // Validate status transition if status is being changed
       if (updateData.status && updateData.status !== existingIncident.status) {
         if (!IncidentModel.isValidStatusTransition(existingIncident.status, updateData.status)) {
-          throw new Error(`Invalid status transition from ${existingIncident.status} to ${updateData.status}`);
+          throw httpError(`Invalid status transition from ${existingIncident.status} to ${updateData.status}`, 400);
         }
       }
 
@@ -143,7 +152,7 @@ export class IncidentService {
       if (updateData.affected_services) {
         const servicesExist = await ServiceModel.existsAll(updateData.affected_services);
         if (!servicesExist) {
-          throw new Error('One or more affected services do not exist');
+          throw httpError('One or more affected services do not exist', 400);
         }
       }
 
@@ -172,6 +181,7 @@ export class IncidentService {
       return incident;
     } catch (error: any) {
       console.error(`Error updating incident ${incidentId}:`, error);
+      if (error.statusCode) throw error;
       throw new Error(error.message || 'Failed to update incident');
     }
   }
@@ -250,18 +260,18 @@ export class IncidentService {
       // Check if incident exists
       const incident = await IncidentModel.findById(incidentId);
       if (!incident) {
-        throw new Error('Incident not found');
+        throw httpError('Incident not found', 404);
       }
 
       // Check user permissions
       if (!await UserModel.hasPermission(updateData.user_id, 'manage_incidents')) {
-        throw new Error('User does not have permission to add incident updates');
+        throw httpError('User does not have permission to add incident updates', 403);
       }
 
       // Validate status transition if status is being changed
       if (updateData.status && updateData.status !== incident.status) {
         if (!IncidentModel.isValidStatusTransition(incident.status, updateData.status)) {
-          throw new Error(`Invalid status transition from ${incident.status} to ${updateData.status}`);
+          throw httpError(`Invalid status transition from ${incident.status} to ${updateData.status}`, 400);
         }
       }
 
@@ -288,6 +298,7 @@ export class IncidentService {
       return update;
     } catch (error: any) {
       console.error(`Error adding update to incident ${incidentId}:`, error);
+      if (error.statusCode) throw error;
       throw new Error(error.message || 'Failed to add incident update');
     }
   }
@@ -320,13 +331,13 @@ export class IncidentService {
       // Check if incident exists
       const incident = await IncidentModel.findById(incidentId);
       if (!incident) {
-        throw new Error('Incident not found');
+        throw httpError('Incident not found', 404);
       }
 
       // Check user permissions (admin only)
       const user = await UserModel.findById(userId);
       if (!user || user.role !== 'admin') {
-        throw new Error('Only administrators can delete incidents');
+        throw httpError('Only administrators can delete incidents', 403);
       }
 
       const deletedIncident = await IncidentModel.delete(incidentId);
@@ -337,6 +348,7 @@ export class IncidentService {
       return deletedIncident;
     } catch (error: any) {
       console.error(`Error deleting incident ${incidentId}:`, error);
+      if (error.statusCode) throw error;
       throw new Error(error.message || 'Failed to delete incident');
     }
   }
@@ -370,7 +382,7 @@ export class IncidentService {
       // Validate service exists
       const serviceExists = await ServiceModel.exists(serviceId);
       if (!serviceExists) {
-        throw new Error('Service not found');
+        throw httpError('Service not found', 404);
       }
 
       const { incidents, total } = await IncidentModel.findByService(serviceId, limit, offset);
@@ -398,6 +410,7 @@ export class IncidentService {
       };
     } catch (error: any) {
       console.error(`Error getting incidents for service ${serviceId}:`, error);
+      if (error.statusCode) throw error;
       throw new Error(error.message || 'Failed to retrieve service incidents');
     }
   }
@@ -427,16 +440,16 @@ export class IncidentService {
       // Check if incident exists and is not already resolved
       const incident = await IncidentModel.findById(incidentId);
       if (!incident) {
-        throw new Error('Incident not found');
+        throw httpError('Incident not found', 404);
       }
 
       if (incident.status === 'resolved') {
-        throw new Error('Incident is already resolved');
+        throw httpError('Incident is already resolved', 409);
       }
 
       // Check user permissions
       if (!await UserModel.hasPermission(userId, 'manage_incidents')) {
-        throw new Error('User does not have permission to resolve incidents');
+        throw httpError('User does not have permission to resolve incidents', 403);
       }
 
       // Update incident to resolved
@@ -459,6 +472,7 @@ export class IncidentService {
       return resolvedIncident;
     } catch (error: any) {
       console.error(`Error resolving incident ${incidentId}:`, error);
+      if (error.statusCode) throw error;
       throw new Error(error.message || 'Failed to resolve incident');
     }
   }
@@ -634,6 +648,7 @@ export class IncidentService {
       };
     } catch (error: any) {
       console.error(`Error getting incidents for date ${date}:`, error);
+      if (error.statusCode) throw error;
       throw new Error(error.message || 'Failed to retrieve incidents by date');
     }
   }
@@ -696,18 +711,18 @@ export class IncidentService {
       // Check if incident exists
       const incident = await IncidentModel.findById(incidentId);
       if (!incident) {
-        throw new Error('Incident not found');
+        throw httpError('Incident not found', 404);
       }
 
       // Check user permissions
       if (!await UserModel.hasPermission(userId, 'manage_incidents')) {
-        throw new Error('User does not have permission to assign incidents');
+        throw httpError('User does not have permission to assign incidents', 403);
       }
 
       // Check if assignee exists
       const assignee = await UserModel.findById(assigneeId);
       if (!assignee) {
-        throw new Error('Assignee not found');
+        throw httpError('Assignee not found', 404);
       }
 
       // Update incident with assignee
@@ -726,6 +741,7 @@ export class IncidentService {
       return updatedIncident;
     } catch (error: any) {
       console.error(`Error assigning incident ${incidentId}:`, error);
+      if (error.statusCode) throw error;
       throw new Error(error.message || 'Failed to assign incident');
     }
   }
@@ -739,12 +755,12 @@ export class IncidentService {
       // Check if incident exists
       const incident = await IncidentModel.findById(incidentId);
       if (!incident) {
-        throw new Error('Incident not found');
+        throw httpError('Incident not found', 404);
       }
 
       // Check user permissions
       if (!await UserModel.hasPermission(userId, 'manage_incidents')) {
-        throw new Error('User does not have permission to escalate incidents');
+        throw httpError('User does not have permission to escalate incidents', 403);
       }
 
       // Escalate severity
@@ -777,6 +793,7 @@ export class IncidentService {
       return updatedIncident;
     } catch (error: any) {
       console.error(`Error escalating incident ${incidentId}:`, error);
+      if (error.statusCode) throw error;
       throw new Error(error.message || 'Failed to escalate incident');
     }
   }

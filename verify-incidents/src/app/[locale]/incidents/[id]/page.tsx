@@ -140,9 +140,9 @@ export default function IncidentDetailPage() {
       await refresh();
 
       console.log('Update added successfully:', updateData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to add update:', error);
-      alert(tt('updateAddFailed'));
+      alert(error?.message || tt('updateAddFailed'));
     } finally {
       setUpdateLoading(false);
     }
