@@ -10,6 +10,8 @@ interface IncidentHistoryContextType {
   refetch: () => void;
 }
 
+const REFRESH_INTERVAL_MS = 30_000;
+
 const IncidentHistoryContext = createContext<IncidentHistoryContextType | undefined>(undefined);
 
 interface IncidentHistoryProviderProps {
@@ -57,9 +59,9 @@ export const IncidentHistoryProvider: React.FC<IncidentHistoryProviderProps> = (
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = async (showLoading = true) => {
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       setError(null);
       const data = await fetchIncidentHistory();
       setIncidents(data);
@@ -79,11 +81,11 @@ export const IncidentHistoryProvider: React.FC<IncidentHistoryProviderProps> = (
   };
 
   useEffect(() => {
-    // Only fetch data in browser environment
-    if (typeof window !== 'undefined') {
-      console.info('🚀 IncidentHistoryProvider initialized - making single API call');
-      fetchData();
-    }
+    if (typeof window === 'undefined') return;
+
+    fetchData();
+    const timer = setInterval(() => fetchData(false), REFRESH_INTERVAL_MS);
+    return () => clearInterval(timer);
   }, []);
 
   const value: IncidentHistoryContextType = {

@@ -7,7 +7,6 @@ import { routing } from '@/i18n/routing';
 import VisualEditsMessenger from "../../visual-edits/VisualEditsMessenger";
 import ErrorReporter from "@/components/ErrorReporter";
 import Script from "next/script";
-import { SocketProvider } from "../../context/socket-context";
 import { SWRProvider } from "../../providers/swr-provider";
 import { IncidentHistoryProvider } from "../../context/IncidentHistoryContext";
 
@@ -55,9 +54,7 @@ export default async function LocaleLayout({
           />
           <SWRProvider>
             <IncidentHistoryProvider>
-              <SocketProvider>
-                {children}
-              </SocketProvider>
+              {children}
             </IncidentHistoryProvider>
           </SWRProvider>
           <VisualEditsMessenger />

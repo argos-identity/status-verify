@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 
 type UptimeStatus = 'operational' | 'degraded' | 'outage' | 'partial';
 
+const REFRESH_INTERVAL_MS = 30_000;
+
 interface ServiceStatusData {
   name: string;
   uptimePercentage: string;
@@ -57,9 +59,9 @@ export const useServicesStatus = (): UseServicesStatusResult => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = async (showLoading = true) => {
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       setError(null);
       const data = await fetchServicesStatus();
       setServices(data);
@@ -77,6 +79,8 @@ export const useServicesStatus = (): UseServicesStatusResult => {
 
   useEffect(() => {
     fetchData();
+    const timer = setInterval(() => fetchData(false), REFRESH_INTERVAL_MS);
+    return () => clearInterval(timer);
   }, []);
 
   return {

@@ -134,6 +134,9 @@ services:
       PORT: 3008
       API_HOST: verify-monitor-api
       API_PORT: 3003
+      # Monitored service authentication
+      SERVICE_API_KEY: ${SERVICE_API_KEY:?SERVICE_API_KEY is required - health checks return 403 without it}
+      SERVICE_AUTH_HEADER: ${SERVICE_AUTH_HEADER:-x-api-key}
       # Monitoring configuration
       REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-10000}
       MAX_RETRIES: ${MAX_RETRIES:-3}
