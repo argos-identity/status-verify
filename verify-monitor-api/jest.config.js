@@ -1,11 +1,17 @@
-module.exports = {
+const common = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
-  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  clearMocks: true,
+  restoreMocks: true,
+};
+
+module.exports = {
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
@@ -22,12 +28,23 @@ module.exports = {
       statements: 80,
     },
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  testTimeout: 10000,
-  moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
   verbose: true,
-  clearMocks: true,
-  restoreMocks: true,
+  testTimeout: 10000,
+  projects: [
+    {
+      ...common,
+      displayName: 'unit',
+      testMatch: ['<rootDir>/tests/unit/**/*.test.ts', '<rootDir>/src/**/*.test.ts'],
+    },
+    {
+      // tests/setup.ts 는 모든 테이블을 TRUNCATE 하므로 DB 가 필요한 스위트에만 붙인다.
+      ...common,
+      displayName: 'db',
+      testMatch: [
+        '<rootDir>/tests/contract/**/*.test.ts',
+        '<rootDir>/tests/integration/**/*.test.ts',
+      ],
+      setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+    },
+  ],
 };

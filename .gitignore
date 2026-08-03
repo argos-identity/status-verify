@@ -40,6 +40,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# 테스트 소스 옆에 컴파일 산출물이 커밋되어 구 코드가 남는 사고가 있었음
+verify-monitor-api/tests/**/*.js
+verify-monitor-api/tests/**/*.js.map
+verify-monitor-api/tests/**/*.d.ts
+verify-monitor-api/tests/**/*.d.ts.map
+
 # Docker
 .docker/
 docker-compose.override.yml
