@@ -132,11 +132,18 @@ The frontend component is structured to easily accept API data:
 - UI components are separated from data concerns
 
 ## Port Configuration
-- verify-main: 80
-- Backend API: 3001
-- verify-incidents: 3006
-- Watch Server: 3008
-- HAProxy (설치형): 80 (HTTP), 8404 (Statistics)
+운영 서버(`verify-status.argosidentity.io`, ssh `ubuntu@54.211.121.248`) 실측 기준:
+
+| 서비스 | 호스트 포트 | 컨테이너 내부 |
+|---|---|---|
+| verify-main | 3000 | 80 |
+| verify-incidents | 3006 | 3006 |
+| Backend API | 3003 | 3003 |
+| Watch Server | 3008 | 3008 |
+| PostgreSQL | 5432 | 5432 |
+
+컨테이너 간 통신은 Docker 내부 DNS `http://verify-monitor-api:3003/api` 를 사용한다.
+HAProxy 는 현재 미사용(각 컨테이너가 호스트 포트에 직접 바인딩).
 
 ## Implementation Documentation
 
